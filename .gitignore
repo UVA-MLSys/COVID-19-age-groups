@@ -1,0 +1,21 @@
+__pycache__/
+.idea/
+*.pyc
+.vscode
+.DS_Store
+__init__.py
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# checkpoint and data folders
+# checkpoints
+lightning_logs
+# *.out
+
+# the file sizes are too big
+Total.csv
+predictions.csv
+*.sif
+
+# for temporary experiments
+scratch/
