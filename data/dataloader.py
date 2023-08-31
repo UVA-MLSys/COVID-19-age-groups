@@ -64,6 +64,9 @@ class AgeDataLoader:
         self.known_reals = known_reals
         self.known_categoricals = known_categoricals
         
+        self.real_features = static_reals + observed_reals + known_reals
+        self.categorical_features = static_categoricals + observed_categoricals + known_categoricals
+        
         self.targets = targets
         
         selected_columns = [date_index] + group_ids + static_reals + \
@@ -105,13 +108,13 @@ class AgeDataLoader:
         test_start = split.test_start - pd.to_timedelta(self.seq_len, unit='day')
         test_data = df[(dates >= test_start) & (dates <= split.test_end)]
 
-        print(f'Train samples {train_data.shape[0]}, validation samples {val_data.shape[0]}, test samples {test_data.shape[0]}')
+        print(f'\nTrain samples {train_data.shape[0]}, validation samples {val_data.shape[0]}, test samples {test_data.shape[0]}')
 
         train_days = (split.val_start - split.train_start).days
         validation_days = (split.test_start - split.val_start).days
         test_days = (split.test_end - split.test_start).days + 1
 
-        print(f'{train_days} days of training, {validation_days} days of validation data, {test_days} days of test data.')
+        print(f'{train_days} days of training, {validation_days} days of validation data, {test_days} days of test data.\n')
         
         if self.scale:
             self.fit_scalers(train_data)
@@ -120,16 +123,16 @@ class AgeDataLoader:
     
     def fit_scalers(self, train_data:DataFrame):
         print('Fitting scalers on train data')
-        # fit scalers
-        real_features = self.static_reals + self.observed_reals + self.known_reals
         # targets are separately scaled. targets can be observed features
-        real_features =  [feature for feature in real_features if feature not in self.targets]
+        real_input_features =  [
+            feature for feature in self.real_features \
+                if feature not in self.targets
+        ]
         
-        categorical_features = self.static_categoricals + self.observed_categoricals + self.known_categoricals
-        if len(real_features) > 0:
-            self.real_feature_scaler = StandardScaler().fit(train_data[real_features])
-        if len(categorical_features):
-            self.categorical_feature_scaler = LabelEncoder().fit(train_data[categorical_features])
+        if len(real_input_features) > 0:
+            self.real_feature_scaler = StandardScaler().fit(train_data[real_input_features])
+        if len(self.categorical_features) >0:
+            self.categorical_feature_scaler = LabelEncoder().fit(train_data[self.categorical_features])
         
         # this work has only real values as target
         # TODO: make more generalized by supporing both categorical and real scaling here
@@ -137,20 +140,19 @@ class AgeDataLoader:
         
     def _scale_data(self, df:DataFrame) -> DataFrame:        
         data = df.copy()
-        # fit scalers
-        real_features = self.static_reals + self.observed_reals + self.known_reals
         # targets are separately scaled. targets can be observed features
-        real_features =  [feature for feature in real_features if feature not in self.targets]
-        
-        categorical_features = self.static_categoricals + self.observed_categoricals + self.known_categoricals
+        real_input_features =  [
+            feature for feature in self.real_features \
+                if feature not in self.targets
+        ]
         
         if self.real_feature_scaler:
-            data[real_features] = self.real_feature_scaler.transform(
-                data[real_features]
+            data[real_input_features] = self.real_feature_scaler.transform(
+                data[real_input_features]
             )
         if self.categorical_feature_scaler:
-            data[categorical_features] = self.categorical_feature_scaler.transform(
-                data[categorical_features]
+            data[self.categorical_features] = self.categorical_feature_scaler.transform(
+                data[self.categorical_features]
             )
         if self.target_scaler:
             data[self.targets] = self.target_scaler.transform(data[self.targets])
@@ -188,9 +190,9 @@ class AgeDataLoader:
             time_varying_known_reals = self.known_reals,
             time_varying_known_categoricals = self.known_categoricals,
             # add_target_scales=True,
-            target_normalizer = MultiNormalizer(
-                [GroupNormalizer(groups=self.group_ids) for _ in self.targets]
-            )
+            # target_normalizer = MultiNormalizer(
+            #     [GroupNormalizer(groups=self.group_ids) for _ in self.targets]
+            # )
         )
 
         batch_size = self.batch_size

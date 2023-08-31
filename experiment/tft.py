@@ -95,7 +95,7 @@ class Experiment_TFT:
         
     def train(
         self, model_config:ModelConfig, train_data:pd.DataFrame, 
-        val_data:pd.DataFrame, ckpt_path=None
+        val_data:pd.DataFrame, ckpt_path:str=None
     ):
         trainer = self._get_trainer()
         
@@ -128,7 +128,7 @@ class Experiment_TFT:
 
     def test(
         self, tft:TemporalFusionTransformer, data:pd.DataFrame,
-        split_type:str='Test'
+        split_type:str='Test', plot=True
     ) -> pd.DataFrame:
         _, dataloader = self.age_dataloader.create_timeseries(data)
         predictions, test_index = tft.predict(
@@ -139,6 +139,7 @@ class Experiment_TFT:
         result_merged = align_predictions(
             data, test_index, predictions, self.age_dataloader
         )
-        self.plotter.summed_plot(result_merged, type=split_type)
+        if plot:
+            self.plotter.summed_plot(result_merged, type=split_type)
         gc.collect()
         return result_merged    

@@ -6,8 +6,8 @@ from dataclasses import dataclass
 class DataConfig:
     root_folder = 'dataset/processed'
     date_index='Date'
-    seq_len=13 
-    pred_len=15
+    seq_len=14 
+    pred_len=14
     
     static_reals=["UNDER5","AGE517","AGE1829","AGE3039","AGE4049","AGE5064","AGE6574","AGE75PLUS"]
     observed_reals=['VaccinationFull', 'Cases']
@@ -15,7 +15,7 @@ class DataConfig:
     targets=['Cases']
     
     group_ids=['FIPS']
-    scale=True
+    scale=False
     
 @dataclass
 class FeatureFiles:
@@ -62,7 +62,7 @@ class Split:
     def primary():
         return Split(
             train_start="2020-03-01", val_start="2021-11-28",
-            test_start="2021-12-13", test_end="2021-12-27",
+            test_start="2021-12-12", test_end="2021-12-25",
             transform=to_datetime
         )
     
@@ -70,7 +70,7 @@ class Split:
     def updated():
         return Split(
             train_start="2022-01-01", val_start="2022-12-02",
-            test_start="2022-12-17", test_end="2022-12-31",
+            test_start="2022-12-16", test_end="2022-12-29",
             transform=to_datetime
         )
              

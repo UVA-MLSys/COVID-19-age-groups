@@ -1,7 +1,7 @@
 # local classes and methods
 from experiment.tft import Experiment_TFT
 from experiment.config import Split, DataConfig, ModelConfig
-from utils.utils import seed_torch, clear_directory
+from utils.utils import seed_torch, clear_directory, get_best_model_path
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -9,6 +9,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 import torch, os
 from datetime import datetime
 import pandas as pd
+from pytorch_forecasting import TemporalFusionTransformer
 
 def main(args):
     start = datetime.now()
@@ -18,7 +19,7 @@ def main(args):
     seed_torch(args.seed)
     
     print(f'Starting experiment. Result folder {args.result_folder}.')
-    clear_directory(args.result_folder)
+    # clear_directory(args.result_folder)
     
     data_path = os.path.join(args.input_folder, args.input)
     experiment = Experiment_TFT(
@@ -31,9 +32,15 @@ def main(args):
     train_data, val_data, test_data = experiment.age_dataloader.split_data(
         total_data, Split.primary()
     )
-    model = experiment.train(
-        ModelConfig.primary(), train_data, val_data, ckpt_path=None
-    )
+    
+    if args.test:
+        best_model_path = get_best_model_path(args.result_folder)
+        print(f'Loading best model from {best_model_path}.\n\n')
+        model = TemporalFusionTransformer.load_from_checkpoint(best_model_path)
+    else:
+        model = experiment.train(
+            ModelConfig.primary(), train_data, val_data, ckpt_path=None
+        )
     
     print('\n---Training prediction--\n')
     train_result_merged = experiment.test(model, train_data, split_type='Train')
@@ -83,6 +90,10 @@ def get_argparser():
     parser.add_argument(
         '--disable-progress', action='store_true', 
         help='disable progress bar. useful when submitting job script.'
+    )
+    parser.add_argument(
+        '--test', action='store_true',
+        help='test the best model at result folder'
     )
     parser.add_argument(
         '--seed', type=int, default=7,

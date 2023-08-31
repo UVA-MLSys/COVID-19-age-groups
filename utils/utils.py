@@ -2,14 +2,20 @@ import pandas as pd
 from pandas import DataFrame, to_datetime, to_timedelta
 import numpy as np
 from typing import List
-import os, gc
+import os, gc, random, shutil
 from torch import Tensor
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_log_error, explained_variance_score
-from data.dataloader import AgeDataLoader
-
-import random, shutil
 from pytorch_lightning import seed_everything
+
+from data.dataloader import AgeDataLoader
+from experiment.config import DataConfig
+    
+def normalize_feature_groups(df, features):
+    summed = df[features].sum().T.reset_index()
+    summed.columns = ['Feature', 'Score']
+    summed['Score'] = summed['Score'] * 100 / summed['Score'].sum()
+    print(summed)
 
 def clear_directory(dir_path):
     if os.path.exists(dir_path):
@@ -32,7 +38,6 @@ def align_predictions(
     remove_negative:bool=True
 ):
     horizons = range(0, dataloader.pred_len)
-    stride = 1
     time_index_max = predictions_index[dataloader.time_index].max()
 
     targets, time_index, group_ids = dataloader.targets, dataloader.time_index, dataloader.group_ids
@@ -57,7 +62,7 @@ def align_predictions(
 
             new_df = DataFrame({
                 time_index : 
-                time_index_max + range(stride, dataloader.pred_len, stride)
+                time_index_max + range(1, dataloader.pred_len)
             })
             new_df[group_ids] = group_id
             new_df.loc[:, horizons] = None
@@ -73,7 +78,9 @@ def align_predictions(
         outputs = pd.concat(outputs, axis=0)
         
         if all_outputs:
-            all_outputs = all_outputs.merge(outputs, how='inner', on=predictions_index.columns)
+            all_outputs = all_outputs.merge(
+                outputs, how='inner', on=predictions_index.columns
+            )
         else:
             all_outputs = outputs
             
@@ -107,7 +114,7 @@ def align_predictions(
 def get_best_model_path(checkpoint_folder, prefix='best-epoch='):
     for item in os.listdir(checkpoint_folder):
         if item.startswith(prefix):
-            print(f'Checkpoint model {item}.')
+            print(f'\nFound best checkpoint model {item}.')
             return os.path.join(checkpoint_folder, item)
 
     raise FileNotFoundError(f"Couldn't find the best model in {checkpoint_folder}")

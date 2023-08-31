@@ -16,20 +16,19 @@ from matplotlib.figure import Figure
 
 class PlotResults:
     def __init__(
-        self, figPath:str, targets:List[str], figsize=FIGSIZE, 
-        show=True
+        self, figPath:str, targets:List[str], 
+        show:bool = True
     ) -> None:
         self.figPath = figPath
-        self.figsize = figsize
         self.show = show
         self.targets = targets
     
     def plot(
         self, df:DataFrame, target:str, title:str=None, scale=1, 
-        base:int=None, figure_name:str=None, plot_error:bool=False,
-        legend_loc='best'
+        figure_name:str=None, plot_error:bool=False,
+        figsize=FIGSIZE, legend_loc='best'
     ) -> Figure:
-        fig, ax = plt.subplots(figsize=self.figsize)
+        fig, ax = plt.subplots(figsize=figsize)
         if title is not None: plt.title(title)
         x_column = 'Date'
 
@@ -41,16 +40,13 @@ class PlotResults:
         _, y_max = ax.get_ylim()
         ax.set_ylim(0, y_max*1.1)
         
-        if base is None:
-            x_first_tick = df[x_column].min()
-            x_last_tick = df[x_column].max()
-            x_major_ticks = DATE_TICKS
-            ax.set_xticks(
-                [x_first_tick + (x_last_tick - x_first_tick) * i / (x_major_ticks - 1) for i in range(x_major_ticks)]
-            )
-        else:
-            # plt.xlim(left=df[x_column].min() - ONE_DAY, right=df[x_column].max() + ONE_DAY)
-            ax.xaxis.set_major_locator(MultipleLocator(base=base))
+        # set fixed number of x axis ticks
+        x_first_tick = df[x_column].min()
+        x_last_tick = df[x_column].max()
+        x_major_ticks = DATE_TICKS
+        ax.set_xticks(
+            [x_first_tick + (x_last_tick - x_first_tick) * i / (x_major_ticks - 1) for i in range(x_major_ticks)]
+        )
         
         # plt.xticks(rotation = 15)
         # plt.xlabel(x_column)
@@ -61,7 +57,7 @@ class PlotResults:
                 if scale ==1e3: unit = 'K'
                 else: unit = 'M'
 
-                for loc in plt.yticks()[0]:
+                for loc in ax.get_yticks():
                     if loc == 0:
                         label_text.append('0')
                     else:
@@ -69,14 +65,10 @@ class PlotResults:
 
                 ax.set_yticks(ax.get_yticks())
                 ax.set_yticklabels(label_text)
-                
                 plt.ylabel(f'Daily {target}')
             else:
                 ax.yaxis.set_major_formatter(get_formatter(scale))
-                if scale==1e3: unit = 'in thousands'
-                elif scale==1e6: unit = 'in millions'
-                else: unit = f'x {scale:.0e}'
-
+                unit = f'x {scale:.0e}'
                 plt.ylabel(f'Daily {target} ({unit})')
         else:
             plt.ylabel(f'Daily {target}')
@@ -96,7 +88,7 @@ class PlotResults:
 
     def summed_plot(
         self, merged_df:DataFrame, type:str='', save:bool=True, 
-        base:int=None, plot_error:bool=False, legend_loc='best'
+        plot_error:bool=False, figsize=FIGSIZE, legend_loc='best'
     ) -> List[Figure]:
         """
         Plots summation of prediction and observation from all counties
@@ -125,8 +117,8 @@ class PlotResults:
             if save: target_figure_name = f'Summed_plot_{target}_{type}.jpg'
 
             fig = self.plot(
-                summed_df, target, title, scale, base, target_figure_name, 
-                plot_error, legend_loc
+                summed_df, target, title, scale, target_figure_name, 
+                plot_error, figsize, legend_loc
             )
             figures.append(fig)
         
@@ -134,7 +126,7 @@ class PlotResults:
 
     def individual_plot(
         self, df:DataFrame, fips:str, type:str='', save:bool=True, 
-        base:int=None, plot_error:bool=False
+        plot_error:bool=False, figsize=FIGSIZE, legend_loc='best'
     ):
         """
         Plots the prediction and observation for this specific county
@@ -160,7 +152,10 @@ class PlotResults:
             if save: target_figure_name = f'Individual_plot_{target}_{type}_FIPS_{fips}.jpg'
             
             title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, NNSE {nnse:0.3g}'
-            fig = self.plot(df, target, title, scale, base, target_figure_name, plot_error)
+            fig = self.plot(
+                df, target, title, scale, target_figure_name, 
+                plot_error, figsize, legend_loc
+            )
             figures.append(fig)
 
         return figures
@@ -174,3 +169,40 @@ class PlotResults:
         ].aggregate('sum').reset_index()
         
         return summed
+    
+    def local_interpretation(
+        self, df:DataFrame, features: List[int | str], 
+        figure_name='Static_feature_importance.jpg', 
+        figsize=(16, 8), x_major_ticks = DATE_TICKS
+    ):
+        _, ax = plt.subplots(figsize=figsize)
+        prop_cycle = iter(plt.rcParams["axes.prop_cycle"])
+
+        for feature in features:
+            color = next(prop_cycle)["color"]
+            plt.plot(
+                df['Date'], df[feature], color=color, 
+                label = feature, linewidth=2.5 #, marker=markers[feature_index]
+            )
+
+        # fix x label ticks
+        if df['Date'].nunique() > x_major_ticks:
+            x_first_tick = df['Date'].min()
+            x_last_tick = df['Date'].max()
+            ax.set_xticks(
+                [x_first_tick + (x_last_tick - x_first_tick) * i / (x_major_ticks - 1) \
+                    for i in range(x_major_ticks)]
+            )
+
+        # fix y label ticks
+        ax.set_ylabel('Feature Relevance Score', labelpad=15)
+
+        plt.legend(edgecolor="black", ncol=4, bbox_to_anchor = (1.01, 1.25))
+        
+        if figure_name: 
+            plt.savefig(
+                os.path.join(self.figPath, figure_name), 
+                dpi=200, bbox_inches="tight"
+            )
+        if self.show:
+            plt.show()
