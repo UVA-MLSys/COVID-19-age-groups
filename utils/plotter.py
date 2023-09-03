@@ -172,7 +172,7 @@ class PlotResults:
     
     def local_interpretation(
         self, df:DataFrame, features: List[int | str], 
-        figure_name='Static_feature_importance.jpg', 
+        figure_name='feature_importance.jpg', 
         figsize=(16, 8), x_major_ticks = DATE_TICKS
     ):
         _, ax = plt.subplots(figsize=figsize)

@@ -13,23 +13,6 @@ import torch, os
 from datetime import datetime
 import pandas as pd
 from pytorch_forecasting import TemporalFusionTransformer
-    
-
-def explainer_factory(
-    args, model, dataloader:AgeDataLoader, 
-)-> BaseExplainer:
-    # only interpreting static reals for now
-    features = dataloader.static_reals
-    
-    if args.explainer == 'FO':
-        explainer = FeatureOcclusion(model, dataloader, features)
-    elif args.explainer == 'AFO':
-        explainer = AugmentedFeatureOcclusion(model, dataloader, features, n_samples=2)
-    elif args.explainer == 'FA':
-        explainer = FeatureAblation(model, dataloader, features, method='global')
-    else:
-        raise ValueError(f'{args.explainer} isn\'t supported.')
-    return explainer
 
 def main(args):
     # --------- Initialization ---------
@@ -67,18 +50,21 @@ def main(args):
 
     # --------- Interpret Predictions ---------
     # initialize explainer
-    explainer = explainer_factory(args, model, dataloader)
+    # only interpreting static reals for now
+    features = dataloader.static_reals
+    explainer = explainer_factory(args, model, dataloader, features)
     
     # train any baseline or parameters
     explainer.train_generators(train_data)
     all_scores = explainer.attribute(train_data, args.disable_progress)
     
     # save raw scores
-    score_file = os.path.join(args.result_folder, 'scores.npy')
-    np.savez_compressed(score_file, all_scores)
+    if not args.no_write:
+        score_file = os.path.join(args.result_folder, f'scores_{args.explainer}.npy')
+        np.savez_compressed(score_file, all_scores)
+        # all_scores = np.load(score_file)
 
     time_index = dataloader.time_index
-    features = dataloader.static_reals # only interpreting static features
 
     # filter out days outside interpretation range
     time_range = explainer.time_range(train_data)
@@ -90,25 +76,40 @@ def main(args):
     global_rank = calculate_global_rank(
         df, all_scores, features
     )
-    global_rank.to_csv(
-        os.path.join(args.result_folder, 'global_rank.csv'), index=False
-    )
+    if not args.no_write:
+        global_rank.to_csv(
+            os.path.join(args.result_folder, f'global_rank_{args.explainer}.csv'), 
+            index=False
+        )
     
+    # align importance along their time axis with the input data
     group_agg_scores_df = align_interpretation(df, all_scores, features)
-    group_agg_scores_df.to_csv(
-        os.path.join(args.result_folder, 'group_agg_scores.csv'), index=False
-    )
+    if not args.no_write:
+        group_agg_scores_df.to_csv(
+            os.path.join(args.result_folder, f'group_agg_scores_{args.explainer}.csv'), 
+            index=False
+        )
     
-    # plot local interpretations
+    # ----- Plot local interpretations -------
     plotter = PlotResults(
         figPath=args.result_folder, targets=dataloader.targets, 
         show=not args.disable_progress
     )
+    
+    if not args.no_write:
+        figure_name=f'feature_importance_{args.explainer}.jpg'
+    else: figure_name = None
     plotter.local_interpretation(
-        group_agg_scores_df, features
+        group_agg_scores_df, features, figure_name=figure_name
     )
     
     # ----- Evaluate ------
+    # find common set among age groups and interpreted features
+    common_features = list(set(features) & set(dataloader.static_reals))
+    if len(common_features) == 0:
+        print('Ground truth available only for age group features.\nReturning...\n')
+        return
+    
     # Load ground truth
     group_cases = pd.read_csv(
         os.path.join(FeatureFiles.root_folder, 'Cases by age groups.csv')
@@ -123,16 +124,16 @@ def main(args):
     # since age group ground truth is weekly aggregated
     # do the same for predicted importance
     weekly_agg_scores_df = aggregate_importance_by_window(
-        group_agg_scores_df, dataloader.static_reals, first_common_date
+        group_agg_scores_df, common_features, first_common_date
     )
     evaluate_interpretation(
-        group_cases, weekly_agg_scores_df, dataloader.static_reals
+        group_cases, weekly_agg_scores_df, common_features
     )
     
 
 def get_argparser():
     parser = ArgumentParser(
-        description='Run infection prediction model',
+        description='Interpret infection prediction model',
         formatter_class=ArgumentDefaultsHelpFormatter
     )
     
@@ -160,8 +161,13 @@ def get_argparser():
     
     parser.add_argument(
         '--explainer', type=str, default='FO',
-        choices=['FO', 'AFO', 'FA'],
+        choices=['FO', 'AFO', 'FA', 'MS'],
         help="Interpretation method"
+    )
+    
+    parser.add_argument(
+        '--no-write', action='store_true', 
+        help="Don't write down the interpretation results."
     )
     
     return parser

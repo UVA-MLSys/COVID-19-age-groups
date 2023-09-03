@@ -1,26 +1,14 @@
 import numpy as np
 import pandas as pd
 from typing import List
-from sklearn.metrics import ndcg_score
+from sklearn.metrics import dcg_score, ndcg_score, mean_absolute_error, mean_squared_error
 from pandas import DataFrame
 
-def align_feature_scores(
-        data, time_index, last_time_step, 
-        time_range, scores, features
-    ):
-    df = data[data[time_index]<=last_time_step][['Date', 'FIPS']]
-    
-    # n_samples x features x pred_len
-    if len(scores.shape) == 3:
-        df[features] = np.sum(scores, axis=-1)
-    
-    # n_samples x features
-    else:
-        df[features] = scores
-    
-    df.dropna(inplace=True)
-    print(df[features].sum().T)
-    return df
+def normalize_feature_groups(df, features):
+    summed = df[features].sum().T.reset_index()
+    summed.columns = ['Feature', 'Score']
+    summed['Score'] = summed['Score'] * 100 / summed['Score'].sum()
+    print(summed)
 
 def evaluate_interpretation(
     ground_truth:DataFrame, relevance_score:DataFrame, features:List[str | int]
@@ -30,18 +18,39 @@ def evaluate_interpretation(
         on='end_of_week', how='inner'
     )
     
-    y_true = merged[[feature +'_x' for feature in features]]
-    y_score = merged[[feature+'_y' for feature in features]]
+    true_features = [feature +'_x' for feature in features]
+    pred_features = [feature +'_y' for feature in features]
     
-    ndcg = ndcg_score(y_true, y_score)
-    print(f'ndcg score {ndcg:0.5g}')
-    return ndcg
+    true_ranks = merged[true_features].rank(axis=1, ascending=False).reset_index(drop=True)
+    predicted_ranks = merged[pred_features].rank(axis=1, ascending=False).reset_index(drop=True)
+    # normalize the ranks
+    y_true, y_pred = true_ranks/len(features), predicted_ranks/len(features)
+    
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
+    # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ndcg_score.html
+    # Normalized Discounted Cumulative Gain.
+    # This ranking metric returns a high value if true labels are ranked high by y_score.
+    ndcg = ndcg_score(y_true, y_pred)
+    
+    print(f'Rank mae: {mae:0.5g}, rmse: {rmse:0.5g}, ndcg: {ndcg:0.5g}')
+    
+    true_scores = merged[true_features].div(merged[true_features].sum(axis=1), axis=0)
+    pred_scores = merged[pred_features].div(merged[pred_features].sum(axis=1), axis=0)
+    
+    normalized_mae = mean_absolute_error(true_scores, pred_scores)
+    normalized_rmse = np.sqrt(mean_squared_error(true_scores, pred_scores))
+    normalized_ndcg = ndcg_score(true_scores, pred_scores)
+
+    print(f'Normalized mae: {normalized_mae:0.5g}, rmse: {normalized_rmse:0.5g}, ndcg: {normalized_ndcg:0.5g}')
+    return mae, rmse, ndcg, normalized_mae, normalized_rmse, normalized_ndcg
 
 def find_first_common_date(group_cases, dates):
-    one_week = pd.to_timedelta(7, unit='D')
+    six_days = pd.to_timedelta(6, unit='D')
 
+    # dates needs to have at least 7 days of data includign the end_of_week
     for end_of_week in group_cases['end_of_week'].values:
-        if end_of_week in dates and (end_of_week - one_week) in dates:
+        if end_of_week in dates and (end_of_week - six_days) in dates:
             print(f'Found first common date {end_of_week}.')
             return end_of_week
             
@@ -54,7 +63,10 @@ def aggregate_importance_by_window(
 ):
     index = df[df['Date'] == end_of_week].first_valid_index()
     group_agg_scores = df[features].values
-    weekly_sum = np.zeros((group_agg_scores.shape[0] //window_size,  len(features)))
+    weekly_sum = np.zeros(
+        (group_agg_scores.shape[0] //window_size,  len(features)),
+        dtype=np.float32
+    )
 
     i = 0
     while index < group_agg_scores.shape[0]:
@@ -66,7 +78,6 @@ def aggregate_importance_by_window(
         index += window_size
         
     weekly_agg_scores_df = pd.DataFrame()
-
     weekly_agg_scores_df['end_of_week'] = [
         end_of_week + pd.to_timedelta(i*window_size, unit='D') \
             for i in range(weekly_sum.shape[0])
@@ -95,7 +106,7 @@ def align_interpretation(
 
     group_agg_scores = np.full(
         (num_dates + pred_len, len(features), pred_len), 
-        fill_value=np.nan, dtype=np.float16
+        fill_value=np.nan, dtype=np.float32
     )
 
     for feature_index in range(len(features)):

@@ -4,6 +4,7 @@ from tqdm import tqdm
 from data.dataloader import AgeDataLoader
 import pandas as pd
 from typing import List
+import SALib
 
 class BaseExplainer(abc.ABC):
     """
@@ -12,7 +13,7 @@ class BaseExplainer(abc.ABC):
     
     def __init__(self, model, dataloader:AgeDataLoader, features:List[str]) -> None:
         self.model = model
-        self.loader = dataloader
+        self.dataloader = dataloader
         self.features =  features
         
         self.time_index = dataloader.time_index
@@ -54,14 +55,16 @@ class BaseExplainer(abc.ABC):
         time_range = self.time_range(data)
         
         # this is necessary for later score alignment
-        data = data.sort_values(by=time_index).reset_index(drop=True)
+        data = data.sort_values(
+            by=[time_index] + self.dataloader.group_ids
+        ).reset_index(drop=True)
         self.train_generators(data)
         
         all_scores = np.full(
             (
                 data[data[time_index]<=time_range[-1]].shape[0], 
                 len(features), self.pred_len
-            ), fill_value=np.nan, dtype=np.float16
+            ), fill_value=np.nan, dtype=np.float32
         )
 
         for t in tqdm(time_range, disable=disable_progress):
@@ -71,15 +74,15 @@ class BaseExplainer(abc.ABC):
                 (data[time_index] <= (t + self.pred_len))
             ]
             
-            _, dataloader = self.loader.create_timeseries(x)
-            y_t = self.model.predict(dataloader) 
+            _, data_loader = self.dataloader.create_timeseries(x)
+            y_t = self.model.predict(data_loader) 
             
             self._local_attribute(x, t, y_t, all_scores)
         
         # since we are trying to calculate the importance in future 
         # feature importance are calculated from minimum time seq_len-1
         # this drops those early nan values
-        num_group_ids = data[self.loader.group_ids].nunique().max()
+        num_group_ids = data[self.dataloader.group_ids].nunique().max()
         all_scores = all_scores[num_group_ids*(self.seq_len-1):]
         
         gc.collect()
@@ -104,10 +107,11 @@ class FeatureOcclusion(BaseExplainer):
     """
     def __init__(
         self, model, dataloader:AgeDataLoader, 
-        features:List[str], n_samples:int=2
+        features:List[str], n_samples:int=2, dists='unif'
     ) -> None:
         super().__init__(model, dataloader, features)
         self.n_samples = n_samples
+        self.dists = dists
         
     def train_generators(self, data):
         """
@@ -117,17 +121,28 @@ class FeatureOcclusion(BaseExplainer):
         self.minimums = data[self.features].min().values
         self.maximums = data[self.features].max().values
         
+        self.means = data[self.features].mean().values
+        self.stds = data[self.features].std().values
+        
     def _local_attribute(self, x, t, y_t, all_scores):
+        selected_index = x[x[self.time_index] <= t].index
+        sample_size = selected_index.shape[0]
+        
         for feature_index, feature in enumerate(self.features):
-            selected_index = x[x[self.time_index] <= t].index
-            
             x_hat = x.copy()
-            x_hat.loc[selected_index, feature] = np.random.uniform(
-                self.minimums[feature_index], self.maximums[feature_index], 
-                size = selected_index.shape[0]
-            )
             
-            _, dataloader = self.loader.create_timeseries(x_hat)
+            if self.dists == 'norm':
+                x_hat.loc[selected_index, feature] = np.random.normal(
+                    self.means[feature_index], self.stds[feature_index], 
+                    size = sample_size
+                )
+            else:
+                x_hat.loc[selected_index, feature] = np.random.uniform(
+                    self.minimums[feature_index], self.maximums[feature_index], 
+                    size = sample_size
+                )
+            
+            _, dataloader = self.dataloader.create_timeseries(x_hat)
             y_hat_t = self.model.predict(dataloader)
             
             diff = abs(y_t[0] - y_hat_t[0]).detach().cpu().numpy()
@@ -160,25 +175,26 @@ class AugmentedFeatureOcclusion(BaseExplainer):
         self.dist = data[self.features].values
         
     def _local_attribute(self, x, t, y_t, all_scores):
+        selected_index = x[x[self.time_index] <= t].index
+        sample_size = selected_index.shape[0]
+        
         for feature_index, feature in enumerate(self.features):
-            selected_index = x[x[self.time_index] <= t].index
-            
             x_hat = x.copy()
             x_hat.loc[selected_index, feature] = np.random.choice(
                 self.dist[feature_index],
-                size = selected_index.shape[0]
+                size = sample_size
             )
             
-            _, dataloader = self.loader.create_timeseries(x_hat)
+            _, dataloader = self.dataloader.create_timeseries(x_hat)
             y_hat_t = self.model.predict(dataloader)
             
             diff = abs(y_t[0] - y_hat_t[0]).detach().cpu().numpy()
             
             # no need to return as arrays are passed by reference
-            all_scores[x[self.time_index] == t, feature_index, :] = diff
+            all_scores[x[x[self.time_index] == t].index, feature_index, :] = diff
     
     def get_name(self) -> str:
-        return "Feature Occlusion"
+        return "Augmented Feature Occlusion"
     
 class FeatureAblation(BaseExplainer):
     """
@@ -211,9 +227,9 @@ class FeatureAblation(BaseExplainer):
             self.baselines = data[self.features].mean().values
         
     def _local_attribute(self, x, t, y_t, all_scores):
+        selected_index = x[x[self.time_index] <= t].index
+        
         for feature_index, feature in enumerate(self.features):
-            selected_index = x[x[self.time_index] <= t].index
-            
             x_hat = x.copy()
             
             if self.method == "global":
@@ -221,13 +237,116 @@ class FeatureAblation(BaseExplainer):
             else:
                 x_hat.loc[selected_index, feature] = x_hat[selected_index][feature].mean()
             
-            _, dataloader = self.loader.create_timeseries(x_hat)
+            _, dataloader = self.dataloader.create_timeseries(x_hat)
             y_hat_t = self.model.predict(dataloader)
             
             diff = abs(y_t[0] - y_hat_t[0]).detach().cpu().numpy()
             
             # no need to return as arrays are passed by reference
-            all_scores[x[self.time_index] == t, feature_index, :] = diff
+            all_scores[x[x[self.time_index] == t].index, feature_index, :] = diff
     
     def get_name(self) -> str:
         return "Feature Ablation"
+    
+
+class MorrisSensitivity(BaseExplainer):
+    """
+    Perform Morris Analysis [1] on model outputs using the mu_star.
+    
+    API Reference: https://salib.readthedocs.io/en/latest/api.html#method-of-morris.
+    
+    [1] Morris, M.D., 1991. Factorial Sampling Plans for Preliminary Computational 
+    Experiments. Technometrics 33, 161-174. https://doi.org/10.1080/00401706.1991.10484804
+    """
+    def __init__(
+        self, model, dataloader:AgeDataLoader, 
+        features:List[str], dists:[str | List[str]] = 'unif'
+    ) -> None:
+        """
+        Args:
+            dists [str | List[str]]: Sample distribution a feature. Defaults to 'unif'. 
+            Possible values are unif, norm, lognorm, triang.
+        """
+        super().__init__(model, dataloader, features)
+        
+        if type(dists) == str:
+            self.dists = [dists] * len(features)
+        else:
+            assert len(features) == len(dists), \
+                'Distribution list must equal to feature list in length'
+            self.dists = dists
+        
+    def train_generators(self, data):
+        bounds = []
+        for i, feature in enumerate(self.features):
+            dist = self.dists[i]
+            values = data[feature]
+            if dist == 'unif':
+                bounds.append([values.min(), values.max()])
+            elif dist == 'triang':
+                bounds.append([values.min(), values.median(), values.max()])
+            else:
+                bounds.append([values.mean(), values.std()])
+        
+        self.sp = SALib.ProblemSpec({
+            "num_vars": len(self.features),
+            'names': self.features,
+            'bounds': bounds,
+            'dists': self.dists,
+            'sample_scaled': self.dataloader.scale # Whether the input samples are already scaled
+        })
+        self.num_group_ids = data[self.dataloader.group_ids].nunique().max()
+        
+    def _local_attribute(self, x, t, y_t, all_scores):
+        selected_index = x[x[self.time_index] <= t].index
+        samples = SALib.sample.morris.sample(self.sp, self.num_group_ids)
+        samples_reshaped = samples.reshape((-1, self.num_group_ids, len(self.features)))
+        
+        x_hat = x.copy()
+
+        num_morris_samples = len(self.features) + 1
+        y_hats = np.ndarray(
+            shape=(num_morris_samples, self.num_group_ids, self.dataloader.pred_len),
+            dtype=np.float32
+        )
+        
+        for sample_index in range(num_morris_samples):
+            group_samples = samples_reshaped[sample_index]
+            group_samples = np.tile(group_samples, [self.dataloader.seq_len, 1])
+            
+            x_hat.loc[selected_index, self.features] = group_samples
+            _, data_loader = self.dataloader.create_timeseries(x_hat)
+            
+            y_hat_t = self.model.predict(data_loader)[0]
+            y_hats[sample_index] = y_hat_t
+
+        y_hats_reshaped = y_hats.reshape((-1, self.dataloader.pred_len))
+        for index, Y in enumerate(y_hats_reshaped.T):
+            morris_index = SALib.analyze.morris.analyze(
+                self.sp, samples, Y
+            )['mu_star'].data
+            
+            all_scores[
+                x[x[self.dataloader.time_index] == t].index, :, index
+            ] = morris_index
+    
+    def get_name(self) -> str:
+        return "Morris Sensitivity"
+    
+def explainer_factory(
+    args, model, dataloader:AgeDataLoader, 
+    features: List[str | int]
+)-> BaseExplainer:
+    if args.explainer == 'FO':
+        explainer = FeatureOcclusion(model, dataloader, features, dists='unif')
+    elif args.explainer == 'AFO':
+        explainer = AugmentedFeatureOcclusion(model, dataloader, features, n_samples=2)
+    elif args.explainer == 'FA':
+        explainer = FeatureAblation(model, dataloader, features, method='global')
+    elif args.explainer == 'MS':
+        explainer = MorrisSensitivity(model, dataloader, features, dists='unif')
+    else:
+        raise ValueError(f'{args.explainer} isn\'t supported.')
+    
+    print(f'Initialized explainer: {explainer.get_name()}.\n')
+    return explainer

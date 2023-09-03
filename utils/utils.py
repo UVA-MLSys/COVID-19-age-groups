@@ -9,13 +9,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_square
 from pytorch_lightning import seed_everything
 
 from data.dataloader import AgeDataLoader
-from experiment.config import DataConfig
-    
-def normalize_feature_groups(df, features):
-    summed = df[features].sum().T.reset_index()
-    summed.columns = ['Feature', 'Score']
-    summed['Score'] = summed['Score'] * 100 / summed['Score'].sum()
-    print(summed)
 
 def clear_directory(dir_path):
     if os.path.exists(dir_path):
@@ -91,6 +84,8 @@ def align_predictions(
         all_outputs[targets] = dataloader.target_scaler.inverse_transform(
             all_outputs[targets]
         )
+        
+    # must appear after upschaling
     if remove_negative:
         # remove negative values, since infection count can't be negative
         for target in targets:
