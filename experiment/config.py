@@ -15,7 +15,7 @@ class DataConfig:
     targets=['Cases']
     
     group_ids=['FIPS']
-    scale=False
+    scale=True
     
 @dataclass
 class FeatureFiles:
