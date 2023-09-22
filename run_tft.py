@@ -1,6 +1,6 @@
 # local classes and methods
-from experiment.tft import Experiment_TFT
-from experiment.config import Split, DataConfig, ModelConfig
+from exp.tft import Experiment_TFT
+from exp.config import Split, DataConfig, ModelConfig
 from utils.utils import seed_torch, clear_directory, get_best_model_path
 
 import warnings

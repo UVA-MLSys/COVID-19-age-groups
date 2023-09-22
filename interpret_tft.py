@@ -1,6 +1,6 @@
 # local classes and methods
-from experiment.tft import Experiment_TFT
-from experiment.config import Split, DataConfig, FeatureFiles
+from exp.tft import Experiment_TFT
+from exp.config import Split, DataConfig, FeatureFiles
 from utils.utils import *
 from utils.interpreter import *
 from explainers import *

@@ -2,7 +2,7 @@
 # single merged file that the model can work on.
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from experiment.config import FeatureFiles, DataConfig
+from exp.config import FeatureFiles, DataConfig
 import os, pandas as pd
 from data.datamerger import DataMerger
 

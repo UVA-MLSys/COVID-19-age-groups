@@ -8,7 +8,7 @@ from torch import Tensor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_log_error, explained_variance_score
 from pytorch_lightning import seed_everything
 
-from data.dataloader import AgeDataLoader
+from data.dataloader import AgeData
 
 def clear_directory(dir_path):
     if os.path.exists(dir_path):
@@ -27,7 +27,7 @@ def seed_torch(seed=7):
 
 def align_predictions(
     ground_truth:DataFrame, predictions_index:DataFrame, 
-    predictions:List, dataloader:AgeDataLoader,
+    predictions:List, dataloader:AgeData,
     remove_negative:bool=True
 ):
     horizons = range(0, dataloader.pred_len)
@@ -85,7 +85,7 @@ def align_predictions(
             all_outputs[targets]
         )
         
-    # must appear after upschaling
+    # must appear after upscaling
     if remove_negative:
         # remove negative values, since infection count can't be negative
         for target in targets:

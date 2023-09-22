@@ -1,7 +1,7 @@
 import abc, gc
 import numpy as np
 from tqdm import tqdm
-from data.dataloader import AgeDataLoader
+from data.dataloader import AgeData
 import pandas as pd
 from typing import List
 import SALib
@@ -11,7 +11,7 @@ class BaseExplainer(abc.ABC):
     A base class for explainer.
     """
     
-    def __init__(self, model, dataloader:AgeDataLoader, features:List[str]) -> None:
+    def __init__(self, model, dataloader:AgeData, features:List[str]) -> None:
         self.model = model
         self.dataloader = dataloader
         self.features =  features
@@ -106,7 +106,7 @@ class FeatureOcclusion(BaseExplainer):
     European conference on computer vision, 2014.
     """
     def __init__(
-        self, model, dataloader:AgeDataLoader, 
+        self, model, dataloader:AgeData, 
         features:List[str], n_samples:int=2, dists='unif'
     ) -> None:
         super().__init__(model, dataloader, features)
@@ -165,7 +165,7 @@ class AugmentedFeatureOcclusion(BaseExplainer):
     """
     
     def __init__(
-        self, model, dataloader:AgeDataLoader, 
+        self, model, dataloader:AgeData, 
         features:List[str], n_samples:int=2
     ) -> None:
         super().__init__(model, dataloader, features)
@@ -210,7 +210,7 @@ class FeatureAblation(BaseExplainer):
         time series forecasting. Applied Intelligence, pages 1–17, 2022.
     """
     def __init__(
-        self, model, dataloader:AgeDataLoader, 
+        self, model, dataloader:AgeData, 
         features:List[str], method:str="global"
     ) -> None:
         """
@@ -259,7 +259,7 @@ class MorrisSensitivity(BaseExplainer):
     Experiments. Technometrics 33, 161-174. https://doi.org/10.1080/00401706.1991.10484804
     """
     def __init__(
-        self, model, dataloader:AgeDataLoader, 
+        self, model, dataloader:AgeData, 
         features:List[str], dists:[str | List[str]] = 'unif'
     ) -> None:
         """
@@ -334,7 +334,7 @@ class MorrisSensitivity(BaseExplainer):
         return "Morris Sensitivity"
     
 def explainer_factory(
-    args, model, dataloader:AgeDataLoader, 
+    args, model, dataloader:AgeData, 
     features: List[str | int]
 )-> BaseExplainer:
     if args.explainer == 'FO':

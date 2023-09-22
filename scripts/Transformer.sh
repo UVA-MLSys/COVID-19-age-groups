@@ -1,0 +1,1 @@
+python run.py --is_training --use_gpu --data_path Top_20.csv --model Transformer --train_epochs 10
