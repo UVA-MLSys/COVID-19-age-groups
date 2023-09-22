@@ -19,3 +19,5 @@ predictions.csv
 
 # for temporary experiments
 scratch/
+test_results
+*.pth

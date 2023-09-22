@@ -1,107 +1,129 @@
-# local classes and methods
-from experiment.tft import Experiment_TFT
-from experiment.config import Split, DataConfig, ModelConfig
-from utils.utils import seed_torch, clear_directory, get_best_model_path
-
-import warnings
-warnings.filterwarnings("ignore")
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-import torch, os
-from datetime import datetime
-import pandas as pd
-from pytorch_forecasting import TemporalFusionTransformer
+import argparse, torch, random
+from exp.exp_forecasting import Exp_Forecast
+from exp.config import DataConfig
+import numpy as np
 
 def main(args):
-    start = datetime.now()
-    print(f'Experiment started at {start}.\nCuda available: {torch.cuda.is_available()}.\n')
-    
-    # Setting random seed
-    seed_torch(args.seed)
-    
-    print(f'Starting experiment. Result folder {args.result_folder}.')
-    # clear_directory(args.result_folder)
-    
-    data_path = os.path.join(args.input_folder, args.input)
-    experiment = Experiment_TFT(
-        data_path, args.result_folder, not args.disable_progress
-    )
-    total_data = experiment.age_dataloader.read_df()
-    print(total_data.shape)
-    print(total_data.head(3))
-    
-    train_data, val_data, test_data = experiment.age_dataloader.split_data(
-        total_data, Split.primary()
-    )
-    
-    if args.test:
-        best_model_path = get_best_model_path(args.result_folder)
-        print(f'Loading best model from {best_model_path}.\n\n')
-        model = TemporalFusionTransformer.load_from_checkpoint(best_model_path)
+    set_random_seed(args.seed)
+    args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
+
+    if args.use_gpu and args.use_multi_gpu:
+        args.devices = args.devices.replace(' ', '')
+        device_ids = args.devices.split(',')
+        args.device_ids = [int(id_) for id_ in device_ids]
+        args.gpu = args.device_ids[0]
+        
+    args.n_features = len(set(DataConfig.static_reals+DataConfig.observed_reals+DataConfig.targets))
+    args.n_targets = len(DataConfig.targets)
+
+    print('Args in experiment:')
+    print(args)
+
+    setting = stringify_setting(args)
+    exp = Exp_Forecast(args, setting)
+
+    if args.is_training:
+        # setting record of experiments
+        print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
+        exp.train(setting)
+
+        print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+        exp.test(setting)
     else:
-        model = experiment.train(
-            ModelConfig.primary(), train_data, val_data, ckpt_path=None
-        )
-    
-    print('\n---Training prediction--\n')
-    train_result_merged = experiment.test(model, train_data, split_type='Train')
-    
-    print(f'\n---Validation results--\n')
-    val_result_merged = experiment.test(model, val_data, split_type='Validation')
-    
-    print(f'\n---Test results--\n')
-    test_result_merged = experiment.test(model, test_data, split_type='Test')
+        print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
+        exp.test(setting, load_model=True, flag='test')
+        
+    torch.cuda.empty_cache()
 
-    # Dump results
-    train_result_merged['split'] = 'train'
-    val_result_merged['split'] = 'validation'
-    test_result_merged['split'] = 'test'
-    
-    df = pd.concat([train_result_merged, val_result_merged, test_result_merged])
-    df.sort_values(
-        by=[experiment.age_dataloader.date_index] + experiment.age_dataloader.group_ids,
-        inplace=True
-    )
-    
-    output_file_path = os.path.join(args.result_folder, 'predictions.csv')
-    df.to_csv(output_file_path, index=False)
 
-    print(df.head(3))
-    print(f'\nEnded at {datetime.now()}. Elapsed time {datetime.now() - start}')
-    # torch.cuda.empty_cache()
+def stringify_setting(args):
+    setting = '{}_{}'.format(
+        args.model,
+        args.data_path.split('.')[0] # Top_100.csv -> Top_100
+    )
+    if args.des and args.des != '':
+        setting += '_' + args.des
+        
+    return setting
 
-def get_argparser():
-    parser = ArgumentParser(
-        description='Run infection prediction model',
-        formatter_class=ArgumentDefaultsHelpFormatter
+def get_parser():
+    parser = argparse.ArgumentParser(
+        description='Run Timeseries', 
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+
+    # basic config
+    parser.add_argument('--is_training', action='store_true', help='status')
+    parser.add_argument('--model', type=str, required=True, default='Transformer',
+                        choices=['Transformer', 'DLinear'], help='model name')
+    parser.add_argument('--seed', default=7, help='random seed')
+
+    # data loader
+    parser.add_argument('--root_path', type=str, default='./dataset/processed/', help='root path of the data file')
+    parser.add_argument('--data_path', type=str, default='Top_20.csv', help='data file')
+    parser.add_argument('--result_path', type=str, default='results', help='result folder')
+    parser.add_argument('--freq', type=str, default='d',
+                        help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
+    parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
+    parser.add_argument('--no-scale', action='store_true', help='do not scale the dataset')
+
+    # forecasting task
+    parser.add_argument('--seq_len', type=int, default=14, help='input sequence length')
+    parser.add_argument('--label_len', type=int, default=7, help='start token length')
+    parser.add_argument('--pred_len', type=int, default=14, help='prediction sequence length')
+
+    # model define
+    parser.add_argument('--top_k', type=int, default=5, help='for TimesBlock')
+    parser.add_argument('--num_kernels', type=int, default=6, help='for Inception')
+    parser.add_argument('--enc_in', type=int, default=10, help='encoder input size, equal to number of past fetures.')
+    parser.add_argument('--dec_in', type=int, default=10, help='decoder input size, same as enc_in')
+    parser.add_argument('--c_out', type=int, default=10, help='output size, same as enc_in')
+    parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
+    parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
+    parser.add_argument('--e_layers', type=int, default=2, help='num of encoder layers')
+    parser.add_argument('--d_layers', type=int, default=1, help='num of decoder layers')
+    parser.add_argument('--d_ff', type=int, default=2048, help='dimension of fcn')
+    parser.add_argument('--moving_avg', type=int, default=25, help='window size of moving average')
+    parser.add_argument('--factor', type=int, default=1, help='attn factor')
+    parser.add_argument('--distil', action='store_false',
+                        help='whether to use distilling in encoder, using this argument means not using distilling',
+                        default=True)
+    parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
+    parser.add_argument('--embed', type=str, default='timeF',
+                        help='time features encoding, options:[timeF, fixed, learned]')
+    parser.add_argument('--activation', type=str, default='gelu', help='activation')
+    parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
+
+    # optimization
+    parser.add_argument('--num_workers', type=int, default=0, help='data loader num workers')
+    parser.add_argument('--train_epochs', type=int, default=10, help='train epochs')
+    parser.add_argument('--batch_size', type=int, default=32, help='batch size of train input data')
+    parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
+    parser.add_argument('--learning_rate', type=float, default=0.001, help='optimizer learning rate')
+    parser.add_argument('--des', type=str, default='', help='exp description')
+    parser.add_argument('--loss', type=str, default='MSE', help='loss function')
+    parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
+    parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
+
+    # GPU
+    parser.add_argument('--use_gpu', action='store_true', help='use gpu')
+    parser.add_argument('--gpu', type=int, default=0, help='gpu')
+    parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)
+    parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multile gpus')
+
+    # de-stationary projector params
+    parser.add_argument('--p_hidden_dims', type=int, nargs='+', default=[128, 128],
+                        help='hidden layer dimensions of projector (List)')
+    parser.add_argument('--p_hidden_layers', type=int, default=2, help='number of hidden layers in projector')
     
-    parser.add_argument(
-        '--input-folder', type=str, default=DataConfig.root_folder, 
-        help='folder containing the input data file'
-    )
-    parser.add_argument(
-        '--input', type=str, default='Top_100.csv',
-        help='input file containing all features'
-    )
-    parser.add_argument(
-        '--result-folder', type=str, default='results', 
-        help='result output folder'
-    )
-    parser.add_argument(
-        '--disable-progress', action='store_true', 
-        help='disable progress bar. useful when submitting job script.'
-    )
-    parser.add_argument(
-        '--test', action='store_true',
-        help='test the best model at result folder'
-    )
-    parser.add_argument(
-        '--seed', type=int, default=7,
-        help='seed for randomization'
-    )
     return parser
 
+def set_random_seed(seed):
+    random.seed(seed)
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+
 if __name__ == '__main__':
-    parser = get_argparser()
+    parser = get_parser()
     args = parser.parse_args()
     main(args)

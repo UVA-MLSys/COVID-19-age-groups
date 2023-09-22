@@ -1,8 +1,8 @@
 # local classes and methods
-from experiment.config import DataConfig, ModelConfig
-from data.dataloader import AgeDataLoader
+from exp.config import DataConfig, ModelConfig
+from data.dataloader import AgeData
 from utils.plotter import PlotResults
-from utils.utils import align_predictions, show_result
+from utils.utils import align_predictions
 
 # pytorch lightning
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
@@ -26,7 +26,7 @@ class Experiment_TFT:
         self.result_folder = result_folder
         self.progress_bar = progress_bar
         
-        self.age_dataloader = AgeDataLoader(
+        self.age_dataloader = AgeData(
             data_path=data_path,
             date_index=DataConfig.date_index, 
             seq_len=DataConfig.seq_len, pred_len=DataConfig.pred_len,

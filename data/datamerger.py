@@ -2,7 +2,7 @@ import pandas as pd
 from pandas import DataFrame
 import os, math, sys
 
-from experiment.config import DataConfig, FeatureFiles
+from exp.config import DataConfig, FeatureFiles
 from utils.utils import *
 
 class DataMerger:

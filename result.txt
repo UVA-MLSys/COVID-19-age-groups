@@ -1,0 +1,9 @@
+Transformer_Top_20  
+mse:2.3553, mae:0.89012, msle: 0.50863, r2: -0.038781.
+
+DLinear_Top_100  
+mse:2.5165, mae:0.74547, msle: 0.31977, r2: 0.3127.
+
+DLinear_Top_100  
+mse:2.4933, mae:0.74283, msle: 0.31897, r2: 0.31684.
+

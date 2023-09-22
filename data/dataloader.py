@@ -1,21 +1,21 @@
 from typing import Any, Callable, Dict, List, Tuple, Union, Optional
 from pandas import DataFrame
 from sklearn.preprocessing import StandardScaler, LabelEncoder
-import pandas as pd
-from torch.utils.data import DataLoader
+import pandas as pd, numpy as np
+from torch.utils.data import DataLoader, Dataset
 from pytorch_forecasting.data import TimeSeriesDataSet
 from pytorch_forecasting.data import GroupNormalizer, MultiNormalizer
+import os
 
-from experiment.config import Split
+from exp.config import Split
 
-class AgeDataLoader:
+class AgeData:
     def __init__(
         self, data_path:str, date_index:str, seq_len:int, 
         pred_len:int, group_ids:List[str] = [],
-        static_reals:List[str] = [], static_categoricals:List[str] = [],
+        static_reals:List[str] = [],
         observed_reals:List[str] = [], 
-        observed_categoricals:List[str] = [],
-        known_reals:List[str] = [], known_categoricals:List[str] = [],
+        known_reals:List[str] = [],
         targets:List[str] = [], scale:bool=True,
         batch_size:Union[int, List[int]] = [64, 256]
     ):
@@ -32,20 +32,11 @@ class AgeDataLoader:
                 that the ``group_ids`` identify a sample together with the ``time_idx``. 
                 If you have only one timeseries, set this to the name of column that is constant.
             static_reals (List[str]): list of continuous variables that do not change over time.
-            static_categoricals (List[str]): list of categorical variables that do not change over time,
-                entries can be also lists which are then encoded together.
             observed_reals (List[str]): list of continuous variables that change over
                 time and are not known in the future. You might want to include your target here.
-            observed_categoricals (List[str]): list of categorical variables that change over
-                time and are not known in the future, entries can be also lists which are then encoded together
-                (e.g. useful for weather categories). You might want to include your target here.
             known_reals (List[str]): list of continuous variables that change over
                 time and are known in the future (e.g. price of a product, but not demand of a product).
-            known_categoricals (List[str]): list of categorical variables that change over
-                time and are known in the future, entries can be also lists which are then encoded together
-                (e.g. useful for special days or promotion categories).
-            targets (List[str]): column denoting the target or list of columns denoting the target -
-                categorical or continous.
+            targets (List[str]): column denoting the target or list of columns denoting the continous target.
             scale (bool): whether to scale the input and target features. Default True.
             batch_size (Union[int, List[int]]): batch size of the dataset. If a list is provided, the size at the 
                 first index is used in the train data and the second index is used for test/validation data.
@@ -57,21 +48,16 @@ class AgeDataLoader:
         self.time_index = 'TimeFromStart'
         self.date_index = date_index
         self.static_reals = static_reals
-        self.static_categoricals = static_categoricals
 
         self.observed_reals = observed_reals
-        self.observed_categoricals = observed_categoricals
         self.known_reals = known_reals
-        self.known_categoricals = known_categoricals
         
         self.real_features = static_reals + observed_reals + known_reals
-        self.categorical_features = static_categoricals + observed_categoricals + known_categoricals
         
         self.targets = targets
         
         selected_columns = [date_index] + group_ids + static_reals + \
-            static_categoricals + observed_reals + observed_categoricals + \
-            known_reals + known_categoricals + targets
+            observed_reals + known_reals + targets
         # remove any duplicates
         self.selected_columns = []
         for column in selected_columns:
@@ -87,7 +73,6 @@ class AgeDataLoader:
         self.scale = scale
         self.target_scaler:Optional[StandardScaler] = None
         self.real_feature_scaler:Optional[StandardScaler] = None
-        self.categorical_feature_scaler:Optional[LabelEncoder] = None
     
     def read_df(self):
         df = pd.read_csv(self.data_path)[self.selected_columns]
@@ -131,8 +116,6 @@ class AgeDataLoader:
         
         if len(real_input_features) > 0:
             self.real_feature_scaler = StandardScaler().fit(train_data[real_input_features])
-        if len(self.categorical_features) >0:
-            self.categorical_feature_scaler = LabelEncoder().fit(train_data[self.categorical_features])
         
         # this work has only real values as target
         # TODO: make more generalized by supporing both categorical and real scaling here
@@ -150,10 +133,7 @@ class AgeDataLoader:
             data[real_input_features] = self.real_feature_scaler.transform(
                 data[real_input_features]
             )
-        if self.categorical_feature_scaler:
-            data[self.categorical_features] = self.categorical_feature_scaler.transform(
-                data[self.categorical_features]
-            )
+
         if self.target_scaler:
             data[self.targets] = self.target_scaler.transform(data[self.targets])
             
@@ -170,7 +150,7 @@ class AgeDataLoader:
     
     def create_timeseries(
         self, data:DataFrame, train:bool=False
-    ) -> Tuple[TimeSeriesDataSet, DataLoader]:
+    ) -> Tuple[Dataset, DataLoader]:
         
         if self.scale:
             data = self._scale_data(data)
@@ -184,11 +164,8 @@ class AgeDataLoader:
             max_encoder_length = self.seq_len,
             max_prediction_length = self.pred_len,
             static_reals = self.static_reals,
-            static_categoricals = self.static_categoricals,
             time_varying_unknown_reals=self.observed_reals,
-            time_varying_unknown_categoricals=self.observed_categoricals,
             time_varying_known_reals = self.known_reals,
-            time_varying_known_categoricals = self.known_categoricals,
             # add_target_scales=True,
             # target_normalizer = MultiNormalizer(
             #     [GroupNormalizer(groups=self.group_ids) for _ in self.targets]
@@ -203,3 +180,127 @@ class AgeDataLoader:
         dataloader = data_timeseries.to_dataloader(train=train, batch_size=batch_size)
         
         return data_timeseries, dataloader 
+    
+    def create_tslib_timeseries(
+        self, data:DataFrame, train:bool=False
+    ) -> Tuple[Dataset, DataLoader]:
+        if self.scale:
+            data = self._scale_data(data)
+            
+        ts_dataset = MultiTimeSeries(
+            data, self.seq_len, self.pred_len, 
+            self.static_reals + self.observed_reals, 
+            self.known_reals, self.targets
+        )
+        if type(self.batch_size) == list:
+            assert len(self.batch_size) == 2, \
+                'Batch size list can have two items at most. [train batch, val/test batch]'
+            if train: batch_size = self.batch_size[0]
+            else: batch_size = self.batch_size[1]
+        else:
+            batch_size = self.batch_size
+        
+        ts_dataloader = DataLoader(
+            ts_dataset, batch_size, shuffle=train, drop_last=train
+        )
+        return ts_dataset, ts_dataloader
+        
+    
+class MultiTimeSeries(Dataset):
+    def __init__(
+        self, data, seq_len, pred_len, past_features,
+        known_features, targets, time_col='Date', 
+        id_col='FIPS', max_samples=-1
+    ):
+    
+        self.seq_len = seq_len
+        self.label_len = seq_len // 2
+        self.pred_len = pred_len
+        
+        self.past_features = past_features
+        self.known_features = known_features
+        self.targets = targets
+        
+        self.id_col = id_col
+        self.time_col = time_col
+        self.time_steps = self.seq_len + self.pred_len
+        self.max_samples = max_samples
+
+        self.__load_data__(data)
+        
+    def __load_data__(self, df_raw):
+        df_raw[self.time_col] = pd.to_datetime(df_raw[self.time_col])
+        
+        id_col, time_steps = self.id_col, self.time_steps
+        df_raw = df_raw.sort_values(by=[self.time_col, id_col]).reset_index(drop=True)
+        
+        data_stamp = self._add_time_features(df_raw.loc[0, [self.time_col]])
+        time_encoded_columns = list(data_stamp.columns)
+        print('Time encoded columns :', time_encoded_columns)
+            
+        print('Getting valid sampling locations.')
+        
+        valid_sampling_locations = []
+        split_data_map = {}
+        for identifier, df in df_raw.groupby(id_col):
+            num_entries = len(df)
+            if num_entries >= time_steps:
+                valid_sampling_locations += [
+                    (identifier, i)
+                    for i in range(num_entries - time_steps + 1)
+                ]
+            split_data_map[identifier] = df
+
+        max_samples = self.max_samples # -1 takes all samples
+        
+        if max_samples > 0 and len(valid_sampling_locations) > max_samples:
+            print('Extracting {} samples...'.format(max_samples))
+            ranges = [valid_sampling_locations[i] for i in np.random.choice(
+                  len(valid_sampling_locations), max_samples, replace=False)]
+        else:
+            # print('Max samples={} exceeds # available segments={}'.format(
+            #      max_samples, len(valid_sampling_locations)))
+            ranges = valid_sampling_locations
+            max_samples = len(valid_sampling_locations)
+        
+        self.ranges = ranges
+        
+        # must add target features to the end of data. this is the input to encoder decoder 
+        past_features = [f for f in self.past_features if f not in self.targets] + self.targets
+        self.data = np.zeros((max_samples, self.time_steps, len(past_features)))
+        self.data_stamp = np.zeros((max_samples, self.time_steps, len(time_encoded_columns)))
+        
+        for i, tup in enumerate(ranges):
+            if ((i + 1) % 10000) == 0:
+                print(i + 1, 'of', max_samples, 'samples done...')
+            identifier, start_idx = tup
+            sliced = split_data_map[identifier].iloc[start_idx:start_idx + time_steps]
+            self.data[i] = sliced[self.past_features]
+            self.data_stamp[i] = self._add_time_features(sliced[[self.time_col]])
+        
+    def __getitem__(self, index):
+        s_end = self.seq_len
+        r_begin = s_end - self.label_len
+        r_end = r_begin + self.label_len + self.pred_len
+
+        seq_x = self.data[index][:s_end]
+        seq_y = self.data[index][r_begin:r_end]
+        
+        seq_x_mark = self.data_stamp[index][:s_end]
+        seq_y_mark = self.data_stamp[index][r_begin:r_end]
+        return seq_x, seq_y, seq_x_mark, seq_y_mark
+    
+    def _add_time_features(self, df):
+        df_stamp = pd.DataFrame()
+        df_stamp['date'] = pd.to_datetime(df[self.time_col])
+
+        # Time sereis library day encoding takes 3 values
+        # check utils.tools.time_features
+        df_stamp['month'] = df_stamp.date.apply(lambda row: row.month, 1)
+        df_stamp['day'] = df_stamp.date.apply(lambda row: row.day, 1)
+        df_stamp['weekday'] = df_stamp.date.apply(lambda row: row.weekday(), 1)
+        
+        return df_stamp.drop(columns=['date'])
+
+    def __len__(self):
+        return len(self.data) # - self.seq_len - self.pred_len + 1

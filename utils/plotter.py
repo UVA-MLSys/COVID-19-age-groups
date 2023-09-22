@@ -9,7 +9,7 @@ from pytorch_forecasting.models.temporal_fusion_transformer import TemporalFusio
 import matplotlib.pyplot as plt
 
 from utils.utils import calculate_result, show_result
-from experiment.plot_config import *
+from exp.plot_config import *
 
 from matplotlib.ticker import StrMethodFormatter, MultipleLocator
 from matplotlib.figure import Figure
