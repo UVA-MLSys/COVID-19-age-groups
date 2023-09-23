@@ -269,6 +269,7 @@ class MultiTimeSeries(Dataset):
         past_features = [f for f in self.past_features if f not in self.targets] + self.targets
         self.data = np.zeros((max_samples, self.time_steps, len(past_features)))
         self.data_stamp = np.zeros((max_samples, self.time_steps, len(time_encoded_columns)))
+        self.target_data = np.zeros((max_samples, self.time_steps, len(self.targets)))
         
         for i, tup in enumerate(ranges):
             if ((i + 1) % 10000) == 0:
@@ -277,6 +278,7 @@ class MultiTimeSeries(Dataset):
             sliced = split_data_map[identifier].iloc[start_idx:start_idx + time_steps]
             self.data[i] = sliced[self.past_features]
             self.data_stamp[i] = self._add_time_features(sliced[[self.time_col]])
+            self.target_data[i] = sliced[self.targets]
         
     def __getitem__(self, index):
         s_end = self.seq_len
@@ -284,7 +286,8 @@ class MultiTimeSeries(Dataset):
         r_end = r_begin + self.label_len + self.pred_len
 
         seq_x = self.data[index][:s_end]
-        seq_y = self.data[index][r_begin:r_end]
+        # seq_y = self.data[index][r_begin:r_end]
+        seq_y = self.target_data[index][r_begin:r_end]
         
         seq_x_mark = self.data_stamp[index][:s_end]
         seq_y_mark = self.data_stamp[index][r_begin:r_end]

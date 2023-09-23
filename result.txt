@@ -7,3 +7,24 @@ mse:2.5165, mae:0.74547, msle: 0.31977, r2: 0.3127.
 DLinear_Top_100  
 mse:2.4933, mae:0.74283, msle: 0.31897, r2: 0.31684.
 
+Transformer_Top_20  
+mse:2.2688, mae:0.8544, msle: 0.49342, r2: 0.095049.
+
+DLinear_Top_20  
+mse:2.055, mae:0.78987, msle: 0.40911, r2: 0.22478.
+
+DLinear_Top_100  
+mse:2.4933, mae:0.74283, msle: 0.31897, r2: 0.31684.
+
+Transformer_Top_100  
+mse:2.6046, mae:0.87789, msle: 0.44316, r2: 0.14615.
+
+Transformer_Top_100  
+mse:2.6046, mae:0.87789, msle: 0.44316, r2: 0.14615.
+
+Transformer_Top_100  
+mse:2.8403, mae:0.84452, msle: 0.40086, r2: 0.20257.
+
+Transformer_Top_100  
+mse:2.6262, mae:0.8487, msle: 0.42248, r2: 0.22604.
+

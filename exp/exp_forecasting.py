@@ -6,7 +6,9 @@ import numpy as np
 from models import Transformer, DLinear
 from data.dataloader import AgeData
 from exp.config import DataConfig, Split
-import datetime, time
+import time
+from datetime import datetime
+from tqdm import tqdm
 
 warnings.filterwarnings('ignore')
 
@@ -145,11 +147,12 @@ class Exp_Forecast(object):
         )
 
         time_now = time.time()
+        start_time = datetime.now()
         model_optim = self._select_optimizer()
         # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html
-        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            model_optim, patience=1, factor=0.5, verbose=True
-        )
+        # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        #     model_optim, patience=1, factor=0.5, verbose=True
+        # )
         criterion = self._select_criterion()
 
         if self.args.use_amp:
@@ -217,18 +220,18 @@ class Exp_Forecast(object):
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_loader, criterion)
-            test_loss = self.vali(test_loader, criterion)
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
-                epoch + 1, train_steps, train_loss, vali_loss, test_loss))
+            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
+                epoch + 1, train_steps, train_loss, vali_loss))
             early_stopping(vali_loss, self.model)
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
 
-            lr_scheduler.step(vali_loss)
-            # adjust_learning_rate(model_optim, epoch + 1, self.args)
+            # lr_scheduler.step(vali_loss)
+            adjust_learning_rate(model_optim, epoch + 1, self.args)
 
+        print(f'Train ended. Total time {datetime.now() - start_time}')
         print(f'Loading the best model from {early_stopping.best_model_path}')
         self.model.load_state_dict(torch.load(early_stopping.best_model_path))
 

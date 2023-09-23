@@ -60,7 +60,6 @@ class Model(nn.Module):
             norm_layer=torch.nn.LayerNorm(configs.d_model),
             projection=nn.Linear(configs.d_model, configs.c_out, bias=True)
         )
-        self.projection = nn.Linear(configs.d_model, configs.c_out, bias=True)
 
     def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         # Embedding
