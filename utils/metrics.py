@@ -22,6 +22,9 @@ def MSE(pred, true):
 def MSLE(pred, true):
     return MSE(np.log1p(pred), np.log1p(true))
 
+def RMSLE(pred, true):
+    return np.sqrt(MSLE(pred, true))
+
 def RMSE(pred, true):
     return np.sqrt(MSE(pred, true))
 
@@ -36,8 +39,8 @@ def MSPE(pred, true):
 
 def calculate_metrics(pred, true):
     mae = MAE(pred, true)
-    mse = MSE(pred, true)
-    msle = MSLE(pred, true)
+    rmse = RMSE(pred, true)
+    rmsle = RMSLE(pred, true)
     r2 = r2_score(true, pred)
 
-    return mae, mse, msle, r2
+    return mae, rmse, rmsle, r2

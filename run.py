@@ -14,7 +14,14 @@ def main(args):
         args.gpu = args.device_ids[0]
         
     args.n_features = len(set(DataConfig.static_reals+DataConfig.observed_reals+DataConfig.targets))
-    args.n_targets = len(DataConfig.targets)
+    args.enc_in = args.n_features
+    
+    args.mode = 2
+    if args.mode == 1:
+        args.dec_in = args.c_out = args.n_targets = len(DataConfig.targets)
+    else:
+        args.dec_in = args.c_out = args.n_features
+        args.n_targets = len(DataConfig.targets)
 
     print('Args in experiment:')
     print(args)
@@ -37,12 +44,9 @@ def main(args):
 
 
 def stringify_setting(args):
-    setting = '{}_{}'.format(
-        args.model,
-        args.data_path.split('.')[0] # Top_100.csv -> Top_100
-    )
+    setting = f"{args.model}_{args.data_path.split('.')[0]}_scale_{args.scale}_mode_{args.mode}"
     if args.des and args.des != '':
-        setting += '_' + args.des
+        setting += '_des_' + args.des
         
     return setting
 
@@ -65,7 +69,7 @@ def get_parser():
     parser.add_argument('--freq', type=str, default='d',
                         help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
-    parser.add_argument('--no-scale', action='store_true', help='do not scale the dataset')
+    parser.add_argument('--scale', action='store_true', help='scale the dataset')
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=14, help='input sequence length')
@@ -75,9 +79,9 @@ def get_parser():
     # model define
     parser.add_argument('--top_k', type=int, default=5, help='for TimesBlock')
     parser.add_argument('--num_kernels', type=int, default=6, help='for Inception')
-    parser.add_argument('--enc_in', type=int, default=10, help='encoder input size, equal to number of past fetures.')
-    parser.add_argument('--dec_in', type=int, default=10, help='decoder input size, same as enc_in')
-    parser.add_argument('--c_out', type=int, default=10, help='output size, same as enc_in')
+    # parser.add_argument('--enc_in', type=int, default=10, help='encoder input size, equal to number of past fetures.')
+    # parser.add_argument('--dec_in', type=int, default=10, help='decoder input size, same as enc_in')
+    # parser.add_argument('--c_out', type=int, default=10, help='output size, same as enc_in')
     parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
     parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
     parser.add_argument('--e_layers', type=int, default=2, help='num of encoder layers')
@@ -102,7 +106,7 @@ def get_parser():
     parser.add_argument('--learning_rate', type=float, default=0.001, help='optimizer learning rate')
     parser.add_argument('--des', type=str, default='', help='exp description')
     parser.add_argument('--loss', type=str, default='MSE', help='loss function')
-    parser.add_argument('--lradj', type=str, default='type1', help='adjust learning rate')
+    parser.add_argument('--lradj', choices=['type1', 'type2'], default='type1', help='adjust learning rate')
     parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
 
     # GPU

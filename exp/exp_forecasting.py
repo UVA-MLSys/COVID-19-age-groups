@@ -2,7 +2,7 @@ from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import calculate_metrics
 import torch, os, time, warnings
 import numpy as np
-
+import pandas as pd
 from models import Transformer, DLinear
 from data.dataloader import AgeData
 from exp.config import DataConfig, Split
@@ -31,13 +31,13 @@ class Exp_Forecast(object):
         self.age_data = AgeData(
             data_path=os.path.join(args.root_path, args.data_path),
             date_index=DataConfig.date_index, 
-            seq_len=DataConfig.seq_len, pred_len=DataConfig.pred_len,
+            seq_len=args.seq_len, pred_len=args.pred_len,
             group_ids=DataConfig.group_ids, 
             static_reals=DataConfig.static_reals,
             observed_reals=DataConfig.observed_reals,
             known_reals=DataConfig.known_reals,
             targets=DataConfig.targets,
-            scale=DataConfig.scale
+            scale=args.scale
         )
         
         self.total_data = self.age_data.read_df()
@@ -63,7 +63,7 @@ class Exp_Forecast(object):
             model = torch.nn.DataParallel(model, device_ids=self.args.device_ids)
         return model
 
-    def _get_data(self, flag:str='train'):
+    def _get_data(self, flag:str='train', train=False):
         assert flag in ['train', 'test', 'val'], \
             f'Flag {flag} not supported. Supported flags: [train, test, val]'
         
@@ -72,7 +72,7 @@ class Exp_Forecast(object):
         else: data = self.test_data
         
         return self.age_data.create_tslib_timeseries(
-            data, train = (flag == 'train')
+            data, train, self.args.mode
         )
 
     def _select_optimizer(self):
@@ -120,7 +120,6 @@ class Exp_Forecast(object):
                 true = batch_y.detach().cpu()
 
                 loss = criterion(pred, true)
-
                 total_loss.append(loss.item())
         
         if len(total_loss) == 0:
@@ -133,9 +132,8 @@ class Exp_Forecast(object):
         return total_loss
 
     def train(self, setting):
-        _, train_loader = self._get_data(flag='train')
+        _, train_loader = self._get_data(flag='train', train=True)
         _, vali_loader = self._get_data(flag='val')
-        _, test_loader = self._get_data(flag='test')
 
         path = os.path.join(self.args.result_path, setting)
         if not os.path.exists(path):
@@ -150,9 +148,9 @@ class Exp_Forecast(object):
         start_time = datetime.now()
         model_optim = self._select_optimizer()
         # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html
-        # lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        #     model_optim, patience=1, factor=0.5, verbose=True
-        # )
+        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            model_optim, patience=0, factor=0.1, verbose=True
+        )
         criterion = self._select_criterion()
 
         if self.args.use_amp:
@@ -227,22 +225,22 @@ class Exp_Forecast(object):
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
+            elif early_stopping.counter > 0:
+                best_model_path = os.path.join(self.output_folder, 'checkpoint.pth')
+                self.model.load_state_dict(torch.load(best_model_path))
 
-            # lr_scheduler.step(vali_loss)
-            adjust_learning_rate(model_optim, epoch + 1, self.args)
+            lr_scheduler.step(vali_loss)
+            # adjust_learning_rate(model_optim, epoch + 1, self.args)
 
         print(f'Train ended. Total time {datetime.now() - start_time}')
         print(f'Loading the best model from {early_stopping.best_model_path}')
         self.model.load_state_dict(torch.load(early_stopping.best_model_path))
 
         return self.model
-
-    def test(self, setting:str, load_model:bool=False, flag:str='test'):
-        _, test_loader = self._get_data(flag)
-        if load_model:
-            best_model_path = os.path.join(self.output_folder, 'checkpoint.pth')
-            print(f'loading best model from {best_model_path}')
-            self.model.load_state_dict(torch.load(best_model_path))
+    
+    def pred(self, load_model:bool=False, flag:str='test', return_index=False):
+        test_dataset, test_loader = self._get_data(flag, train=False)
+        if load_model: self.load_model()
 
         preds = []
         trues = []
@@ -281,36 +279,50 @@ class Exp_Forecast(object):
 
                 preds.append(outputs)
                 trues.append(batch_y)
-                
-                # if i % 20 == 0:
-                #     input = batch_x.detach().cpu().numpy()
-                #     gt = np.concatenate((input[0, :, -1], batch_y[0, :, -1]), axis=0)
-                #     pd = np.concatenate((input[0, :, -1], outputs[0, :, -1]), axis=0)
-                #     visual(gt, pd, os.path.join(self.output_folder, str(i) + '.pdf'))
 
         # this line handles different size of batch. E.g. last batch can be < batch_size.
         preds = np.concatenate(preds, axis=0)
         trues = np.concatenate(trues, axis=0)
-
-        # possible since this problem has single target
-        # otherwise use the next block
-        preds = preds.reshape(*preds.shape[:2])
-        trues = trues.reshape(*preds.shape[:2])
         # preds = preds.reshape((-1, *preds.shape[-2:]))
         # trues = trues.reshape((-1, *trues.shape[-2:]))
         
         print('Preds and Trues shape:', preds.shape, trues.shape)
-
-        mae, mse, msle, r2 = calculate_metrics(preds, trues)
-        result_string = f'mse:{mse:0.5g}, mae:{mae:0.5g}, msle: {msle:0.5g}, r2: {r2:0.5g}.'
-        print(result_string)
         
+        if return_index:
+            predictions_index = pd.DataFrame(
+                test_dataset.ranges, 
+                columns=self.age_data.group_ids + [self.age_data.time_index]
+            )
+            return preds, trues, predictions_index
+        else: 
+            return preds, trues
+        
+    def load_model(self):
+        best_model_path = os.path.join(self.output_folder, 'checkpoint.pth')
+        try:
+            print(f'loading best model from {best_model_path}')
+            self.model.load_state_dict(torch.load(best_model_path))
+        except:
+            raise
+
+    def test(self, setting:str, load_model:bool=False, flag:str='test'):
+        preds, trues = self.pred(load_model, flag)
+
         with open("result.txt", 'a') as output_file:
-            output_file.write(setting + "  \n" + result_string + '\n\n')
             # The file is automatically closed when the 'with' block ends
             # contents will be auto flushed before closing
-
-        np.save(os.path.join(self.output_folder, f'{flag}_metrics.npy'), np.array([mae, mse, msle, r2]))
+            n_targets = preds.shape[-1]
+            evaluation_metrics = np.zeros(shape=(n_targets, 4))
+            for target_index in range(n_targets):
+                mae, rmse, rmsle, r2 = calculate_metrics(preds[:, :, target_index], trues[:, :, target_index])
+                result_string = f'rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}, r2: {r2:0.5g}.'
+                
+                print(result_string)
+                output_file.write(setting + "  \n" + result_string + '\n\n')
+                evaluation_metrics[target_index] = [mae, rmse, rmsle, r2]
+        
+            np.save(os.path.join(self.output_folder, f'{flag}_metrics.npy'), np.array(evaluation_metrics))
+        
         np.save(os.path.join(self.output_folder, f'{flag}_pred.npy'), preds)
         np.save(os.path.join(self.output_folder, f'{flag}_true.npy'), trues)
 

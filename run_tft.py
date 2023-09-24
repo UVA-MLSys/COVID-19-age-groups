@@ -99,6 +99,10 @@ def get_argparser():
         '--seed', type=int, default=7,
         help='seed for randomization'
     )
+    parser.add_argument(
+        '--scale', type=bool, default=True,
+        help='scale dataset'
+    )
     return parser
 
 if __name__ == '__main__':

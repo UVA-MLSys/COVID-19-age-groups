@@ -30,7 +30,7 @@ def align_predictions(
     predictions:List, dataloader:AgeData,
     remove_negative:bool=True
 ):
-    horizons = range(0, dataloader.pred_len)
+    horizons = range(dataloader.pred_len)
     time_index_max = predictions_index[dataloader.time_index].max()
 
     targets, time_index, group_ids = dataloader.targets, dataloader.time_index, dataloader.group_ids
@@ -197,7 +197,7 @@ def show_result(df: DataFrame, targets:List[str]):
         y_true, y_pred = df[target].values, df[predicted_column].values
 
         mae, rmse, rmsle, nnse = calculate_result(y_true, y_pred)
-        print(f'Target {target}, MAE {mae:.5g}, RMSE {rmse:.5g}, RMSLE {rmsle:0.5g}, NNSE {nnse:0.5g}.')
+        print(f'Target {target}: MAE {mae:.5g}, RMSE {rmse:.5g}, RMSLE {rmsle:0.5g}, NNSE {nnse:0.5g}.')
     print()
 
 def read_feature_file(dataPath, file_name):

@@ -1,10 +1,9 @@
 from typing import Any, Callable, Dict, List, Tuple, Union, Optional
 from pandas import DataFrame
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 import pandas as pd, numpy as np
 from torch.utils.data import DataLoader, Dataset
 from pytorch_forecasting.data import TimeSeriesDataSet
-from pytorch_forecasting.data import GroupNormalizer, MultiNormalizer
 import os
 
 from exp.config import Split
@@ -182,15 +181,16 @@ class AgeData:
         return data_timeseries, dataloader 
     
     def create_tslib_timeseries(
-        self, data:DataFrame, train:bool=False
-    ) -> Tuple[Dataset, DataLoader]:
+        self, data:DataFrame, train:bool=False, mode=0
+    ):
+    # ) -> Tuple[MultiTimeSeries, DataLoader]:
         if self.scale:
             data = self._scale_data(data)
             
         ts_dataset = MultiTimeSeries(
             data, self.seq_len, self.pred_len, 
             self.static_reals + self.observed_reals, 
-            self.known_reals, self.targets
+            self.known_reals, self.targets, mode
         )
         if type(self.batch_size) == list:
             assert len(self.batch_size) == 2, \
@@ -201,7 +201,7 @@ class AgeData:
             batch_size = self.batch_size
         
         ts_dataloader = DataLoader(
-            ts_dataset, batch_size, shuffle=train, drop_last=train
+            ts_dataset, batch_size, shuffle=train
         )
         return ts_dataset, ts_dataloader
         
@@ -209,8 +209,8 @@ class AgeData:
 class MultiTimeSeries(Dataset):
     def __init__(
         self, data, seq_len, pred_len, past_features,
-        known_features, targets, time_col='Date', 
-        id_col='FIPS', max_samples=-1
+        known_features, targets, mode, time_col='Date', 
+        id_col='FIPS', 
     ):
     
         self.seq_len = seq_len
@@ -224,7 +224,7 @@ class MultiTimeSeries(Dataset):
         self.id_col = id_col
         self.time_col = time_col
         self.time_steps = self.seq_len + self.pred_len
-        self.max_samples = max_samples
+        self.mode = mode
 
         self.__load_data__(data)
         
@@ -250,20 +250,9 @@ class MultiTimeSeries(Dataset):
                     for i in range(num_entries - time_steps + 1)
                 ]
             split_data_map[identifier] = df
-
-        max_samples = self.max_samples # -1 takes all samples
         
-        if max_samples > 0 and len(valid_sampling_locations) > max_samples:
-            print('Extracting {} samples...'.format(max_samples))
-            ranges = [valid_sampling_locations[i] for i in np.random.choice(
-                  len(valid_sampling_locations), max_samples, replace=False)]
-        else:
-            # print('Max samples={} exceeds # available segments={}'.format(
-            #      max_samples, len(valid_sampling_locations)))
-            ranges = valid_sampling_locations
-            max_samples = len(valid_sampling_locations)
-        
-        self.ranges = ranges
+        max_samples = len(valid_sampling_locations)
+        self.ranges = valid_sampling_locations
         
         # must add target features to the end of data. this is the input to encoder decoder 
         past_features = [f for f in self.past_features if f not in self.targets] + self.targets
@@ -271,7 +260,7 @@ class MultiTimeSeries(Dataset):
         self.data_stamp = np.zeros((max_samples, self.time_steps, len(time_encoded_columns)))
         self.target_data = np.zeros((max_samples, self.time_steps, len(self.targets)))
         
-        for i, tup in enumerate(ranges):
+        for i, tup in enumerate(valid_sampling_locations):
             if ((i + 1) % 10000) == 0:
                 print(i + 1, 'of', max_samples, 'samples done...')
             identifier, start_idx = tup
@@ -287,7 +276,10 @@ class MultiTimeSeries(Dataset):
 
         seq_x = self.data[index][:s_end]
         # seq_y = self.data[index][r_begin:r_end]
-        seq_y = self.target_data[index][r_begin:r_end]
+        if self.mode == 1:
+            seq_y = self.target_data[index][r_begin:r_end]
+        else:
+            seq_y = self.data[index][r_begin:r_end]
         
         seq_x_mark = self.data_stamp[index][:s_end]
         seq_y_mark = self.data_stamp[index][r_begin:r_end]
