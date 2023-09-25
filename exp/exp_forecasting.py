@@ -1,4 +1,4 @@
-from utils.tools import EarlyStopping, adjust_learning_rate, visual
+from utils.tools import EarlyStopping, adjust_learning_rate
 from utils.metrics import calculate_metrics
 import torch, os, time, warnings
 import numpy as np
@@ -7,6 +7,8 @@ from models import Transformer, DLinear, Autoformer, FEDformer, TimesNet, PatchT
 from data.data_factory import AgeData
 from exp.config import Split
 from datetime import datetime
+from utils.plotter import PlotResults
+from utils.utils import align_predictions
 
 warnings.filterwarnings('ignore')
 
@@ -33,9 +35,15 @@ class Exp_Forecast(object):
         
         self.age_data = AgeData.build(args)
         self.total_data = self.age_data.read_df()
-        self.train_data, self.val_data, self.test_data = self.age_data.split_data(
+        train, val, test = self.age_data.split_data(
             self.total_data, Split.primary()
         )
+        self.data_map = {
+            'train': train, 'val':val, 'test': test
+        }
+        self.dataset_map = {
+            'train': None, 'val':None, 'test': None
+        }
         
     def _acquire_device(self):
         if self.args.use_gpu:
@@ -56,14 +64,14 @@ class Exp_Forecast(object):
         return model
 
     def _get_data(self, flag:str='train', train=False):
-        assert flag in ['train', 'test', 'val'], \
-            f'Flag {flag} not supported. Supported flags: [train, test, val]'
-        
-        if flag =='train': data = self.train_data
-        elif flag == 'val': data = self.val_data
-        else: data = self.test_data
-        
-        return self.age_data.create_tslib_timeseries(data, train)
+        dataset, dataloader = self.age_data.create_tslib_timeseries(
+            self.data_map[flag], train, 
+            self.dataset_map[flag] # using a cached dataset help speeding up
+        )
+        if self.dataset_map[flag] is None:
+            self.dataset_map[flag] = dataset
+            
+        return dataset, dataloader
 
     def _select_optimizer(self):
         model_optim = torch.optim.Adam(
@@ -78,6 +86,8 @@ class Exp_Forecast(object):
     def vali(self, vali_loader, criterion):
         total_loss = []
         self.model.eval()
+        f_dim = - self.args.n_targets
+        
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
                 batch_x = batch_x.float().to(self.device)
@@ -102,7 +112,6 @@ class Exp_Forecast(object):
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
         
-                f_dim = - self.args.n_targets
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
@@ -139,9 +148,10 @@ class Exp_Forecast(object):
         model_optim = self._select_optimizer()
         # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            model_optim, patience=0, factor=0.1, verbose=True
+            model_optim, patience=0, factor=0.1, verbose=True, min_lr=1e-5
         )
         criterion = self._select_criterion()
+        f_dim = - self.args.n_targets
 
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
@@ -183,7 +193,6 @@ class Exp_Forecast(object):
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
-                    f_dim = - self.args.n_targets
                     outputs = outputs[:, -self.args.pred_len:, f_dim:]
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                     loss = criterion(outputs, batch_y)
@@ -222,8 +231,8 @@ class Exp_Forecast(object):
             lr_scheduler.step(vali_loss)
             # adjust_learning_rate(model_optim, epoch + 1, self.args)
 
-        print(f'Train ended. Total time {datetime.now() - start_time}')
-        print(f'Loading the best model from {early_stopping.best_model_path}')
+        print(f'Train ended. Total time {datetime.now() - start_time}\n')
+        print(f'Loading the best model from {early_stopping.best_model_path}\n')
         self.model.load_state_dict(torch.load(early_stopping.best_model_path))
 
         return self.model
@@ -295,25 +304,58 @@ class Exp_Forecast(object):
         except:
             raise
 
-    def test(self, setting:str, load_model:bool=False, flag:str='test'):
-        preds, trues = self.pred(load_model, flag)
+    def test(
+        self, setting:str, load_model:bool=False, flag:str='test',
+        output_results=True, plot_results=True
+    ):
+        preds, trues, predictions_index = self.pred(
+            load_model, flag, return_index=True
+        )
+        
+        preds = self.age_data.upscale_target(preds)
+        # since dataset was standard scaled, prediction can 
+        # be negative after upscaling. but covid cases are non-negative
+        preds = np.where(preds<0, 0, preds)
+        trues = self.age_data.upscale_target(trues)
 
-        with open("result.txt", 'a') as output_file:
+        if output_results:
+            self.output_results(trues, preds, setting, flag)
+            
+        if plot_results:        
+            plotter = PlotResults(
+                self.output_folder, self.age_data.targets
+            )
+            df = self.data_map[flag]
+            time_index = self.age_data.time_index
+            predictions_index[time_index] += self.args.pred_len + df[time_index].min()
+            
+            pred_list = [
+                preds[:, :, target] for target in range(preds.shape[-1])
+            ]
+            merged = align_predictions(
+                df, predictions_index, pred_list, self.age_data, 
+                remove_negative=True, upscale=False
+            )
+            plotter.summed_plot(merged, type=flag)
+
+        return
+    
+    def output_results(self, trues, preds, setting, flag, filename='result.txt'):
+        with open(filename, 'a') as output_file:
             # The file is automatically closed when the 'with' block ends
             # contents will be auto flushed before closing
             n_targets = preds.shape[-1]
-            evaluation_metrics = np.zeros(shape=(n_targets, 4))
+            evaluation_metrics = np.zeros(shape=(n_targets, 3))
+            
             for target_index in range(n_targets):
-                mae, rmse, rmsle, r2 = calculate_metrics(preds[:, :, target_index], trues[:, :, target_index])
-                result_string = f'rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}, r2: {r2:0.5g}.'
+                mae, rmse, rmsle = calculate_metrics(preds[:, :, target_index], trues[:, :, target_index])
+                result_string = f'rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}'
                 
                 print(result_string)
-                output_file.write(setting + "  \n" + result_string + '\n\n')
-                evaluation_metrics[target_index] = [mae, rmse, rmsle, r2]
+                output_file.write(setting + "  " + flag + "\n" + result_string + '\n\n')
+                evaluation_metrics[target_index] = [mae, rmse, rmsle]
         
-            np.save(os.path.join(self.output_folder, f'{flag}_metrics.npy'), np.array(evaluation_metrics))
+            np.savetxt(os.path.join(self.output_folder, f'{flag}_metrics.txt'), np.array(evaluation_metrics))
         
         np.save(os.path.join(self.output_folder, f'{flag}_pred.npy'), preds)
         np.save(os.path.join(self.output_folder, f'{flag}_true.npy'), trues)
-
-        return

@@ -26,6 +26,7 @@ def main(args):
     if args.test:
         print(f'>>>>>>> testing : {setting} <<<<<<<<')
         exp.test(setting, load_model=True, flag='test')
+        exp.test(setting, flag='train')
     else:
         # setting record of experiments
         print(f'>>>>>>> training : {setting} >>>>>>>>>')
@@ -38,7 +39,7 @@ def main(args):
 
 
 def stringify_setting(args):
-    setting = f"{args.model}_{args.data_path.split('.')[0]}_scale_{not args.no_scale}"
+    setting = f"{args.model}_{args.data_path.split('.')[0]}"
     if args.des and args.des != '':
         setting += '_des_' + args.des
         

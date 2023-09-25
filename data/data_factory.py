@@ -159,8 +159,15 @@ class AgeData:
             data[self.targets] = self.target_scaler.inverse_transform(
                 data[self.targets]
             )
-        else:
+        elif len(data.shape) == 2: 
+            # n_examples x n_targets
             data = self.target_scaler.inverse_transform(data)
+        elif len(data.shape) == 3 and data.shape[-1] == len(self.targets): 
+            # n_examples x pred_len x n_targets
+            original_shape = data.shape
+            data = data.reshape((-1, len(self.targets)))
+            data = self.target_scaler.inverse_transform(data)
+            data = data.reshape(original_shape)
             
         return data
     
@@ -194,16 +201,17 @@ class AgeData:
         return data_timeseries, dataloader 
     
     def create_tslib_timeseries(
-        self, data:DataFrame, train:bool=False,
+        self, data:DataFrame, train:bool=False, ts_dataset=None
     ) -> Tuple[MultiTimeSeries, DataLoader]:
         if self.scale:
             data = self._scale_data(data)
             
-        ts_dataset = MultiTimeSeries(
-            data, self.seq_len, self.pred_len, 
-            self.static_reals + self.observed_reals, 
-            self.known_reals, self.targets
-        )
+        if ts_dataset is None:
+            ts_dataset = MultiTimeSeries(
+                data, self.seq_len, self.pred_len, 
+                self.static_reals + self.observed_reals, 
+                self.known_reals, self.targets
+            )
         if type(self.batch_size) == list:
             assert len(self.batch_size) == 2, \
                 'Batch size list can have two items at most. [train batch, val/test batch]'

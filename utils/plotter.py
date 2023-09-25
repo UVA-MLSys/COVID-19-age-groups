@@ -5,7 +5,6 @@ https://pytorch-forecasting.readthedocs.io/en/stable/_modules/pytorch_forecastin
 import os
 from pandas import DataFrame, to_timedelta, to_datetime
 from typing import List, Optional
-from pytorch_forecasting.models.temporal_fusion_transformer import TemporalFusionTransformer
 import matplotlib.pyplot as plt
 
 from utils.utils import calculate_result, show_result

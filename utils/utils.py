@@ -8,7 +8,7 @@ from torch import Tensor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_log_error, explained_variance_score
 from pytorch_lightning import seed_everything
 
-from data.dataloader import AgeData
+from data.data_factory import AgeData
 
 def clear_directory(dir_path):
     if os.path.exists(dir_path):
@@ -28,7 +28,7 @@ def seed_torch(seed=7):
 def align_predictions(
     ground_truth:DataFrame, predictions_index:DataFrame, 
     predictions:List, dataloader:AgeData,
-    remove_negative:bool=True
+    remove_negative:bool=True, upscale:bool=True
 ):
     horizons = range(dataloader.pred_len)
     time_index_max = predictions_index[dataloader.time_index].max()
@@ -79,11 +79,9 @@ def align_predictions(
             
     gc.collect()
       
-    # upscale the target values
-    if dataloader.target_scaler:
-        all_outputs[targets] = dataloader.target_scaler.inverse_transform(
-            all_outputs[targets]
-        )
+    # upscale the target values if needed
+    if upscale:
+        all_outputs = dataloader.upscale_target(all_outputs)
         
     # must appear after upscaling
     if remove_negative:
