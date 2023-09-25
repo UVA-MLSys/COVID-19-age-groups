@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class DataConfig:
-    root_folder = 'dataset/processed'
+    root_folder = './dataset/processed'
     date_index='Date'
     seq_len=14 
     pred_len=14

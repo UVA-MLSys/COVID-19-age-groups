@@ -1,12 +1,93 @@
-import os
-
+import os, gc
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import pandas as pd
+from pandas import DataFrame
+from typing import List
+
+from data.data_factory import AgeData
 
 plt.switch_backend('agg')
 
+def align_predictions(
+    ground_truth:DataFrame, predictions_index:DataFrame, 
+    predictions:List, dataloader:AgeData,
+    remove_negative:bool=True, upscale:bool=True
+):
+    horizons = range(dataloader.pred_len)
+    time_index_max = predictions_index[dataloader.time_index].max()
+
+    targets, time_index, group_ids = dataloader.targets, dataloader.time_index, dataloader.group_ids
+    # a groupby with a groupength 1 throws warning later
+    if len(group_ids) == 1: group_ids = group_ids[0]
+    
+    all_outputs = None 
+    for target_index, target in enumerate(targets):
+        if type(predictions[target_index]) == torch.Tensor:
+            predictions[target_index] = predictions[target_index].numpy()
+
+        pred_df = DataFrame(
+            predictions[target_index], columns=horizons
+        )
+        pred_df = pd.concat([predictions_index, pred_df], axis=1)
+        outputs = []
+
+        for group_id, group_df in pred_df.groupby(group_ids):
+            group_df = group_df.sort_values(
+                by=time_index
+            ).reset_index(drop=True)
+
+            new_df = DataFrame({
+                time_index : 
+                time_index_max + range(1, dataloader.pred_len)
+            })
+            new_df[group_ids] = group_id
+            new_df.loc[:, horizons] = None
+            new_df = new_df[group_df.columns]
+            group_df = pd.concat([group_df, new_df], axis=0).reset_index(drop=True)
+
+            for horizon in horizons:
+                group_df[horizon] = group_df[horizon].shift(periods=horizon, axis=0)
+                
+            group_df[target] = group_df[horizons].mean(axis=1, skipna=True)
+            outputs.append(group_df.drop(columns=horizons))
+
+        outputs = pd.concat(outputs, axis=0)
+        
+        if all_outputs:
+            all_outputs = all_outputs.merge(
+                outputs, how='inner', on=predictions_index.columns
+            )
+        else:
+            all_outputs = outputs
+            
+    gc.collect()
+      
+    # upscale the target values if needed
+    if upscale:
+        all_outputs = dataloader.upscale_target(all_outputs)
+        
+    # must appear after upscaling
+    if remove_negative:
+        # remove negative values, since infection count can't be negative
+        for target in targets:
+            all_outputs.loc[all_outputs[target]<0, target] = 0
+            
+    # add `Predicted` prefix to the predictions
+    all_outputs.rename(
+        {target:'Predicted_'+target for target in targets}, 
+        axis=1, inplace=True
+    )
+    
+    # only keep the directly relevant columns
+    ground_truth = ground_truth[[dataloader.date_index] + list(predictions_index.columns) + targets]
+    # merge with grounth truth for evaluation
+    all_outputs = ground_truth.merge(
+        all_outputs, how='inner', on=list(predictions_index.columns)
+    )
+    
+    return all_outputs
 
 def adjust_learning_rate(optimizer, epoch, args):
     # lr = args.learning_rate * (0.2 ** (epoch // 2))

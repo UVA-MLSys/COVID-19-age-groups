@@ -1,8 +1,8 @@
 # local classes and methods
 from exp.config import DataConfig, ModelConfig
-from data.dataloader import AgeData
+from data.data_factory import AgeData
 from utils.plotter import PlotResults
-from utils.utils import align_predictions
+from utils.tools import align_predictions
 
 # pytorch lightning
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
@@ -15,31 +15,18 @@ from pytorch_forecasting.metrics import RMSE, MultiLoss
 from pytorch_forecasting.data import TimeSeriesDataSet
 
 import pandas as pd
-import gc
+import gc, os
 from datetime import datetime
     
 class Experiment_TFT:
-    def __init__(
-        self, data_path:str, result_folder:str,
-        progress_bar:bool=True
-    ) -> None:
-        self.result_folder = result_folder
-        self.progress_bar = progress_bar
+    def __init__(self, args) -> None:
+        self.result_folder = args.result_path
+        self.progress_bar = not args.disable_progress
         
-        self.age_dataloader = AgeData(
-            data_path=data_path,
-            date_index=DataConfig.date_index, 
-            seq_len=DataConfig.seq_len, pred_len=DataConfig.pred_len,
-            group_ids=DataConfig.group_ids, 
-            static_reals=DataConfig.static_reals,
-            observed_reals=DataConfig.observed_reals,
-            known_reals=DataConfig.known_reals,
-            targets=DataConfig.targets,
-            scale=DataConfig.scale
-        )
+        self.age_dataloader = AgeData.build(args)
         self.model_config = ModelConfig.primary()
         self.plotter = PlotResults(
-            result_folder, DataConfig.targets, 
+            self.result_folder, DataConfig.targets, 
             show=self.progress_bar
         )
         

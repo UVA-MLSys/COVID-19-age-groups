@@ -3,9 +3,8 @@ Done following
 https://pytorch-forecasting.readthedocs.io/en/stable/_modules/pytorch_forecasting/models/base_model.html#BaseModel.plot_prediction
 """
 import os
-from pandas import DataFrame, to_timedelta, to_datetime
-from typing import List, Optional
-from pytorch_forecasting.models.temporal_fusion_transformer import TemporalFusionTransformer
+from pandas import DataFrame, to_datetime
+from typing import List
 import matplotlib.pyplot as plt
 
 from utils.utils import calculate_result, show_result
@@ -106,8 +105,8 @@ class PlotResults:
             predicted_column = f'Predicted_{target}'
             y_true, y_pred = merged_df[target].values, merged_df[predicted_column].values
             
-            mae, rmse, rmsle, nnse = calculate_result(y_true, y_pred)
-            title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, NNSE {nnse:0.3g}'
+            mae, rmse, rmsle, r2 = calculate_result(y_true, y_pred)
+            title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, R2 {r2:0.3g}'
             
             if (summed_df[target].max() - summed_df[target].min()) >= 1e3:
                 scale = 1e3
@@ -144,14 +143,14 @@ class PlotResults:
             predicted_column = f'Predicted_{target}'
             y_true, y_pred = df[target].values, df[predicted_column].values
             
-            mae, rmse, rmsle, nnse = calculate_result(y_true, y_pred)
+            mae, rmse, rmsle, r2 = calculate_result(y_true, y_pred)
             if (df[target].max() - df[target].min())>=2e3: scale = 1e3
             else: scale = 1
 
             target_figure_name = None
             if save: target_figure_name = f'Individual_plot_{target}_{type}_FIPS_{fips}.jpg'
             
-            title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, NNSE {nnse:0.3g}'
+            title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, R2 {r2:0.3g}'
             fig = self.plot(
                 df, target, title, scale, target_figure_name, 
                 plot_error, figsize, legend_loc

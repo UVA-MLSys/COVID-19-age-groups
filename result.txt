@@ -1,90 +1,39 @@
-Transformer_Top_20  
-mse:2.3553, mae:0.89012, msle: 0.50863, r2: -0.038781.
+DLinear_Top_100  test
+rmse:958.61, mae:448.45, msle: 2.6446
 
-DLinear_Top_100  
-mse:2.5165, mae:0.74547, msle: 0.31977, r2: 0.3127.
+DLinear_Top_100  test
+rmse:958.61, mae:448.45, msle: 2.6446
 
-DLinear_Top_100  
-mse:2.4933, mae:0.74283, msle: 0.31897, r2: 0.31684.
+DLinear_Top_100  val
+rmse:411.66, mae:222.38, msle: 2.5361
 
-Transformer_Top_20  
-mse:2.2688, mae:0.8544, msle: 0.49342, r2: 0.095049.
+DLinear_Top_100  train
+rmse:328.4, mae:131, msle: 1.7119
 
-DLinear_Top_20  
-mse:2.055, mae:0.78987, msle: 0.40911, r2: 0.22478.
+DLinear_Top_100  test
+rmse:958.61, mae:448.45, msle: 2.6446, r2: 0.3294
 
-DLinear_Top_100  
-mse:2.4933, mae:0.74283, msle: 0.31897, r2: 0.31684.
+DLinear_Top_100  val
+rmse:411.66, mae:222.38, msle: 2.5361, r2: 0.43502
 
-Transformer_Top_100  
-mse:2.6046, mae:0.87789, msle: 0.44316, r2: 0.14615.
+DLinear_Top_100  train
+rmse:328.4, mae:131, msle: 1.7119, r2: 0.71856
 
-Transformer_Top_100  
-mse:2.6046, mae:0.87789, msle: 0.44316, r2: 0.14615.
+Autoformer_Top_100  test
+rmse:998.83, mae:510.19, msle: 3.0929, r2: 0.22549
 
-Transformer_Top_100  
-mse:2.8403, mae:0.84452, msle: 0.40086, r2: 0.20257.
+Autoformer_Top_100  val
+rmse:463.09, mae:258.27, msle: 2.9315, r2: 0.17202
 
-Transformer_Top_100  
-mse:2.6262, mae:0.8487, msle: 0.42248, r2: 0.22604.
+Autoformer_Top_100  train
+rmse:379.34, mae:172, msle: 2.1303, r2: 0.62446
 
-DLinear_Top_20  
-mse:2.1448, mae:0.811, msle: 0.42424, r2: 0.18585.
+FEDformer_Top_100  test
+rmse:961.33, mae:466.64, msle: 3.0475, r2: 0.31451
 
-DLinear_Top_20_scale_False  
-mse:2.1456, mae:0.81112, msle: 0.42455, r2: 0.18466.
+FEDformer_Top_100  val
+rmse:410.15, mae:235.17, msle: 2.8847, r2: 0.36939
 
-DLinear_Top_20_scale_False  
-mse:3.1862e+06, mae:989.19, msle: nan, r2: 0.16067.
-
-DLinear_Top_20_scale_False  
-mse:3.0111e+06, mae:961.79, msle: nan, r2: 0.2056.
-
-DLinear_Top_100_scale_False  
-mse:9.3318e+05, mae:456.92, msle: nan, r2: 0.31152.
-
-DLinear_Top_100_scale_False  
-mse:9.3762e+05, mae:456.85, msle: nan, r2: 0.31284.
-
-Transformer_Top_20_scale_False  
-rmse:2056.3, mae:1115.1, msle: 7.6949, r2: -0.17764.
-
-Transformer_Top_100_scale_False  
-rmse:1188.6, mae:602.56, msle: 11.274, r2: -0.14646.
-
-Transformer_Top_20_scale_True  
-rmse:1.5579, mae:0.90133, msle: 0.73032, r2: -0.026803.
-
-Transformer_Top_20_scale_True  
-rmse:1.4959, mae:0.87921, msle: 0.69089, r2: 0.085027.
-
-DLinear_Top_100_scale_True  
-rmse:1.587, mae:0.74283, msle: 0.56332, r2: 0.31364.
-
-DLinear_Top_100_scale_True  
-rmse:1.7075, mae:0.85407, msle: 0.66249, r2: 0.18833.
-
-Transformer_Top_20_scale_True  
-rmse:1.5211, mae:0.87181, msle: 0.70105, r2: 0.0088782.
-
-Transformer_Top_20_scale_False  
-rmse:2056.3, mae:1115.1, msle: 2.774, r2: -0.17764.
-
-Transformer_Top_20_scale_False  
-rmse:2044.9, mae:1212.7, msle: 3.3901, r2: -0.1763.
-
-Transformer_Top_20_scale_True  
-rmse:1.5579, mae:0.90133, msle: 0.73032, r2: -0.026803.
-
-Transformer_Top_100_scale_True  
-rmse:1.616, mae:0.85337, msle: 0.64913, r2: 0.22873.
-
-Transformer_Top_20_scale_True_mode_2  
-rmse:1.5857, mae:0.9337, msle: 0.77311, r2: -0.11201.
-
-Transformer_Top_20_scale_True_mode_2  
-rmse:1.5632, mae:0.90446, msle: 0.72162, r2: -0.07815.
-
-Transformer_Top_20_scale_True_mode_1  
-rmse:1.49, mae:0.88142, msle: 0.69907, r2: 0.040464.
+FEDformer_Top_100  train
+rmse:342.19, mae:142.58, msle: 1.8795, r2: 0.69444
 

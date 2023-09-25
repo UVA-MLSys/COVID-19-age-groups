@@ -14,37 +14,35 @@ def main(args):
         args.gpu = args.device_ids[0]
         
     args.n_features = len(set(DataConfig.static_reals+DataConfig.observed_reals+DataConfig.targets))
-    args.enc_in = args.n_features
+    args.enc_in = args.dec_in = args.c_out = args.n_features
+    args.n_targets = len(DataConfig.targets)
     
-    args.mode = 2
-    if args.mode == 1:
-        args.dec_in = args.c_out = args.n_targets = len(DataConfig.targets)
-    else:
-        args.dec_in = args.c_out = args.n_features
-        args.n_targets = len(DataConfig.targets)
-
     print('Args in experiment:')
     print(args)
 
     setting = stringify_setting(args)
     exp = Exp_Forecast(args, setting)
 
-    if args.is_training:
+    if args.test:
+        print(f'>>>>>>> testing : {setting} <<<<<<<<')
+        exp.test(setting, load_model=True, flag='test')
+        exp.test(setting, flag='val')
+        exp.test(setting, flag='train')
+    else:
         # setting record of experiments
-        print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
+        print(f'>>>>>>> training : {setting} >>>>>>>>>')
         exp.train(setting)
 
-        print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-        exp.test(setting)
-    else:
-        print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
-        exp.test(setting, load_model=True, flag='test')
+        print(f'>>>>>>> testing : {setting} <<<<<<<<')
+        exp.test(setting, flag='test')
+        exp.test(setting, flag='val')
+        exp.test(setting, flag='train')
         
     torch.cuda.empty_cache()
 
 
 def stringify_setting(args):
-    setting = f"{args.model}_{args.data_path.split('.')[0]}_scale_{args.scale}_mode_{args.mode}"
+    setting = f"{args.model}_{args.data_path.split('.')[0]}"
     if args.des and args.des != '':
         setting += '_des_' + args.des
         
@@ -57,19 +55,19 @@ def get_parser():
     )
 
     # basic config
-    parser.add_argument('--is_training', action='store_true', help='status')
+    parser.add_argument('--test', action='store_true', help='test the checkpointed best model, train otherwise')
     parser.add_argument('--model', type=str, required=True, default='Transformer',
-                        choices=['Transformer', 'DLinear'], help='model name')
+        choices=(Exp_Forecast.model_dict.keys()), help='model name')
     parser.add_argument('--seed', default=7, help='random seed')
 
     # data loader
     parser.add_argument('--root_path', type=str, default='./dataset/processed/', help='root path of the data file')
     parser.add_argument('--data_path', type=str, default='Top_20.csv', help='data file')
     parser.add_argument('--result_path', type=str, default='results', help='result folder')
-    parser.add_argument('--freq', type=str, default='d',
-                        help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
-    parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='location of model checkpoints')
-    parser.add_argument('--scale', action='store_true', help='scale the dataset')
+    parser.add_argument('--freq', type=str, default='d', choices=['s', 't', 'h', 'd', 'b', 'w', 'm'],
+        help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, \
+            b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
+    parser.add_argument('--no-scale', action='store_true', help='do not scale the dataset')
 
     # forecasting task
     parser.add_argument('--seq_len', type=int, default=14, help='input sequence length')
@@ -82,19 +80,19 @@ def get_parser():
     # parser.add_argument('--enc_in', type=int, default=10, help='encoder input size, equal to number of past fetures.')
     # parser.add_argument('--dec_in', type=int, default=10, help='decoder input size, same as enc_in')
     # parser.add_argument('--c_out', type=int, default=10, help='output size, same as enc_in')
-    parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
-    parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
+    parser.add_argument('--d_model', type=int, default=64, help='dimension of model')
+    parser.add_argument('--n_heads', type=int, default=4, help='num of heads')
     parser.add_argument('--e_layers', type=int, default=2, help='num of encoder layers')
     parser.add_argument('--d_layers', type=int, default=1, help='num of decoder layers')
-    parser.add_argument('--d_ff', type=int, default=2048, help='dimension of fcn')
-    parser.add_argument('--moving_avg', type=int, default=25, help='window size of moving average')
-    parser.add_argument('--factor', type=int, default=1, help='attn factor')
+    parser.add_argument('--d_ff', type=int, default=256, help='dimension of fcn')
+    parser.add_argument('--moving_avg', type=int, default=7, help='window size of moving average')
+    parser.add_argument('--factor', type=int, default=3, help='attn factor')
     parser.add_argument('--distil', action='store_false',
-                        help='whether to use distilling in encoder, using this argument means not using distilling',
-                        default=True)
+        help='whether to use distilling in encoder, using this argument means not using distilling',
+    )
     parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
-    parser.add_argument('--embed', type=str, default='timeF',
-                        help='time features encoding, options:[timeF, fixed, learned]')
+    parser.add_argument('--embed', type=str, default='timeF', choices=['timeF', 'fixed', 'learned'],
+        help='time features encoding')
     parser.add_argument('--activation', type=str, default='gelu', help='activation')
     parser.add_argument('--output_attention', action='store_true', help='whether to output attention in ecoder')
 
@@ -107,17 +105,17 @@ def get_parser():
     parser.add_argument('--des', type=str, default='', help='exp description')
     parser.add_argument('--loss', type=str, default='MSE', help='loss function')
     parser.add_argument('--lradj', choices=['type1', 'type2'], default='type1', help='adjust learning rate')
-    parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
+    parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training')
 
     # GPU
     parser.add_argument('--use_gpu', action='store_true', help='use gpu')
     parser.add_argument('--gpu', type=int, default=0, help='gpu')
-    parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)
+    parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus')
     parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multile gpus')
 
     # de-stationary projector params
-    parser.add_argument('--p_hidden_dims', type=int, nargs='+', default=[128, 128],
-                        help='hidden layer dimensions of projector (List)')
+    parser.add_argument('--p_hidden_dims', type=int, nargs='+', default=[64, 64],
+        help='hidden layer dimensions of projector (List)')
     parser.add_argument('--p_hidden_layers', type=int, default=2, help='number of hidden layers in projector')
     
     return parser

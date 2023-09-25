@@ -8,7 +8,7 @@ from torch import Tensor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_log_error, explained_variance_score
 from pytorch_lightning import seed_everything
 
-from data.dataloader import AgeData
+from data.data_factory import AgeData
 
 def clear_directory(dir_path):
     if os.path.exists(dir_path):
@@ -25,87 +25,6 @@ def seed_torch(seed=7):
     os.environ['PYTHONHASHSEED'] = str(seed)
     seed_everything(seed, workers=True)
 
-def align_predictions(
-    ground_truth:DataFrame, predictions_index:DataFrame, 
-    predictions:List, dataloader:AgeData,
-    remove_negative:bool=True
-):
-    horizons = range(dataloader.pred_len)
-    time_index_max = predictions_index[dataloader.time_index].max()
-
-    targets, time_index, group_ids = dataloader.targets, dataloader.time_index, dataloader.group_ids
-    # a groupby with a groupength 1 throws warning later
-    if len(group_ids) == 1: group_ids = group_ids[0]
-    
-    all_outputs = None 
-    for target_index, target in enumerate(targets):
-        if type(predictions[target_index]) == Tensor:
-            predictions[target_index] = predictions[target_index].numpy()
-
-        pred_df = DataFrame(
-            predictions[target_index], columns=horizons
-        )
-        pred_df = pd.concat([predictions_index, pred_df], axis=1)
-        outputs = []
-
-        for group_id, group_df in pred_df.groupby(group_ids):
-            group_df = group_df.sort_values(
-                by=time_index
-            ).reset_index(drop=True)
-
-            new_df = DataFrame({
-                time_index : 
-                time_index_max + range(1, dataloader.pred_len)
-            })
-            new_df[group_ids] = group_id
-            new_df.loc[:, horizons] = None
-            new_df = new_df[group_df.columns]
-            group_df = pd.concat([group_df, new_df], axis=0).reset_index(drop=True)
-
-            for horizon in horizons:
-                group_df[horizon] = group_df[horizon].shift(periods=horizon, axis=0)
-                
-            group_df[target] = group_df[horizons].mean(axis=1, skipna=True)
-            outputs.append(group_df.drop(columns=horizons))
-
-        outputs = pd.concat(outputs, axis=0)
-        
-        if all_outputs:
-            all_outputs = all_outputs.merge(
-                outputs, how='inner', on=predictions_index.columns
-            )
-        else:
-            all_outputs = outputs
-            
-    gc.collect()
-      
-    # upscale the target values
-    if dataloader.target_scaler:
-        all_outputs[targets] = dataloader.target_scaler.inverse_transform(
-            all_outputs[targets]
-        )
-        
-    # must appear after upscaling
-    if remove_negative:
-        # remove negative values, since infection count can't be negative
-        for target in targets:
-            all_outputs.loc[all_outputs[target]<0, target] = 0
-            
-    # add `Predicted` prefix to the predictions
-    all_outputs.rename(
-        {target:'Predicted_'+target for target in targets}, 
-        axis=1, inplace=True
-    )
-    
-    # only keep the directly relevant columns
-    ground_truth = ground_truth[[dataloader.date_index] + list(predictions_index.columns) + targets]
-    # merge with grounth truth for evaluation
-    all_outputs = ground_truth.merge(
-        all_outputs, how='inner', on=list(predictions_index.columns)
-    )
-    
-    return all_outputs
-
 def get_best_model_path(checkpoint_folder, prefix='best-epoch='):
     for item in os.listdir(checkpoint_folder):
         if item.startswith(prefix):
@@ -119,9 +38,10 @@ def calculate_result(y_true, y_pred):
     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
     rmsle = np.sqrt(mean_squared_log_error(y_true, y_pred))
     # smape = symmetric_mean_absolute_percentage(y_true, y_pred)
-    nnse = normalized_nash_sutcliffe_efficiency(y_true, y_pred)
+    # nnse = normalized_nash_sutcliffe_efficiency(y_true, y_pred)
+    r2 = explained_variance_score(y_true, y_pred)
 
-    return mae, rmse, rmsle, nnse
+    return mae, rmse, rmsle, r2
 
 def remove_outliers(
     original_df, multiplier:int=3, 
@@ -196,8 +116,8 @@ def show_result(df: DataFrame, targets:List[str]):
         predicted_column = f'Predicted_{target}'
         y_true, y_pred = df[target].values, df[predicted_column].values
 
-        mae, rmse, rmsle, nnse = calculate_result(y_true, y_pred)
-        print(f'Target {target}: MAE {mae:.5g}, RMSE {rmse:.5g}, RMSLE {rmsle:0.5g}, NNSE {nnse:0.5g}.')
+        mae, rmse, rmsle, r2 = calculate_result(y_true, y_pred)
+        print(f'Target {target}: MAE {mae:.5g}, RMSE {rmse:.5g}, RMSLE {rmsle:0.5g}, R2 {r2:0.5g}.')
     print()
 
 def read_feature_file(dataPath, file_name):

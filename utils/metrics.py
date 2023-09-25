@@ -40,7 +40,7 @@ def MSPE(pred, true):
 def calculate_metrics(pred, true):
     mae = MAE(pred, true)
     rmse = RMSE(pred, true)
-    rmsle = RMSLE(pred, true)
+    rmsle = RMSLE(np.where(pred<0, 0, pred) , true)
     r2 = r2_score(true, pred)
 
     return mae, rmse, rmsle, r2
