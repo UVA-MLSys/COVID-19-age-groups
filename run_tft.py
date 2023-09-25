@@ -18,13 +18,10 @@ def main(args):
     # Setting random seed
     seed_torch(args.seed)
     
-    print(f'Starting experiment. Result folder {args.result_folder}.')
+    print(f'Starting experiment. Result folder {args.result_path}.')
     # clear_directory(args.result_folder)
     
-    data_path = os.path.join(args.input_folder, args.input)
-    experiment = Experiment_TFT(
-        data_path, args.result_folder, not args.disable_progress
-    )
+    experiment = Experiment_TFT(args)
     total_data = experiment.age_dataloader.read_df()
     print(total_data.shape)
     print(total_data.head(3))
@@ -34,7 +31,7 @@ def main(args):
     )
     
     if args.test:
-        best_model_path = get_best_model_path(args.result_folder)
+        best_model_path = get_best_model_path(args.result_path)
         print(f'Loading best model from {best_model_path}.\n\n')
         model = TemporalFusionTransformer.load_from_checkpoint(best_model_path)
     else:
@@ -71,25 +68,31 @@ def main(args):
 
 def get_argparser():
     parser = ArgumentParser(
-        description='Run infection prediction model',
+        description='Run TFT prediction model',
         formatter_class=ArgumentDefaultsHelpFormatter
     )
-    
+    # data loader
     parser.add_argument(
-        '--input-folder', type=str, default=DataConfig.root_folder, 
+        '--no-scale', action='store_true',
+        help='do not scale dataset'
+    )
+    parser.add_argument(
+        '--root_path', type=str, default=DataConfig.root_folder, 
         help='folder containing the input data file'
     )
     parser.add_argument(
-        '--input', type=str, default='Top_100.csv',
-        help='input file containing all features'
+        '--data-path', type=str, default='Top_100.csv',
+        help='input feature file name'
     )
     parser.add_argument(
-        '--result-folder', type=str, default='results', 
+        '--result-path', type=str, default='results', 
         help='result output folder'
     )
+    
+    # work configuration
     parser.add_argument(
         '--disable-progress', action='store_true', 
-        help='disable progress bar. useful when submitting job script.'
+        help='disable progress bar'
     )
     parser.add_argument(
         '--test', action='store_true',
@@ -99,10 +102,11 @@ def get_argparser():
         '--seed', type=int, default=7,
         help='seed for randomization'
     )
-    parser.add_argument(
-        '--scale', type=bool, default=True,
-        help='scale dataset'
-    )
+
+    # forecasting task
+    parser.add_argument('--seq_len', type=int, default=14, help='input sequence length')
+    parser.add_argument('--pred_len', type=int, default=14, help='prediction sequence length')
+    
     return parser
 
 if __name__ == '__main__':

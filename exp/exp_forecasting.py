@@ -3,16 +3,23 @@ from utils.metrics import calculate_metrics
 import torch, os, time, warnings
 import numpy as np
 import pandas as pd
-from models import Transformer, DLinear
-from data.dataloader import AgeData
-from exp.config import DataConfig, Split
-import time
+from models import Transformer, DLinear, Autoformer, FEDformer, TimesNet, PatchTST
+from data.data_factory import AgeData
+from exp.config import Split
 from datetime import datetime
-from tqdm import tqdm
 
 warnings.filterwarnings('ignore')
 
 class Exp_Forecast(object):
+    model_dict = {
+        'Transformer': Transformer,
+        'DLinear': DLinear,
+        'Autoformer': Autoformer,
+        'FEDformer': FEDformer,
+        'PatchTST': PatchTST,
+        'TimesNet': TimesNet
+    }
+    
     def __init__(self, args, setting):
         self.args = args
         self.setting = setting
@@ -21,25 +28,10 @@ class Exp_Forecast(object):
             print(f'Output folder {self.output_folder} does not exist. Creating ..')
             os.makedirs(self.output_folder, exist_ok=True)
         
-        self.model_dict = {
-            'Transformer': Transformer,
-            'DLinear': DLinear
-        }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)
         
-        self.age_data = AgeData(
-            data_path=os.path.join(args.root_path, args.data_path),
-            date_index=DataConfig.date_index, 
-            seq_len=args.seq_len, pred_len=args.pred_len,
-            group_ids=DataConfig.group_ids, 
-            static_reals=DataConfig.static_reals,
-            observed_reals=DataConfig.observed_reals,
-            known_reals=DataConfig.known_reals,
-            targets=DataConfig.targets,
-            scale=args.scale
-        )
-        
+        self.age_data = AgeData.build(args)
         self.total_data = self.age_data.read_df()
         self.train_data, self.val_data, self.test_data = self.age_data.split_data(
             self.total_data, Split.primary()
@@ -71,9 +63,7 @@ class Exp_Forecast(object):
         elif flag == 'val': data = self.val_data
         else: data = self.test_data
         
-        return self.age_data.create_tslib_timeseries(
-            data, train, self.args.mode
-        )
+        return self.age_data.create_tslib_timeseries(data, train)
 
     def _select_optimizer(self):
         model_optim = torch.optim.Adam(

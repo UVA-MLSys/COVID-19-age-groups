@@ -88,3 +88,15 @@ rmse:1.5632, mae:0.90446, msle: 0.72162, r2: -0.07815.
 Transformer_Top_20_scale_True_mode_1  
 rmse:1.49, mae:0.88142, msle: 0.69907, r2: 0.040464.
 
+Transformer_Top_100_scale_True_mode_2  
+rmse:1.629, mae:0.85666, msle: 0.65409, r2: 0.19985.
+
+Autoformer_Top_20_scale_True_mode_2  
+rmse:1.4199, mae:0.86631, msle: 0.68877, r2: 0.15426.
+
+FEDformer_Top_20_scale_True_mode_2  
+rmse:1.6476, mae:0.98014, msle: nan, r2: -0.0033713.
+
+PatchTST_Top_20_scale_True  
+rmse:1.5253, mae:0.86279, msle: 0.71515, r2: 0.045895.
+
