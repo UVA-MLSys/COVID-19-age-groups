@@ -21,3 +21,5 @@ predictions.csv
 scratch/
 test_results
 *.pth
+*.pt
+*.npy

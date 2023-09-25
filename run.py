@@ -26,6 +26,7 @@ def main(args):
     if args.test:
         print(f'>>>>>>> testing : {setting} <<<<<<<<')
         exp.test(setting, load_model=True, flag='test')
+        exp.test(setting, flag='val')
         exp.test(setting, flag='train')
     else:
         # setting record of experiments
@@ -33,7 +34,9 @@ def main(args):
         exp.train(setting)
 
         print(f'>>>>>>> testing : {setting} <<<<<<<<')
-        exp.test(setting)
+        exp.test(setting, flag='test')
+        exp.test(setting, flag='val')
+        exp.test(setting, flag='train')
         
     torch.cuda.empty_cache()
 

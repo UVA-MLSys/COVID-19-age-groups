@@ -5,10 +5,10 @@ import numpy as np
 import pandas as pd
 from models import Transformer, DLinear, Autoformer, FEDformer, TimesNet, PatchTST
 from data.data_factory import AgeData
-from exp.config import Split
+from exp.config import Split, DataConfig
 from datetime import datetime
 from utils.plotter import PlotResults
-from utils.utils import align_predictions
+from utils.tools import align_predictions
 
 warnings.filterwarnings('ignore')
 
@@ -41,9 +41,19 @@ class Exp_Forecast(object):
         self.data_map = {
             'train': train, 'val':val, 'test': test
         }
+        
         self.dataset_map = {
-            'train': None, 'val':None, 'test': None
+            # 'train': None, 'val':None, 'test': None
         }
+        self.dataset_root = os.path.join(DataConfig.root_folder, args.data_path.split('.')[0])
+        for flag in ['train', 'val', 'test']:
+            path = os.path.join(self.dataset_root, f'{flag}.pt')
+            ts_dataset = None
+            if os.path.exists(path):
+                print(f'Loading dataset from {path}')
+                ts_dataset = torch.load(path, map_location=self.device)
+            
+            self.dataset_map[flag] = ts_dataset
         
     def _acquire_device(self):
         if self.args.use_gpu:
@@ -70,6 +80,9 @@ class Exp_Forecast(object):
         )
         if self.dataset_map[flag] is None:
             self.dataset_map[flag] = dataset
+            output_path = os.path.join(self.dataset_root, f'{flag}.pt')
+            print(f'Saving dataset at {output_path}')
+            torch.save(dataset, output_path)
             
         return dataset, dataloader
 
@@ -345,15 +358,15 @@ class Exp_Forecast(object):
             # The file is automatically closed when the 'with' block ends
             # contents will be auto flushed before closing
             n_targets = preds.shape[-1]
-            evaluation_metrics = np.zeros(shape=(n_targets, 3))
+            evaluation_metrics = np.zeros(shape=(n_targets, 4))
             
             for target_index in range(n_targets):
-                mae, rmse, rmsle = calculate_metrics(preds[:, :, target_index], trues[:, :, target_index])
-                result_string = f'rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}'
+                mae, rmse, rmsle, r2 = calculate_metrics(preds[:, :, target_index], trues[:, :, target_index])
+                result_string = f'rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}, r2: {r2:0.5g}'
                 
                 print(result_string)
                 output_file.write(setting + "  " + flag + "\n" + result_string + '\n\n')
-                evaluation_metrics[target_index] = [mae, rmse, rmsle]
+                evaluation_metrics[target_index] = [mae, rmse, rmsle, r2]
         
             np.savetxt(os.path.join(self.output_folder, f'{flag}_metrics.txt'), np.array(evaluation_metrics))
         

@@ -2,7 +2,7 @@
 from exp.config import DataConfig, ModelConfig
 from data.data_factory import AgeData
 from utils.plotter import PlotResults
-from utils.utils import align_predictions
+from utils.tools import align_predictions
 
 # pytorch lightning
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint

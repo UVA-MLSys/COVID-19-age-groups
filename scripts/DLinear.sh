@@ -1,1 +1,0 @@
-python run.py --is_training --use_gpu --data_path Top_20.csv --model DLinear --train_epochs 10
