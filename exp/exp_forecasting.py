@@ -59,8 +59,8 @@ class Exp_Forecast(object):
         if self.args.use_gpu:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(
                 self.args.gpu) if not self.args.use_multi_gpu else self.args.devices
-            device = torch.device('cuda:{}'.format(self.args.gpu))
-            print('Use GPU: cuda:{}'.format(self.args.gpu))
+            device = torch.device(f'cuda:{self.args.gpu}')
+            print(f'Use GPU: cuda:{self.args.gpu}')
         else:
             device = torch.device('cpu')
             print('Use CPU')
@@ -215,7 +215,7 @@ class Exp_Forecast(object):
                     train_loss.append(loss.item())
 
                 if (i + 1) % 500 == 0:
-                    print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
+                    print(f"\titers: {i + 1}, epoch: {epoch + 1} | loss: {loss.item():.7g}")
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * train_steps - i)
                     print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
@@ -230,12 +230,11 @@ class Exp_Forecast(object):
                     loss.backward()
                     model_optim.step()
 
-            print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
+            print(f"Epoch: {epoch + 1} cost time: {(time.time() - epoch_time):0.5g}")
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_loader, criterion)
 
-            print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
-                epoch + 1, train_steps, train_loss, vali_loss))
+            print(f"Epoch: {epoch + 1}, Steps: {train_steps} | Train Loss: {train_loss:.5g} Vali Loss: {vali_loss:.5g}")
             early_stopping(vali_loss, self.model)
             if early_stopping.early_stop:
                 print("Early stopping")
@@ -247,7 +246,8 @@ class Exp_Forecast(object):
             lr_scheduler.step(vali_loss)
             # adjust_learning_rate(model_optim, epoch + 1, self.args)
 
-        print(f'Train ended. Total time {datetime.now() - start_time}\n')
+        total_time = datetime.now() - start_time
+        print(f'Train ended. Total time {total_time}, per epoch {total_time/(epoch+1)}\n')
         print(f'Loading the best model from {early_stopping.best_model_path}\n')
         self.model.load_state_dict(torch.load(early_stopping.best_model_path))
 
@@ -365,10 +365,10 @@ class Exp_Forecast(object):
             
             for target_index in range(n_targets):
                 mae, rmse, rmsle, r2 = calculate_metrics(preds[:, :, target_index], trues[:, :, target_index])
-                result_string = f'rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}, r2: {r2:0.5g}'
+                result_string = f'{flag}: rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}, r2: {r2:0.5g}'
                 
                 print(result_string)
-                output_file.write(setting + "  " + flag + "\n" + result_string + '\n\n')
+                output_file.write(setting + result_string + '\n')
                 evaluation_metrics[target_index] = [mae, rmse, rmsle, r2]
         
             np.savetxt(os.path.join(self.output_folder, f'{flag}_metrics.txt'), np.array(evaluation_metrics))

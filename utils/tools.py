@@ -39,8 +39,7 @@ def align_predictions(
             ).reset_index(drop=True)
 
             new_df = DataFrame({
-                time_index : 
-                time_index_max + range(1, dataloader.pred_len)
+                time_index : [t + time_index_max for t in range (1, dataloader.pred_len)]
             })
             new_df[group_ids] = group_id
             new_df.loc[:, horizons] = None

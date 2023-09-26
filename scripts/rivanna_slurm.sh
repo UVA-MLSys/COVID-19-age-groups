@@ -14,7 +14,7 @@ module load cuda cudnn
 
 # 1. using singularity
 module load singularity
-singularity run --nv ./tft_pytorch.sif python run.py --use_gpu --data_path Top_20.csv --model DLinear
+python run.py --use_gpu --data_path Top_20.csv --model DLinear
 
 # # 2. using anaconda
 #  module load anaconda

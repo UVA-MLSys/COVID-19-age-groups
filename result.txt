@@ -37,3 +37,18 @@ rmse:410.15, mae:235.17, msle: 2.8847, r2: 0.36939
 FEDformer_Top_100  train
 rmse:342.19, mae:142.58, msle: 1.8795, r2: 0.69444
 
+DLinear_Top_20  test
+rmse:1717.6, mae:949.37, msle: 2.7177, r2: 0.22656
+
+DLinear_Top_20  test
+rmse:1717.6, mae:949.37, msle: 2.7177, r2: 0.22656
+
+DLinear_Top_20  val
+rmse:686.1, mae:383.85, msle: 2.8124, r2: 0.43476
+
+DLinear_Top_20  train
+rmse:656.48, mae:302.78, msle: 2.011, r2: 0.70963
+
+DLinear_Top_20test: rmse:1717.6, mae:949.37, msle: 2.7177, r2: 0.22656
+DLinear_Top_20val: rmse:686.1, mae:383.85, msle: 2.8124, r2: 0.43476
+DLinear_Top_20train: rmse:656.48, mae:302.78, msle: 2.011, r2: 0.70963

@@ -102,11 +102,10 @@ class PlotResults:
         summed_df = self.makeSummed(merged_df)
         figures = []
         for target in self.targets:
-            predicted_column = f'Predicted_{target}'
-            y_true, y_pred = merged_df[target].values, merged_df[predicted_column].values
-            
-            mae, rmse, rmsle, r2 = calculate_result(y_true, y_pred)
-            title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, R2 {r2:0.3g}'
+            # predicted_column = f'Predicted_{target}'
+            # y_true, y_pred = merged_df[target].values, merged_df[predicted_column].values
+            # mae, rmse, rmsle, r2 = calculate_result(y_true, y_pred)
+            # title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, R2 {r2:0.3g}'
             
             if (summed_df[target].max() - summed_df[target].min()) >= 1e3:
                 scale = 1e3
@@ -116,7 +115,7 @@ class PlotResults:
             if save: target_figure_name = f'Summed_plot_{target}_{type}.jpg'
 
             fig = self.plot(
-                summed_df, target, title, scale, target_figure_name, 
+                summed_df, target, None, scale, target_figure_name, 
                 plot_error, figsize, legend_loc
             )
             figures.append(fig)
@@ -140,19 +139,20 @@ class PlotResults:
 
         figures = []
         for target in self.targets:
-            predicted_column = f'Predicted_{target}'
-            y_true, y_pred = df[target].values, df[predicted_column].values
+            # predicted_column = f'Predicted_{target}'
+            # y_true, y_pred = df[target].values, df[predicted_column].values
+            # mae, rmse, rmsle, r2 = calculate_result(y_true, y_pred)
+            # title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, R2 {r2:0.3g}'
             
-            mae, rmse, rmsle, r2 = calculate_result(y_true, y_pred)
             if (df[target].max() - df[target].min())>=2e3: scale = 1e3
             else: scale = 1
 
             target_figure_name = None
             if save: target_figure_name = f'Individual_plot_{target}_{type}_FIPS_{fips}.jpg'
             
-            title = f'MAE {mae:0.3g}, RMSE {rmse:0.4g}, RMSLE {rmsle:0.3g}, R2 {r2:0.3g}'
+            
             fig = self.plot(
-                df, target, title, scale, target_figure_name, 
+                df, target, None, scale, target_figure_name, 
                 plot_error, figsize, legend_loc
             )
             figures.append(fig)
@@ -170,7 +170,7 @@ class PlotResults:
         return summed
     
     def local_interpretation(
-        self, df:DataFrame, features: List[int | str], 
+        self, df:DataFrame, features: List[str], 
         figure_name='feature_importance.jpg', 
         figsize=(16, 8), x_major_ticks = DATE_TICKS
     ):

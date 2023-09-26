@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings('ignore')
+
 import argparse, torch, random
 from exp.exp_forecasting import Exp_Forecast
 from exp.config import DataConfig
