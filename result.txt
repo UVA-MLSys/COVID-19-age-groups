@@ -48,7 +48,3 @@ rmse:686.1, mae:383.85, msle: 2.8124, r2: 0.43476
 
 DLinear_Top_20  train
 rmse:656.48, mae:302.78, msle: 2.011, r2: 0.70963
-
-DLinear_Top_20test: rmse:1717.6, mae:949.37, msle: 2.7177, r2: 0.22656
-DLinear_Top_20val: rmse:686.1, mae:383.85, msle: 2.8124, r2: 0.43476
-DLinear_Top_20train: rmse:656.48, mae:302.78, msle: 2.011, r2: 0.70963

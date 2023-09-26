@@ -1,10 +1,9 @@
 matplotlib
-numpy==1.23.1
+numpy==1.23
 pandas
-pytorch-forecasting==0.10.2
-pytorch-lightning==1.6.5
+pytorch-forecasting==0.10.3
+pytorch-lightning==1.8.6
 SALib
-shutil
 scikit-learn
 tqdm
 einops
