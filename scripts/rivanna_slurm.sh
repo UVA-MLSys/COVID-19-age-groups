@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 #SBATCH --job-name="train"
-#SBATCH --output=train.out
+#SBATCH --output=scripts/outputs/train.out
 #SBATCH --partition=gpu
-#SBATCH --time=24:00:00
+#SBATCH --time=0:30:00
 #SBATCH --account=bii_dsc_community
-#SBATCH --gres=gpu
-#SBATCH --mem=32GB
+#SBATCH --gres=gpu:v100:1
+#SBATCH --mem=16GB
 
 source /etc/profile.d/modules.sh
 source ~/.bashrc
-cd ..
+
 module load cuda cudnn
 
 # 1. using singularity
 module load singularity
-singularity run --nv timeseries.sif python run.py --use_gpu --data_path Top_20.csv --model DLinear
+singularity run --nv timeseries.sif python run.py --use_gpu --result_path scratch --data_path Top_20.csv --model DLinear
 
 # # 2. using anaconda
 #  module load anaconda
