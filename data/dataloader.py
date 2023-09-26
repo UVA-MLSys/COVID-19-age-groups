@@ -56,7 +56,7 @@ class MultiTimeSeries(Dataset):
         self.data_stamp = np.zeros((max_samples, self.time_steps, len(time_encoded_columns)))
         self.target_data = np.zeros((max_samples, self.time_steps, len(self.targets)))
         
-        for i, tup in tqdm(enumerate(valid_sampling_locations), mininterval=60):
+        for i, tup in tqdm(enumerate(valid_sampling_locations), mininterval=300):
             # if ((i + 1) % 10000) == 0:
             #     print(i + 1, 'of', max_samples, 'samples done...')
             identifier, start_idx = tup

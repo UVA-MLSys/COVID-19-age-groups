@@ -5,7 +5,9 @@ This study aimed to identify the most influential age groups in COVID-19 infecti
 ## Folder Structure
 * `data`: data loader and merger files
 
-* `dataset`: raw and processed data set in CSV files. The `Total.csv` file isn't committed here. But can be created by running the `prepare_data.py` script. Or you can download from [here](https://drive.google.com/drive/folders/1IPID82QWKUTxGOrynLn_QhYgVIa9CjUq?usp=sharing). The cached datasets will also be saved here. You can save some initial time by downloading them from the drive and keeping in the same path. The code will automatically recognise the caches and load from there instead of rebuilding.
+* `dataset`: raw and processed data set in CSV files. 
+  * The `Total.csv` file isn't committed here. You can download from [here](https://drive.google.com/drive/folders/1IPID82QWKUTxGOrynLn_QhYgVIa9CjUq?usp=sharing), unzip the files and keep them in the same path.  
+  * The cached datasets (`.pt` files) are also saved here. Some initial execution times can be save by downloading them from the [drive]((https://drive.google.com/drive/folders/1IPID82QWKUTxGOrynLn_QhYgVIa9CjUq?usp=sharing)) and keeping in the same path. The code will automatically recognise the caches and load from there instead of rebuilding. Make sure to remove the cache if you changed some data config (e.g. `seq_len`, `pred_len`), so that they are rebuild.
 
 * `exp`: experiment runner and configuration for data, model, plots.
 

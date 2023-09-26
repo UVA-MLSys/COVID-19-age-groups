@@ -5,8 +5,11 @@ import argparse, torch, random
 from exp.exp_forecasting import Exp_Forecast
 from exp.config import DataConfig
 import numpy as np
+from datetime import datetime
 
 def main(args):
+    start = datetime.now()
+    print(f'Experiment started at {start}')
     set_random_seed(args.seed)
     args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
 
@@ -42,7 +45,7 @@ def main(args):
         exp.test(setting, flag='train')
         
     torch.cuda.empty_cache()
-
+    print(f'Experiment ended at {datetime.now()}, runtime {datetime.now() - start}')
 
 def stringify_setting(args):
     setting = f"{args.model}_{args.data_path.split('.')[0]}"
