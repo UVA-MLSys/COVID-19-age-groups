@@ -53,7 +53,7 @@ def stringify_setting(args):
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description='Run Timeseries', 
+        description='Run Timeseries Models', 
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 

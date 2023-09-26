@@ -1,76 +1,171 @@
 # Introduction
 
-The COVID-19 pandemic has created unprecedented challenges for governments and healthcare systems worldwide, highlighting the critical importance of understanding the factors that contribute to virus transmission. This study aimed to identify the most influential age groups in COVID-19 infection rates at the US county level using the Modified Morris Method and deep learning for time series. Our approach involved training the state-of-the-art time-series model Temporal Fusion Transformer [[1]](#tft) on different age groups as a static feature and the population vaccination status as the dynamic feature. We analyzed the impact of those age groups on COVID-19 infection rates by perturbing individual input features and ranked them based on their Morris sensitivity scores, which quantify their contribution to COVID-19 transmission rates. The findings are verified using ground truth data from the CDC and US Census, which provide the true infection rates for each age group. The results suggest that young adults were the most influential age group in COVID-19 transmission at the county level between March 1, 2020, and November 27, 2021. Using these results can inform public health policies and interventions, such as targeted vaccination strategies, to better control the spread of the virus. Our approach demonstrates the utility of feature sensitivity analysis in identifying critical factors contributing to COVID-19 transmission and can be applied in other public health domains.
+This study aimed to identify the most influential age groups in COVID-19 infection rates at the US county level using the time series interpretation techniques with deep learning. Our approach involved training the state-of-the-art time-series models on different age groups as a static feature and the population vaccination status as the dynamic feature. We analyzed the impact of those age groups on COVID-19 infection rates by perturbing individual input features and ranked them based on their sensitivity scores. The findings are verified using ground truth data from the CDC and US Census, which provide the true infection rates for each age group. The results suggest that young adults were the most influential age group in COVID-19 transmission at the county level between March 1, 2020, and November 27, 2021. Using these results can inform public health policies and interventions, such as targeted vaccination strategies, to better control the spread of the virus. 
 
-## Folder structure
+## Folder Structure
 * `data`: data loader and merger files
 
-* `dataset`: raw and processed data set in CSV files. The `Total.csv` file isn't committed here. But can be created by running the `prepare_data.py` script.
+* `dataset`: raw and processed data set in CSV files. The `Total.csv` file isn't committed here. But can be created by running the `prepare_data.py` script. Or you can download from [here](https://drive.google.com/drive/folders/1IPID82QWKUTxGOrynLn_QhYgVIa9CjUq?usp=sharing). The cached datasets will also be saved here. You can save some initial time by downloading them from the drive and keeping in the same path. The code will automatically recognise the caches and load from there instead of rebuilding.
 
-* `experiment`: experiment runner and configuration for data, model, plots.
+* `exp`: experiment runner and configuration for data, model, plots.
+
+* `layers`: neural network layer classes and related utils.
+
+* `models`: timeseries model classes.
+
+* `results`: result output from the model training and testing.
+
+* `scratch`: folder to run temporary experiments in without git tracking.
+
+* `scripts`: template scripts and slurm job scripts for rivanna and cs remote server.
 
 * `utils`: miscellaneous util methods and result plotter.
 
 * `singilarity.def`: definition file for singularity.
 
-## Runtime
+## Setup Environment
 
-Currently on Rivanna with batch size 64, each epoch with
+### 1. Singularity (Recommended on Rivanna)
+#### Option A. Pull already built container
 
-* Top 100 counties takes around 2-3 minutes.
-* Top 500 counties takes around 12-13 minutes, memory 24GB.
-* Total 3,142 counties takes around 40-45 minutes, memory 32GB.
-
-## How to Reproduce
-
-### Singularity
-You can either pull the singularity container from the remote library,
+Pull the singularity container from the remote library,
 ```bash
-singularity pull tft_pytorch.sif library://khairulislam/collection/tft_pytorch:latest
+singularity pull timeseries.sif library://khairulislam/collection/timeseries:latest
 ```
-Or create the container locally using the [singularity.def](/TFT-pytorch/singularity.def) file. Executeg the following command. This uses the definition file to create the container from scratch. Note that is uses `sudo` and requires root privilege. After compilation, you'll get a container named `tft_pytorch.sif`. 
+
+#### Option B. Build container from scratch
+
+*Note:* If you want to create the container from scrach, you need a linux machine with `root` privilege or build remotely at [cloud.sylabs.io/library](https://cloud.sylabs.io/library). On Rivanna you can't create containers, you are not the `root`. The you can use the [singularity.def](/TFT-pytorch/singularity.def) file. After compilation, you'll get a container named `timeseries.sif`. 
 
 ```bash
-sudo singularity build tft_pytorch.sif singularity.def
+sudo singularity build timeseries.sif singularity.def
 ```
 
-Then you can use the container to run the scripts. For example, 
+#### Running scripts in container
+Then you can use the container to run the scripts. `--nv` indicates using GPU. For example, 
 ```bash
-singularity run --nv ../../tft_pytorch.sif python run.py
+singularity run --nv timeseries.sif python run.py
 ```
 
-### Virtual Environment
-To create the virtual environment by pip, use the [requirement.txt](/requirements.txt). If you have trouble installing from the file, try installing each of them manually. You should install pytorch with cuda separately, since pip server can't find it
+### 2. Virtual Environment  (More flexible compared to container)
+If you are on remote servers like Rivanna or UVA CS server, you don't have the permission to upgrade default python version. But you can use the already installed `Anaconda` to create a new environment and install latest python and libraries there. 
+
+To create a new env with name `ml` and python version `3.10` run the following. `python 3.10` is the latest one supported with `pytorch GPU` at this moment. 
+```bash
+conda create --name ml python=3.10
+
+# activates the virtual env
+conda activate ml
+
+# installs libraries in the default pip and this env
+pip install some_library 
+
+# installs libraries in this env, but often slower and doesn't work
+conda install some_library 
+
+# will run the script with this environment
+python run.py
+
+# deactivates the virtual env
+conda deactivate
+```
+
+You should install pytorch with cuda separately, since pip server can't find it
 
 ```bash
-pip install torch==1.13.1+cu116 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.11.1+cu113 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
-### UVA Rivanna/CS server
+Then install the other libraries from [requirement.txt](/requirements.txt). If you have trouble installing from the file (command `pip install -r requirements.txt`), try installing each library manually. 
 
-On **Rivanna**, the default python environment doesn't have all the libraries we need. The [requirements.txt](requirements.txt) file contains a list of libraries we need. There are two ways you can run the training there
-
-#### Default Environment
-
-Rivanna provides a bunch of python kernels readily available. You can check them from an interactive Jupyterlab session, on the top-right side of the notebook. I have tested with the `Tensorflow 2.8.0/Keras Py3.9` kernel and uncommented the following snippet in the code.
-
-```python
-!pip install pytorch_lightning==1.8.6
-!pip install pytorch_forecasting==0.10.3
-```
-
-You can choose different kernels and install the additional libraries. 
-
-#### GPU 
-
-Next, you might face issues getting GPU running on Rivanna. Even on a GPU server the code might not recognize the GPU hardware if cuda and cudnn are not properly setup. Try to log into an interactive session in a GPU server, then run the following command
+### 3. GPU 
+Next, you might face issues getting GPU running on Rivanna. Even on a GPU server the code might not recognize the GPU hardware if cuda and cudnn are not properly setup. Try to log into an interactive session in a GPU server, then run the following command from terminal,
 
 ```bash
-import tensorflow as tf
-print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+python -c "import torch;print(torch.cuda.is_available())"
 ```
 
-If this is still 0, then you'll have to install the cuda and cudnn versions that match version in `nvidia-smi` command output. Also see if you tensorflow version is for CPU or GPU.
+If this is still 0, then you'll have to install the cuda and cudnn versions that match version in `nvidia-smi` command output. Also see if you tensorflow version is for CPU or GPU. For this project, `tensorflow` isn't used. So no need to install it.
+
+## Reproduce
+
+### Running models
+Use the `run.py` to run the available models on the dataset. See `scripts/commands.sh` file for some examples. All commands must be run from this current folder. Not from any sub-folders. We currently support the following models `Transformer, DLinear, Autoformer, FEDformer, PatchTST, TimesNet` from the[Time-Series-Library](https://github.com/thuml/Time-Series-Library). Note that, anything written in the `scratch` folder will be ignored by `git`, since it is added in `.gitignore`. So setting `--result_path scratch` is a good idea for temporary experiments.
+
+```
+$COVID-19-age-groups> python run.py --help
+
+Run Timeseries
+
+options:
+  -h, --help            show this help message and exit
+  --test                test the checkpointed best model, train otherwise (default: False)
+  --model {Transformer,DLinear,Autoformer,FEDformer,PatchTST,TimesNet}
+                        model name (default: Transformer)
+  --seed SEED           random seed (default: 7)
+  --root_path ROOT_PATH
+                        root path of the data file (default: ./dataset/processed/)
+  --data_path DATA_PATH
+                        data file (default: Top_20.csv)
+  --result_path RESULT_PATH
+                        result folder (default: results)
+  --freq {s,t,h,d,b,w,m}
+                        freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like   
+                        15min or 3h (default: d)
+  --no-scale            do not scale the dataset (default: False)
+  --seq_len SEQ_LEN     input sequence length (default: 14)
+  --label_len LABEL_LEN
+                        start token length (default: 7)
+  --pred_len PRED_LEN   prediction sequence length (default: 14)
+  --top_k TOP_K         for TimesBlock (default: 5)
+  --num_kernels NUM_KERNELS
+                        for Inception (default: 6)
+  --d_model D_MODEL     dimension of model (default: 64)
+  --n_heads N_HEADS     num of heads (default: 4)
+  --e_layers E_LAYERS   num of encoder layers (default: 2)
+  --d_layers D_LAYERS   num of decoder layers (default: 1)
+  --d_ff D_FF           dimension of fcn (default: 256)
+  --moving_avg MOVING_AVG
+                        window size of moving average (default: 7)
+  --factor FACTOR       attn factor (default: 3)
+  --distil              whether to use distilling in encoder, using this argument means not using distilling (default: True)
+  --dropout DROPOUT     dropout (default: 0.1)
+  --embed {timeF,fixed,learned}
+                        time features encoding (default: timeF)
+  --activation ACTIVATION
+                        activation (default: gelu)
+  --output_attention    whether to output attention in ecoder (default: False)
+  --num_workers NUM_WORKERS
+                        data loader num workers (default: 0)
+  --train_epochs TRAIN_EPOCHS
+                        train epochs (default: 10)
+  --batch_size BATCH_SIZE
+                        batch size of train input data (default: 32)
+  --patience PATIENCE   early stopping patience (default: 3)
+  --learning_rate LEARNING_RATE
+                        optimizer learning rate (default: 0.001)
+  --des DES             exp description (default: )
+  --loss LOSS           loss function (default: MSE)
+  --lradj {type1,type2}
+                        adjust learning rate (default: type1)
+  --use_amp             use automatic mixed precision training (default: False)
+  --use_gpu             use gpu (default: False)
+  --gpu GPU             gpu (default: 0)
+  --use_multi_gpu       use multiple gpus (default: False)
+  --devices DEVICES     device ids of multile gpus (default: 0,1,2,3)
+  --p_hidden_dims P_HIDDEN_DIMS [P_HIDDEN_DIMS ...]
+                        hidden layer dimensions of projector (List) (default: [64, 64])
+  --p_hidden_layers P_HIDDEN_LAYERS
+                        number of hidden layers in projector (default: 2)
+```
+
+### Submitting job scripts
+
+To submit job scripts in remote servers, use the templates in the `scripts` folder. And submit the jobs from this current folder.
+```
+$COVID-19-age-groups> sbatch scripts/rivanna_slurm.sh
+```
+The job outputs will be saved in [`scripts/outputs`](/scripts/outputs/) folder. The model outputs will be in the `result_path/setting` folder.
 
 ## Features
 
@@ -109,9 +204,9 @@ The following table lists the features with their source and description. Note t
 </tr>
 
 <tr>
-<td><strong>SinWeekly</strong></td>
+<td><strong>Time encoded features</strong></td>
 <td>Known Future</td>
-<td> <em>Sin (day of the week / 7) </em>.</td>
+<td> <em> Features calculated from time </em>.</td>
 <td>Date</td>
 </tr>
 
@@ -135,6 +230,18 @@ The following table lists the features with their source and description. Note t
   * To check which files git says untracked `git status -u`. 
   * If you have folders you want to exclude add the path in `.gitignore`, then `git add .gitignore`. Check again with `git status -u` if it is still being tracked.
 
-## References
+## Models
 
-<a id="tft"> 1. </a> B. Lim, S. O¨ . Arik, N. Loeff, and T. Pfister, “Temporal fusion transformers for interpretable multi-horizon time series forecasting,” International Journal of Forecasting, vol. 37, no. 4, pp. 1748–1764, 2021.
+* DLinear
+* Autoformer
+* FEDformer
+* PatchTST
+* TimesNet
+* Temporal Fusion Transformer (TFT)
+* Transformer
+
+## Interpretation Techniques
+
+* Feature Ablation
+* Feature Occlusion
+* Augmented Feature Occlusion
