@@ -50,18 +50,21 @@ class Model(nn.Module):
                 out_channels=configs.d_model,
                 seq_len=self.seq_len,
                 modes=self.modes,
-                mode_select_method=self.mode_select)
+                mode_select_method=self.mode_select,
+                n_heads=configs.n_heads)
             decoder_self_att = FourierBlock(in_channels=configs.d_model,
                 out_channels=configs.d_model,
                 seq_len=self.seq_len // 2 + self.pred_len,
                 modes=self.modes,
-                mode_select_method=self.mode_select)
+                mode_select_method=self.mode_select,
+                n_heads=configs.n_heads)
             decoder_cross_att = FourierCrossAttention(in_channels=configs.d_model,
                 out_channels=configs.d_model,
                 seq_len_q=self.seq_len // 2 + self.pred_len,
                 seq_len_kv=self.seq_len,
                 modes=self.modes,
-                mode_select_method=self.mode_select)
+                mode_select_method=self.mode_select,
+                n_heads=configs.n_heads)
         # Encoder
         self.encoder = Encoder(
             [

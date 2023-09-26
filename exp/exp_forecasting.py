@@ -81,6 +81,9 @@ class Exp_Forecast(object):
         if self.dataset_map[flag] is None:
             self.dataset_map[flag] = dataset
             output_path = os.path.join(self.dataset_root, f'{flag}.pt')
+            if not os.path.exists(self.dataset_root):
+                os.makedirs(self.dataset_root, exist_ok=True)
+                
             print(f'Saving dataset at {output_path}')
             torch.save(dataset, output_path)
             

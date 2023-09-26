@@ -9,10 +9,18 @@
 
 source /etc/profile.d/modules.sh
 source ~/.bashrc
-
-# 1. when you are using singularity
-module load cuda cudnn singularity
-
 cd ..
-# this is for when you are using singularity
+module load cuda cudnn
+
+# 1. using singularity
+module load singularity
 singularity run --nv ./tft_pytorch.sif python run.py --use_gpu --data_path Top_20.csv --model DLinear
+
+# # 2. using anaconda
+#  module load anaconda
+#  conda deactivate 
+#  conda activate ml # replace with your own virtual env
+#  python run.py --use_gpu --data_path Top_20.csv --model DLinear
+
+# # 3. just using local env
+#  python run.py --use_gpu --data_path Top_20.csv --model DLinear
