@@ -328,12 +328,12 @@ class Exp_Forecast(object):
             load_model, flag, return_index=True
         )
         
+        trues = self.age_data.upscale_target(trues)
         preds = self.age_data.upscale_target(preds)
         # since dataset was standard scaled, prediction can 
         # be negative after upscaling. but covid cases are non-negative
         preds = np.where(preds<0, 0, preds)
-        trues = self.age_data.upscale_target(trues)
-
+        
         if output_results:
             self.output_results(trues, preds, setting, flag)
             

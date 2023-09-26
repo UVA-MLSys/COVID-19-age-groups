@@ -57,13 +57,10 @@ Loading the best model from results/DLinear_Top_20/checkpoint.pth
 >>>>>>> testing : DLinear_Top_20 <<<<<<<<
 Preds and Trues shape: (20, 14, 1) (20, 14, 1)
 test: rmse:1717.6, mae:949.37, msle: 2.7177, r2: 0.22656
-Target Cases: MAE 949.37, RMSE 1717.6, RMSLE 2.7177, R2 0.32601.
 
 Preds and Trues shape: (20, 14, 1) (20, 14, 1)
 val: rmse:686.1, mae:383.85, msle: 2.8124, r2: 0.43476
-Target Cases: MAE 383.85, RMSE 686.1, RMSLE 2.8124, R2 0.55512.
 
 Preds and Trues shape: (12200, 14, 1) (12200, 14, 1)
 train: rmse:656.48, mae:302.78, msle: 2.011, r2: 0.70963
-Target Cases: MAE 291.24, RMSE 621.05, RMSLE 2.0466, R2 0.73667.
 

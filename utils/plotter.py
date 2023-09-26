@@ -97,7 +97,7 @@ class PlotResults:
             this method will add the target name as prefix to the figure name.
         """
         merged_df['Date'] = to_datetime(merged_df['Date'])
-        show_result(merged_df, self.targets)
+        # show_result(merged_df, self.targets)
         
         summed_df = self.makeSummed(merged_df)
         figures = []
