@@ -1,0 +1,239 @@
+bash: /u/mi3se/anaconda3/envs/ml/lib/libtinfo.so.6: no version information available (required by bash)
+2023-09-26 01:44:14.764031: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F AVX512_VNNI FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-09-26 01:44:14.947336: I tensorflow/core/util/util.cc:169] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2023-09-26 01:44:14.984400: E tensorflow/stream_executor/cuda/cuda_blas.cc:2981] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2023-09-26 01:44:19.797396: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /sw/ubuntu-22.04/anaconda3/current/lib:/sw/ubuntu-22.04/cudnn/current/lib:/sw/ubuntu-22.04/cuda/current/extras/CUPTI/lib64:/sw/ubuntu-22.04/cuda/current/lib64::/u/mi3se/anaconda3/envs/ml/lib/:/u/mi3se/anaconda3/envs/ml/lib/
+2023-09-26 01:44:19.797747: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /sw/ubuntu-22.04/anaconda3/current/lib:/sw/ubuntu-22.04/cudnn/current/lib:/sw/ubuntu-22.04/cuda/current/extras/CUPTI/lib64:/sw/ubuntu-22.04/cuda/current/lib64::/u/mi3se/anaconda3/envs/ml/lib/:/u/mi3se/anaconda3/envs/ml/lib/
+2023-09-26 01:44:19.797779: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+Args in experiment:
+Namespace(test=False, model='DLinear', seed=7, root_path='./dataset/processed/', data_path='Top_500.csv', result_path='results', freq='d', no_scale=False, seq_len=14, label_len=7, pred_len=14, top_k=5, num_kernels=6, d_model=64, n_heads=4, e_layers=2, d_layers=1, d_ff=256, moving_avg=7, factor=3, distil=True, dropout=0.1, embed='timeF', activation='gelu', output_attention=False, num_workers=0, train_epochs=10, batch_size=32, patience=3, learning_rate=0.001, des='', loss='MSE', lradj='type1', use_amp=False, use_gpu=True, gpu=0, use_multi_gpu=False, devices='0,1,2,3', p_hidden_dims=[64, 64], p_hidden_layers=2, n_features=10, enc_in=10, dec_in=10, c_out=10, n_targets=1)
+Output folder results/DLinear_Top_500 does not exist. Creating ..
+Use GPU: cuda:0
+
+Train samples 318500, validation samples 14000, test samples 14000
+637 days of training, 14 days of validation data, 14 days of test data.
+
+Fitting scalers on train data
+>>>>>>> training : DLinear_Top_500 >>>>>>>>>
+Time encoded columns : ['month', 'day', 'weekday']
+Getting valid sampling locations.
+0it [00:00, ?it/s]21177it [01:00, 352.94it/s]21177it [01:10, 352.94it/s]42413it [02:00, 353.51it/s]42413it [02:10, 353.51it/s]63652it [03:00, 353.73it/s]63652it [03:10, 353.73it/s]84817it [04:00, 353.34it/s]84817it [04:10, 353.34it/s]106038it [05:00, 353.46it/s]106038it [05:10, 353.46it/s]127262it [06:00, 353.55it/s]127262it [06:10, 353.55it/s]148495it [07:00, 353.65it/s]148495it [07:10, 353.65it/s]169713it [08:00, 353.64it/s]169713it [08:10, 353.64it/s]190942it [09:00, 353.69it/s]190942it [09:10, 353.69it/s]212180it [10:00, 353.78it/s]212180it [10:10, 353.78it/s]233398it [11:00, 353.73it/s]233398it [11:10, 353.73it/s]254639it [12:00, 353.81it/s]254639it [12:10, 353.81it/s]275861it [13:00, 353.78it/s]275861it [13:10, 353.78it/s]297100it [14:00, 353.84it/s]297100it [14:10, 353.84it/s]305000it [14:22, 353.65it/s]
+Saving dataset at ./dataset/processed/Top_500/train.pt
+Time encoded columns : ['month', 'day', 'weekday']
+Getting valid sampling locations.
+0it [00:00, ?it/s]500it [00:01, 351.09it/s]
+Saving dataset at ./dataset/processed/Top_500/val.pt
+	iters: 500, epoch: 1 | loss: 0.1960848
+	speed: 0.0044s/iter; left time: 205.3362s
+	iters: 1000, epoch: 1 | loss: 0.1312454
+	speed: 0.0028s/iter; left time: 129.3934s
+	iters: 1500, epoch: 1 | loss: 0.1163823
+	speed: 0.0028s/iter; left time: 127.1624s
+	iters: 2000, epoch: 1 | loss: 0.5436671
+	speed: 0.0028s/iter; left time: 126.1951s
+	iters: 2500, epoch: 1 | loss: 0.7149871
+	speed: 0.0028s/iter; left time: 124.9072s
+	iters: 3000, epoch: 1 | loss: 0.1649936
+	speed: 0.0028s/iter; left time: 123.4774s
+	iters: 3500, epoch: 1 | loss: 0.8471968
+	speed: 0.0028s/iter; left time: 121.8084s
+	iters: 4000, epoch: 1 | loss: 0.05819787
+	speed: 0.0028s/iter; left time: 120.3458s
+	iters: 4500, epoch: 1 | loss: 0.07232069
+	speed: 0.0027s/iter; left time: 118.1963s
+Epoch: 1 cost time: 13.965
+Epoch: 1, Steps: 4766 | Train Loss: 0.31295 Vali Loss: 0.47464
+Validation loss decreased (inf -> 0.47464). Saving model ...
+	iters: 500, epoch: 2 | loss: 0.0718673
+	speed: 0.0043s/iter; left time: 183.6741s
+	iters: 1000, epoch: 2 | loss: 0.1706845
+	speed: 0.0027s/iter; left time: 113.9136s
+	iters: 1500, epoch: 2 | loss: 0.2018234
+	speed: 0.0027s/iter; left time: 112.5235s
+	iters: 2000, epoch: 2 | loss: 0.08736029
+	speed: 0.0027s/iter; left time: 111.0808s
+	iters: 2500, epoch: 2 | loss: 0.0338836
+	speed: 0.0027s/iter; left time: 109.6305s
+	iters: 3000, epoch: 2 | loss: 0.2655904
+	speed: 0.0027s/iter; left time: 108.4240s
+	iters: 3500, epoch: 2 | loss: 0.2481734
+	speed: 0.0027s/iter; left time: 106.9151s
+	iters: 4000, epoch: 2 | loss: 0.2091147
+	speed: 0.0027s/iter; left time: 105.3995s
+	iters: 4500, epoch: 2 | loss: 0.1125338
+	speed: 0.0027s/iter; left time: 104.6433s
+Epoch: 2 cost time: 12.991
+Epoch: 2, Steps: 4766 | Train Loss: 0.28858 Vali Loss: 0.46763
+Validation loss decreased (0.47464 -> 0.46763). Saving model ...
+	iters: 500, epoch: 3 | loss: 0.1459224
+	speed: 0.0043s/iter; left time: 160.3016s
+	iters: 1000, epoch: 3 | loss: 0.1001474
+	speed: 0.0027s/iter; left time: 100.7209s
+	iters: 1500, epoch: 3 | loss: 0.05017481
+	speed: 0.0027s/iter; left time: 99.3467s
+	iters: 2000, epoch: 3 | loss: 0.3249137
+	speed: 0.0027s/iter; left time: 97.9069s
+	iters: 2500, epoch: 3 | loss: 0.07335232
+	speed: 0.0027s/iter; left time: 97.3811s
+	iters: 3000, epoch: 3 | loss: 0.08269145
+	speed: 0.0028s/iter; left time: 99.8299s
+	iters: 3500, epoch: 3 | loss: 0.08295402
+	speed: 0.0028s/iter; left time: 95.5586s
+	iters: 4000, epoch: 3 | loss: 3.220422
+	speed: 0.0027s/iter; left time: 92.4774s
+	iters: 4500, epoch: 3 | loss: 0.07969262
+	speed: 0.0027s/iter; left time: 91.1456s
+Epoch: 3 cost time: 13.059
+Epoch: 3, Steps: 4766 | Train Loss: 0.28672 Vali Loss: 0.51673
+EarlyStopping counter: 1 out of 3
+Epoch 00003: reducing learning rate of group 0 to 1.0000e-04.
+	iters: 500, epoch: 4 | loss: 0.1332211
+	speed: 0.0044s/iter; left time: 143.7446s
+	iters: 1000, epoch: 4 | loss: 0.07456407
+	speed: 0.0027s/iter; left time: 87.7604s
+	iters: 1500, epoch: 4 | loss: 0.211092
+	speed: 0.0027s/iter; left time: 86.4012s
+	iters: 2000, epoch: 4 | loss: 0.1193869
+	speed: 0.0027s/iter; left time: 85.0201s
+	iters: 2500, epoch: 4 | loss: 0.1363422
+	speed: 0.0027s/iter; left time: 84.0259s
+	iters: 3000, epoch: 4 | loss: 0.08487011
+	speed: 0.0027s/iter; left time: 82.3222s
+	iters: 3500, epoch: 4 | loss: 0.09165277
+	speed: 0.0027s/iter; left time: 80.9455s
+	iters: 4000, epoch: 4 | loss: 0.343397
+	speed: 0.0027s/iter; left time: 79.6068s
+	iters: 4500, epoch: 4 | loss: 0.08366203
+	speed: 0.0027s/iter; left time: 78.2601s
+Epoch: 4 cost time: 12.982
+Epoch: 4, Steps: 4766 | Train Loss: 0.27976 Vali Loss: 0.4731
+EarlyStopping counter: 2 out of 3
+Epoch 00004: reducing learning rate of group 0 to 1.0000e-05.
+	iters: 500, epoch: 5 | loss: 0.04461787
+	speed: 0.0043s/iter; left time: 119.5922s
+	iters: 1000, epoch: 5 | loss: 0.1426459
+	speed: 0.0027s/iter; left time: 74.8597s
+	iters: 1500, epoch: 5 | loss: 0.3227132
+	speed: 0.0027s/iter; left time: 73.8694s
+	iters: 2000, epoch: 5 | loss: 0.1899527
+	speed: 0.0027s/iter; left time: 72.5920s
+	iters: 2500, epoch: 5 | loss: 0.08420708
+	speed: 0.0027s/iter; left time: 71.4022s
+	iters: 3000, epoch: 5 | loss: 0.6684512
+	speed: 0.0028s/iter; left time: 70.6223s
+	iters: 3500, epoch: 5 | loss: 0.1521772
+	speed: 0.0027s/iter; left time: 68.8518s
+	iters: 4000, epoch: 5 | loss: 0.1106749
+	speed: 0.0028s/iter; left time: 67.9224s
+	iters: 4500, epoch: 5 | loss: 0.09494826
+	speed: 0.0028s/iter; left time: 66.2808s
+Epoch: 5 cost time: 13.086
+Epoch: 5, Steps: 4766 | Train Loss: 0.28126 Vali Loss: 0.46457
+Validation loss decreased (0.46763 -> 0.46457). Saving model ...
+	iters: 500, epoch: 6 | loss: 1.04609
+	speed: 0.0043s/iter; left time: 101.3420s
+	iters: 1000, epoch: 6 | loss: 0.0450521
+	speed: 0.0028s/iter; left time: 62.9608s
+	iters: 1500, epoch: 6 | loss: 0.07810157
+	speed: 0.0028s/iter; left time: 61.5309s
+	iters: 2000, epoch: 6 | loss: 0.1035177
+	speed: 0.0027s/iter; left time: 59.9293s
+	iters: 2500, epoch: 6 | loss: 0.3691748
+	speed: 0.0027s/iter; left time: 58.4345s
+	iters: 3000, epoch: 6 | loss: 0.05683148
+	speed: 0.0027s/iter; left time: 56.9480s
+	iters: 3500, epoch: 6 | loss: 0.1094832
+	speed: 0.0028s/iter; left time: 56.4388s
+	iters: 4000, epoch: 6 | loss: 0.09646443
+	speed: 0.0027s/iter; left time: 54.1227s
+	iters: 4500, epoch: 6 | loss: 0.06949281
+	speed: 0.0027s/iter; left time: 52.6224s
+Epoch: 6 cost time: 13.127
+Epoch: 6, Steps: 4766 | Train Loss: 0.27974 Vali Loss: 0.46351
+Validation loss decreased (0.46457 -> 0.46351). Saving model ...
+	iters: 500, epoch: 7 | loss: 0.09789971
+	speed: 0.0043s/iter; left time: 79.3036s
+	iters: 1000, epoch: 7 | loss: 1.560358
+	speed: 0.0027s/iter; left time: 48.9466s
+	iters: 1500, epoch: 7 | loss: 0.06479492
+	speed: 0.0027s/iter; left time: 47.6423s
+	iters: 2000, epoch: 7 | loss: 0.1133194
+	speed: 0.0027s/iter; left time: 46.2361s
+	iters: 2500, epoch: 7 | loss: 1.298581
+	speed: 0.0027s/iter; left time: 44.8831s
+	iters: 3000, epoch: 7 | loss: 0.2065271
+	speed: 0.0027s/iter; left time: 43.5975s
+	iters: 3500, epoch: 7 | loss: 0.07504847
+	speed: 0.0027s/iter; left time: 42.1777s
+	iters: 4000, epoch: 7 | loss: 0.08737994
+	speed: 0.0027s/iter; left time: 40.7930s
+	iters: 4500, epoch: 7 | loss: 0.1564357
+	speed: 0.0027s/iter; left time: 39.4747s
+Epoch: 7 cost time: 12.954
+Epoch: 7, Steps: 4766 | Train Loss: 0.27902 Vali Loss: 0.46357
+EarlyStopping counter: 1 out of 3
+	iters: 500, epoch: 8 | loss: 3.609162
+	speed: 0.0043s/iter; left time: 58.6841s
+	iters: 1000, epoch: 8 | loss: 0.1517769
+	speed: 0.0027s/iter; left time: 36.0514s
+	iters: 1500, epoch: 8 | loss: 0.06779661
+	speed: 0.0027s/iter; left time: 34.6731s
+	iters: 2000, epoch: 8 | loss: 0.2223415
+	speed: 0.0027s/iter; left time: 33.3556s
+	iters: 2500, epoch: 8 | loss: 0.1573921
+	speed: 0.0027s/iter; left time: 31.9844s
+	iters: 3000, epoch: 8 | loss: 0.3943881
+	speed: 0.0027s/iter; left time: 30.6224s
+	iters: 3500, epoch: 8 | loss: 0.3311712
+	speed: 0.0027s/iter; left time: 29.2624s
+	iters: 4000, epoch: 8 | loss: 0.3808
+	speed: 0.0027s/iter; left time: 27.9094s
+	iters: 4500, epoch: 8 | loss: 0.07897756
+	speed: 0.0027s/iter; left time: 26.5518s
+Epoch: 8 cost time: 12.953
+Epoch: 8, Steps: 4766 | Train Loss: 0.27911 Vali Loss: 0.4638
+EarlyStopping counter: 2 out of 3
+	iters: 500, epoch: 9 | loss: 0.09412959
+	speed: 0.0043s/iter; left time: 38.4086s
+	iters: 1000, epoch: 9 | loss: 0.0447522
+	speed: 0.0027s/iter; left time: 23.1625s
+	iters: 1500, epoch: 9 | loss: 0.1473316
+	speed: 0.0027s/iter; left time: 21.7547s
+	iters: 2000, epoch: 9 | loss: 0.1462156
+	speed: 0.0027s/iter; left time: 20.4154s
+	iters: 2500, epoch: 9 | loss: 0.4112108
+	speed: 0.0027s/iter; left time: 19.0778s
+	iters: 3000, epoch: 9 | loss: 0.04913445
+	speed: 0.0027s/iter; left time: 17.6968s
+	iters: 3500, epoch: 9 | loss: 0.1104874
+	speed: 0.0027s/iter; left time: 16.4164s
+	iters: 4000, epoch: 9 | loss: 0.4220493
+	speed: 0.0027s/iter; left time: 15.0833s
+	iters: 4500, epoch: 9 | loss: 0.05891626
+	speed: 0.0027s/iter; left time: 13.8139s
+Epoch: 9 cost time: 12.999
+Epoch: 9, Steps: 4766 | Train Loss: 0.27899 Vali Loss: 0.46352
+EarlyStopping counter: 3 out of 3
+Early stopping
+Train ended. Total time 0:01:58.310675, per epoch 0:00:13.145631
+
+Loading the best model from results/DLinear_Top_500/checkpoint.pth
+
+>>>>>>> testing : DLinear_Top_500 <<<<<<<<
+Time encoded columns : ['month', 'day', 'weekday']
+Getting valid sampling locations.
+0it [00:00, ?it/s]500it [00:01, 351.92it/s]
+Saving dataset at ./dataset/processed/Top_500/test.pt
+Preds and Trues shape: (500, 14, 1) (500, 14, 1)
+test: rmse:447.33, mae:144.65, msle: 2.2888, r2: 0.4471
+Target Cases: MAE 144.65, RMSE 447.33, RMSLE 2.2888, R2 0.41253.
+
+Preds and Trues shape: (500, 14, 1) (500, 14, 1)
+val: rmse:205.08, mae:90.697, msle: 2.0393, r2: 0.50814
+Target Cases: MAE 90.697, RMSE 205.08, RMSLE 2.0393, R2 0.59782.
+
+Preds and Trues shape: (305000, 14, 1) (305000, 14, 1)
+train: rmse:157.81, mae:51.187, msle: 1.5437, r2: 0.73147
+Target Cases: MAE 48.432, RMSE 147.57, RMSLE 1.5642, R2 0.76203.
+
