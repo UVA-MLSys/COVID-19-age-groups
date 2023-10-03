@@ -3,6 +3,130 @@ import pandas as pd
 from typing import List
 from sklearn.metrics import dcg_score, ndcg_score, mean_absolute_error, mean_squared_error
 from pandas import DataFrame
+import torch
+from tqdm import tqdm
+from exp.exp_forecasting import Exp_Forecast
+from data.dataloader import MultiTimeSeries
+
+def batch_compute_attr(
+    dataloader:MultiTimeSeries, exp:Exp_Forecast, 
+    explainer, baseline_mode:str = "random"
+) -> torch.TensorType:
+    """_summary_
+
+    Args:
+        dataloader (MultiTimeSeries): _description_
+        exp (Exp_Forecast): _description_
+        explainer (_type_): _description_
+        baseline_mode (str, optional): _description_. Defaults to "random".
+
+    Returns:
+        _type_: _description_
+    """
+    attr_list = []
+
+    progress_bar = tqdm(
+        enumerate(dataloader), total=len(dataloader), disable=False
+    )
+    for _, (batch_x, batch_y, batch_x_mark, batch_y_mark) in progress_bar:
+        batch_x = batch_x.float().to(exp.device)
+        batch_y = batch_y.float().to(exp.device)
+
+        batch_x_mark = batch_x_mark.float().to(exp.device)
+        batch_y_mark = batch_y_mark.float().to(exp.device)
+        # decoder input
+        dec_inp = torch.zeros_like(batch_y[:, -exp.args.pred_len:, :]).float()
+        dec_inp = torch.cat([batch_y[:, :exp.args.label_len, :], dec_inp], dim=1).float()
+        # outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+        
+        # baseline must be a scaler or tuple of tensors with same dimension as input
+        baselines = get_baseline(batch_x, mode=baseline_mode)
+        additional_forward_args = (batch_x_mark, dec_inp, batch_y_mark)
+
+        # get attributions
+        attr = compute_attr(
+            batch_x, baselines, explainer, additional_forward_args, exp.args
+        )
+        attr_list.append(attr)
+        
+    # n_examples x n_features x pred_len
+    attr = torch.vstack(attr_list)
+    return attr
+
+def compute_attr(
+    inputs, baselines, explainer,
+    additional_forward_args, args, mean_axis=2
+):
+    assert type(inputs) == torch.Tensor, \
+        f'Only input type tensor supported, found {type(inputs)} instead.'
+    name = explainer.get_name()
+    
+    # these methods don't support having multiple outputs at the same time
+    if name in ['Deep Lift', 'Lime', 'Integrated Gradients', 'Gradient Shap']:
+        attr_list = []
+        for target in range(args.pred_len):
+            score = explainer.attribute(
+                inputs=inputs, baselines=baselines, target=target,
+                additional_forward_args=additional_forward_args
+            )
+            attr_list.append(score)
+        
+        attr = torch.stack(attr_list)
+        # pred_len x batch x seq_len x features -> batch x pred_len x seq_len x features
+        attr = attr.permute(1, 0, 2, 3)
+        
+    elif name == 'Feature Ablation':
+        attr = explainer.attribute(
+            inputs=inputs, baselines=baselines,
+            additional_forward_args=additional_forward_args
+        )
+    elif name == 'Occlusion':
+        attr = explainer.attribute(
+            inputs=inputs,
+            baselines=baselines,
+            sliding_window_shapes = (1,1),
+            additional_forward_args=additional_forward_args
+        )
+    elif name == 'Augmented Occlusion':
+        attr = explainer.attribute(
+            inputs=inputs,
+            sliding_window_shapes = (1,1),
+            additional_forward_args=additional_forward_args
+        )
+    else:
+        print(f'{name} not supported.')
+        raise NotImplementedError
+    
+    # if mean_axis 1, batch x seq_len x features
+    # if mean_axis 2, batch x pred_len x features
+    attr = attr.reshape(
+        # batch x pred_len x seq_len x features
+        (inputs.shape[0], args.pred_len, args.seq_len, attr.shape[-1])
+    # take mean over the time horizon
+    ).mean(axis=mean_axis)
+    
+    # batch x features x pred_len
+    attr = attr.permute(0, 2, 1)
+    
+    return attr
+
+def get_baseline(inputs, mode='random'):
+    if mode =='zero': baselines = torch.zeros_like(inputs)
+    elif mode == 'random': baselines = torch.randn_like(inputs)
+    elif mode == 'aug':
+        means = torch.mean(inputs, dim=(0, 1))
+        std = torch.std(inputs, dim=(0, 1))
+        baselines = torch.normal(means, std).repeat(
+            inputs.shape[0], inputs.shape[1], 1
+        ).float()
+    elif mode == 'mean': baselines = torch.mean(
+        inputs, axis=0
+    ).repeat(inputs.shape[0], 1, 1).float()
+    else:
+        print(f'baseline mode options: [zero, random, aug, mean]')
+        raise NotImplementedError
+    
+    return baselines
 
 def normalize_feature_groups(df, features):
     summed = df[features].sum().T.reset_index()
@@ -33,8 +157,6 @@ def evaluate_interpretation(
     # This ranking metric returns a high value if true labels are ranked high by y_score.
     ndcg = ndcg_score(y_true, y_pred)
     
-    print(f'Rank mae: {mae:0.5g}, rmse: {rmse:0.5g}, ndcg: {ndcg:0.5g}')
-    
     true_scores = merged[true_features].div(merged[true_features].sum(axis=1), axis=0)
     pred_scores = merged[pred_features].div(merged[pred_features].sum(axis=1), axis=0)
     
@@ -42,8 +164,13 @@ def evaluate_interpretation(
     normalized_rmse = np.sqrt(mean_squared_error(true_scores, pred_scores))
     normalized_ndcg = ndcg_score(true_scores, pred_scores)
 
+    print(f'Rank mae: {mae:0.5g}, rmse: {rmse:0.5g}, ndcg: {ndcg:0.5g}')
     print(f'Normalized mae: {normalized_mae:0.5g}, rmse: {normalized_rmse:0.5g}, ndcg: {normalized_ndcg:0.5g}')
-    return mae, rmse, ndcg, normalized_mae, normalized_rmse, normalized_ndcg
+    result_df = pd.DataFrame({
+        'metrics':['mae', 'rmse', 'ndcg', 'normalized_mae', 'normalized_rmse', 'normalized_ndcg'],
+        'values':[mae, rmse, ndcg, normalized_mae, normalized_rmse, normalized_ndcg]
+    })
+    return result_df
 
 def find_first_common_date(group_cases, dates):
     six_days = pd.to_timedelta(6, unit='D')
@@ -98,42 +225,48 @@ def calculate_global_rank(df, all_scores, features):
     return summed
 
 def align_interpretation(
-        df:pd.DataFrame, all_scores:np.ndarray, features:List[str|int]
-    ):
-    num_dates = df['Date'].nunique()
+    df:pd.DataFrame, all_scores:np.ndarray, 
+    features:List[str|int], 
+    seq_len=14, pred_len=14
+):
+    num_dates = df['Date'].nunique() - seq_len
     num_group_ids = df['FIPS'].nunique()
-    pred_len = all_scores.shape[-1]
+    # prediction starts after the first seq_len days
+    start_date = df['Date'].min() + pd.to_timedelta(seq_len, unit='D')
+    print(start_date, df['Date'].min())
 
     group_agg_scores = np.full(
-        (num_dates + pred_len, len(features), pred_len), 
+        (num_dates, len(features), pred_len), 
         fill_value=np.nan, dtype=np.float32
     )
 
+    # aggregating importance by groups for each date
+    # since ground truth is avaiable on US level only
+    # this assumes things are sorted by [Date, FIPS]
     for feature_index in range(len(features)):
         time_delta = 0
         index = 0
-        while index < df.shape[0]:
-            group_agg_scores[time_delta, feature_index, :] = np.sum(
-                all_scores[
-                    index:(index + num_group_ids), feature_index, :
-                ], axis=0
+        while time_delta < num_dates:
+            group_agg_scores[time_delta, feature_index] = np.sum(
+                np.abs(all_scores[
+                    index:(index + num_group_ids), feature_index
+                ]), axis=0
             )
             
             index += num_group_ids 
             time_delta += 1
-            
+       
+    # align prediction tau days into the future to time t+tau     
     for horizon in range(pred_len):
         group_agg_scores[:, :, horizon] = np.roll(
             group_agg_scores[:, :, horizon], 
-            shift=horizon+1, axis=0
+            shift=horizon, axis=0
         )
-    group_agg_scores = group_agg_scores[1:]
+        
+    dates = [start_date + pd.to_timedelta(i, unit='D') \
+        for i in range(group_agg_scores.shape[0])]
+    group_agg_scores_df = pd.DataFrame({'Date': dates})
     
-    group_agg_scores_df = pd.DataFrame()
-    group_agg_scores_df['Date'] = [
-        df['Date'].min() + pd.to_timedelta(i, unit='D') \
-        for i in range(1, group_agg_scores.shape[0] + 1)
-    ]
     group_agg_scores_df[features] = np.nanmean(
         group_agg_scores, axis=-1
     )

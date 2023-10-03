@@ -3,6 +3,7 @@ from exp.config import DataConfig, ModelConfig
 from data.data_factory import AgeData
 from utils.plotter import PlotResults
 from utils.tools import align_predictions
+from utils.metrics import calculate_metrics
 
 # pytorch lightning
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
@@ -126,6 +127,7 @@ class Experiment_TFT:
         result_merged = align_predictions(
             data, test_index, predictions, self.age_dataloader
         )
+        
         if plot:
             self.plotter.summed_plot(result_merged, type=split_type)
         gc.collect()

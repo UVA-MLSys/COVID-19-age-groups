@@ -108,7 +108,7 @@ def main(args):
     common_features = list(set(features) & set(dataloader.static_reals))
     if len(common_features) == 0:
         print('Ground truth available only for age group features.\nReturning...\n')
-        return
+        raise
     
     # Load ground truth
     group_cases = pd.read_csv(

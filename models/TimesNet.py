@@ -119,4 +119,5 @@ class Model(nn.Module):
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
-        return dec_out[:, -self.pred_len:, :]  # [B, L, D]
+        f_dim = - self.configs.n_targets
+        return dec_out[:, -self.pred_len:, f_dim:]  # [B, L, D]
