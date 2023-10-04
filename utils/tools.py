@@ -54,12 +54,11 @@ def align_predictions(
 
         outputs = pd.concat(outputs, axis=0)
         
-        if all_outputs:
+        if all_outputs is None: all_outputs = outputs
+        else: 
             all_outputs = all_outputs.merge(
                 outputs, how='inner', on=predictions_index.columns
             )
-        else:
-            all_outputs = outputs
             
     gc.collect()
       

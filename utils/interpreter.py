@@ -184,6 +184,15 @@ def find_first_common_date(group_cases, dates):
     print('Error. No overlapping dates found.')
     return None
 
+def find_last_common_date(group_cases, dates):
+    for date in group_cases['end_of_week'].values[::-1]:
+        if date in dates:
+            print(f'Found last common date {date}.')
+            return date
+    
+    print('Error. No overlapping dates found.')
+    return None
+
 def aggregate_importance_by_window(
     df, features, end_of_week,
     window_size=7
@@ -213,10 +222,8 @@ def aggregate_importance_by_window(
     
     return weekly_agg_scores_df
 
-def calculate_global_rank(df, all_scores, features):
-    data = df.copy()
-    
-    data[features] = np.sum(all_scores, axis=-1) 
+def calculate_global_rank(all_scores, features):
+    data = pd.DataFrame(np.sum(all_scores, axis=-1), columns=features)
     summed = data[features].mean().T.reset_index()
     summed.columns = ['Feature', 'Score']
     summed['Score'] = summed['Score'] * 100 / summed['Score'].sum()
@@ -225,50 +232,101 @@ def calculate_global_rank(df, all_scores, features):
     return summed
 
 def align_interpretation(
-    df:pd.DataFrame, all_scores:np.ndarray, 
-    features:List[str|int], 
+    ranges:List, attr:np.ndarray, 
+    features:List[str|int], min_date,  
     seq_len=14, pred_len=14
 ):
-    num_dates = df['Date'].nunique() - seq_len
-    num_group_ids = df['FIPS'].nunique()
-    # prediction starts after the first seq_len days
-    start_date = df['Date'].min() + pd.to_timedelta(seq_len, unit='D')
-    print(start_date, df['Date'].min())
+    pred_df = pd.DataFrame(ranges, columns=['FIPS', 'index'])
+    # n_examples x features x pred_len -> n_examples x features
+    horizons = list(range(pred_len))
+    time_index_max = pred_df['index'].max()
 
-    group_agg_scores = np.full(
-        (num_dates, len(features), pred_len), 
-        fill_value=np.nan, dtype=np.float32
-    )
-
-    # aggregating importance by groups for each date
-    # since ground truth is avaiable on US level only
-    # this assumes things are sorted by [Date, FIPS]
-    for feature_index in range(len(features)):
-        time_delta = 0
-        index = 0
-        while time_delta < num_dates:
-            group_agg_scores[time_delta, feature_index] = np.sum(
-                np.abs(all_scores[
-                    index:(index + num_group_ids), feature_index
-                ]), axis=0
-            )
-            
-            index += num_group_ids 
-            time_delta += 1
-       
-    # align prediction tau days into the future to time t+tau     
-    for horizon in range(pred_len):
-        group_agg_scores[:, :, horizon] = np.roll(
-            group_agg_scores[:, :, horizon], 
-            shift=horizon, axis=0
-        )
+    all_outputs = None
+    for feature_index, feature in enumerate(features):
+        pred_df[horizons] = attr[:, feature_index]
+        groups = []
         
-    dates = [start_date + pd.to_timedelta(i, unit='D') \
-        for i in range(group_agg_scores.shape[0])]
-    group_agg_scores_df = pd.DataFrame({'Date': dates})
+        for FIPS, group_df in pred_df.groupby('FIPS'):
+            group_df.sort_values(by='index', inplace=True)
+            new_df = pd.DataFrame({
+                'index':[t +time_index_max for t in range(1, pred_len)],
+                'FIPS':FIPS
+            })
+            new_df[horizons] = np.nan
+            new_df = new_df[group_df.columns]
+            group_df = pd.concat([group_df, new_df], axis=0).reset_index(drop=True)
+            
+            for horizon in horizons:
+                    group_df[horizon] = group_df[horizon].shift(periods=horizon, axis=0)
+                    
+            group_df[feature] = group_df[horizons].mean(axis=1, skipna=True)
+            groups.append(group_df.drop(columns=horizons))
+        
+        groups = pd.concat(groups, axis=0)
+        
+        if all_outputs is None: all_outputs = groups
+        else:
+            all_outputs = all_outputs.merge(
+                groups, how='inner', on=['FIPS', 'index']
+            )
+
+    all_outputs[features] = all_outputs[features].div(all_outputs[features].sum(axis=1), axis=0)
+
+    all_outputs['Date'] = min_date + pd.to_timedelta(
+        seq_len + all_outputs['index'], unit='D')
+    all_outputs.drop(columns='index', inplace=True)
+
+    print(all_outputs['Date'].min(), all_outputs['Date'].max())
+    return all_outputs
+
+# def align_interpretation(
+#     df:pd.DataFrame, all_scores:np.ndarray, 
+#     features:List[str|int], 
+#     seq_len=14, pred_len=14
+# ):
+#     num_dates = df['Date'].nunique() - seq_len
+#     num_group_ids = df['FIPS'].nunique()
+#     # prediction starts after the first seq_len days
+#     start_date = df['Date'].min() + pd.to_timedelta(seq_len, unit='D')
+#     print(start_date, df['Date'].min())
+
+#     group_agg_scores = np.full(
+#         (num_dates, len(features), pred_len), 
+#         fill_value=np.nan, dtype=np.float32
+#     )
+
+#     # aggregating importance by groups for each date
+#     # since ground truth is avaiable on US level only
+#     # this assumes things are sorted by [Date, FIPS]
+#     for feature_index in range(len(features)):
+#         time_delta = 0
+#         index = 0
+#         while time_delta < num_dates:
+#             # summing importance over whole county group per day
+#             group_agg_scores[time_delta, feature_index] = np.sum(
+#                 # features can be positive or neg influence
+#                 # taking absolute just considers the magnitude of importance
+#                 np.abs(all_scores[
+#                     index:(index + num_group_ids), feature_index
+#                 ]), axis=0
+#             )
+            
+#             index += num_group_ids 
+#             time_delta += 1
+       
+#     # align prediction tau days into the future to time t+tau     
+#     for horizon in range(pred_len):
+#         group_agg_scores[:, :, horizon] = np.roll(
+#             group_agg_scores[:, :, horizon], 
+#             shift=horizon, axis=0
+#         )
+        
+#     dates = [start_date + pd.to_timedelta(i, unit='D') \
+#         for i in range(group_agg_scores.shape[0])]
+#     group_agg_scores_df = pd.DataFrame({'Date': dates})
     
-    group_agg_scores_df[features] = np.nanmean(
-        group_agg_scores, axis=-1
-    )
+#     group_agg_scores_df[features] = np.nanmean(
+#         group_agg_scores, axis=-1
+#     )
     
-    return group_agg_scores_df
+#     return group_agg_scores_df

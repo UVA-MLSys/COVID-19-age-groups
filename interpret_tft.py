@@ -74,7 +74,7 @@ def main(args):
     ][['Date', 'FIPS']]
     
     global_rank = calculate_global_rank(
-        df, all_scores, features
+        all_scores, features
     )
     if not args.no_write:
         global_rank.to_csv(
