@@ -7,6 +7,7 @@ from pytorch_forecasting.data import TimeSeriesDataSet
 import os
 from data.dataloader import MultiTimeSeries
 from exp.config import Split, DataConfig
+from utils.tools import add_day_time_features
 
 class AgeData:
     @staticmethod
@@ -14,13 +15,13 @@ class AgeData:
         return AgeData(
             data_path=os.path.join(args.root_path, args.data_path),
             date_index=DataConfig.date_index, 
-            seq_len=args.seq_len, pred_len=args.pred_len,
             group_ids=DataConfig.group_ids, 
             static_reals=DataConfig.static_reals,
             observed_reals=DataConfig.observed_reals,
-            known_reals=DataConfig.known_reals,
             targets=DataConfig.targets,
-            scale=not args.no_scale
+            seq_len=args.seq_len, pred_len=args.pred_len,
+            scale=not args.no_scale, 
+            batch_size=args.batch_size
         )
     
     def __init__(
@@ -28,7 +29,6 @@ class AgeData:
         pred_len:int, group_ids:List[str] = [],
         static_reals:List[str] = [],
         observed_reals:List[str] = [], 
-        known_reals:List[str] = [],
         targets:List[str] = [], scale:bool=True,
         batch_size:Union[int, List[int]] = [64, 256]
     ):
@@ -47,8 +47,6 @@ class AgeData:
             static_reals (List[str]): list of continuous variables that do not change over time.
             observed_reals (List[str]): list of continuous variables that change over
                 time and are not known in the future. You might want to include your target here.
-            known_reals (List[str]): list of continuous variables that change over
-                time and are known in the future (e.g. price of a product, but not demand of a product).
             targets (List[str]): column denoting the target or list of columns denoting the continous target.
             scale (bool): whether to scale the input and target features. Default True.
             batch_size (Union[int, List[int]]): batch size of the dataset. If a list is provided, the size at the 
@@ -63,14 +61,14 @@ class AgeData:
         self.static_reals = static_reals
 
         self.observed_reals = observed_reals
-        self.known_reals = known_reals
+        self.known_reals = ['month', 'day', 'weekday']
         
-        self.real_features = static_reals + observed_reals + known_reals
+        self.real_features = static_reals + observed_reals + self.known_reals
         
         self.targets = targets
         
         selected_columns = [date_index] + group_ids + static_reals + \
-            observed_reals + known_reals + targets
+            observed_reals + self.known_reals + targets
         # remove any duplicates
         self.selected_columns = []
         for column in selected_columns:
@@ -88,10 +86,19 @@ class AgeData:
         self.real_feature_scaler:Optional[StandardScaler] = None
     
     def read_df(self):
-        df = pd.read_csv(self.data_path)[self.selected_columns]
+        df = pd.read_csv(self.data_path)
         df[self.date_index] = pd.to_datetime(df[self.date_index])
-
-        return df
+        
+        # add time index, necessary for TFT
+        print(f'adding time index columns {self.time_index}')
+        df[self.time_index] = (df[self.date_index] - df[self.date_index].min()).dt.days
+        
+        time_features = add_day_time_features(df[self.date_index].values)
+        self.known_reals = list(time_features.columns)
+        print(f'added time encoded known reals {self.known_reals}.')
+        df = pd.concat([df, time_features], axis=1)
+        
+        return df[self.selected_columns]
         
     def split_data(self, df:DataFrame, split:Split):
         dates = df[self.date_index]

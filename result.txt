@@ -1,16 +1,4 @@
 DLinear_Top_100  test
-rmse:958.61, mae:448.45, msle: 2.6446
-
-DLinear_Top_100  test
-rmse:958.61, mae:448.45, msle: 2.6446
-
-DLinear_Top_100  val
-rmse:411.66, mae:222.38, msle: 2.5361
-
-DLinear_Top_100  train
-rmse:328.4, mae:131, msle: 1.7119
-
-DLinear_Top_100  test
 rmse:958.61, mae:448.45, msle: 2.6446, r2: 0.3294
 
 DLinear_Top_100  val
@@ -48,7 +36,26 @@ rmse:686.1, mae:383.85, msle: 2.8124, r2: 0.43476
 
 DLinear_Top_20  train
 rmse:656.48, mae:302.78, msle: 2.011, r2: 0.70963
+DLinear_Top_100, test: rmse:958.61, mae:448.45, msle: 2.6446, r2: 0.3294
+DLinear_Top_100, val: rmse:411.66, mae:222.38, msle: 2.5361, r2: 0.43502
+DLinear_Top_100, train: rmse:328.4, mae:131, msle: 1.7119, r2: 0.71856
+DLinear_Total, test: rmse:174.95, mae:29.525, msle: 1.4251, r2: 0.52435
+DLinear_Total, val: rmse:84.091, mae:20.833, msle: 1.2674, r2: 0.56765
+DLinear_Total, train: rmse:69.935, mae:13.049, msle: 1.0662, r2: 0.70033
+Autoformer_Total, test: rmse:189.42, mae:35.686, msle: 1.9184, r2: 0.4505
+Autoformer_Total, val: rmse:90.945, mae:24.68, msle: 1.7484, r2: 0.46612
+Autoformer_Total, train: rmse:71.44, mae:13.994, msle: 1.2075, r2: 0.68735
+PatchTST_Total, test: rmse:183.65, mae:33.174, msle: 1.5301, r2: 0.46863
+PatchTST_Total, val: rmse:103.31, mae:25.893, msle: 1.3935, r2: 0.38231
+PatchTST_Total, train: rmse:72.257, mae:13.683, msle: 1.0673, r2: 0.68006
+FEDformer_Total, test: rmse:182.22, mae:30.193, msle: 1.4667, r2: 0.48079
+FEDformer_Total, val: rmse:85.874, mae:21.66, msle: 1.3675, r2: 0.492
+FEDformer_Total, train: rmse:69.171, mae:14.942, msle: 1.3841, r2: 0.70686
+TimesNet_Total, test: rmse:191.93, mae:34.354, msle: 1.6037, r2: 0.41485
+TimesNet_Total, val: rmse:100.1, mae:25.38, msle: 1.4342, r2: 0.34219
+TimesNet_Total, train: rmse:66.104, mae:12.808, msle: 1.05, r2: 0.73219
 
-DLinear_Top_500 test: rmse:447.33, mae:144.65, msle: 2.2888, r2: 0.4471
-DLinear_Top_500 val: rmse:205.08, mae:90.697, msle: 2.0393, r2: 0.50814
-DLinear_Top_500 train: rmse:157.81, mae:51.187, msle: 1.5437, r2: 0.73147
+TFT_Top_100, train: rmse:365.81, mae:138.88, msle: 1.9224, r2: 0.65061
+TFT_Top_100, validation: rmse:452.11, mae:262.72, msle: 2.9696, r2: 0.23032
+TFT_Top_100, test: rmse:942.44, mae:477.75, msle: 3.2527, r2: 0.31507
+

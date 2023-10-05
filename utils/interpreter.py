@@ -12,16 +12,19 @@ def batch_compute_attr(
     dataloader:MultiTimeSeries, exp:Exp_Forecast, 
     explainer, baseline_mode:str = "random"
 ) -> torch.TensorType:
-    """_summary_
+    """Computes the attribute of this dataloder in batch using the explainer
+    and baseline mode.
 
     Args:
-        dataloader (MultiTimeSeries): _description_
-        exp (Exp_Forecast): _description_
-        explainer (_type_): _description_
-        baseline_mode (str, optional): _description_. Defaults to "random".
+        dataloader (MultiTimeSeries): torch dataloader
+        exp (Exp_Forecast): experimenter class
+        explainer: explainer instanace from time interpret
+        baseline_mode (str, optional): how baselines passed to 
+            the explainer attribute method are generated.
+            Available options: [zero, random, aug, mean] . Defaults to "random".
 
     Returns:
-        _type_: _description_
+        torch.Tensor: Attributes of the input data, shape is the same as input.
     """
     attr_list = []
 

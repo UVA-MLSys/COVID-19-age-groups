@@ -80,7 +80,10 @@ class PlotResults:
         # fig.tight_layout() # might change y axis values
 
         if figure_name is not None:
-            plt.savefig(os.path.join(self.figPath, figure_name), dpi=DPI)
+            plt.savefig(
+                os.path.join(self.figPath, figure_name), 
+                dpi=DPI, bbox_inches='tight'
+            )
         if self.show:
             plt.show()
         return fig

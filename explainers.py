@@ -1,7 +1,7 @@
 import abc, gc
 import numpy as np
 from tqdm import tqdm
-from data.dataloader import AgeData
+from data.data_factory import AgeData
 import pandas as pd
 from typing import List
 import SALib
@@ -304,7 +304,7 @@ class MorrisSensitivity(BaseExplainer):
         
         x_hat = x.copy()
 
-        num_morris_samples = len(self.features) + 1
+        num_morris_samples = samples_reshaped.shape[0]
         y_hats = np.ndarray(
             shape=(num_morris_samples, self.num_group_ids, self.dataloader.pred_len),
             dtype=np.float32

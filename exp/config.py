@@ -73,26 +73,3 @@ class Split:
             test_start="2022-12-16", test_end="2022-12-29",
             transform=to_datetime
         )
-             
-class ModelConfig:
-    def __init__(
-        self, 
-        model_parameters:dict = {
-            "hidden_size":16,
-            "dropout": 0.1,
-            "attention_head_size": 4,
-            "learning_rate": 1e-3,
-            "lstm_layers": 1
-        },
-        early_stopping_patience:int = 3,
-        epochs:int = 10,
-        gradient_clip_val: Optional[float] = 1
-    ) -> None:
-        self.model_parameters = model_parameters
-        self.early_stopping_patience = early_stopping_patience
-        self.epochs = epochs
-        self.gradient_clip_val = gradient_clip_val
-        
-    @staticmethod
-    def primary():
-        return ModelConfig()

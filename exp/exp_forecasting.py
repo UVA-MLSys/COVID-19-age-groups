@@ -3,7 +3,7 @@ from utils.metrics import calculate_metrics
 import torch, os, time, warnings
 import numpy as np
 import pandas as pd
-from models import Transformer, DLinear, Autoformer, FEDformer, TimesNet, PatchTST
+from models import DLinear, Autoformer, FEDformer, TimesNet, PatchTST
 from data.data_factory import AgeData
 from exp.config import Split, DataConfig
 from datetime import datetime
@@ -14,7 +14,6 @@ warnings.filterwarnings('ignore')
 
 class Exp_Forecast(object):
     model_dict = {
-        'Transformer': Transformer,
         'DLinear': DLinear,
         'Autoformer': Autoformer,
         'FEDformer': FEDformer,
@@ -26,9 +25,11 @@ class Exp_Forecast(object):
         self.args = args
         self.setting = setting
         self.output_folder = os.path.join(args.result_path, setting)
+        
         if not os.path.exists(self.output_folder):
             print(f'Output folder {self.output_folder} does not exist. Creating ..')
-            os.makedirs(self.output_folder, exist_ok=True)
+            os.makedirs(self.output_folder, exist_ok=True)    
+        print(f'Starting experiment. Result folder {self.output_folder}.')
         
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)

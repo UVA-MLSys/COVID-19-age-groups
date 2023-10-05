@@ -1,6 +1,6 @@
 # local classes and methods
-from exp.tft import Experiment_TFT
-from exp.config import Split, DataConfig, ModelConfig
+from exp.exp_tft import Experiment_TFT
+from exp.config import Split, DataConfig
 from utils.utils import seed_torch, clear_directory, get_best_model_path
 
 import warnings
@@ -18,10 +18,11 @@ def main(args):
     # Setting random seed
     seed_torch(args.seed)
     
-    print(f'Starting experiment. Result folder {args.result_path}.')
-    # clear_directory(args.result_folder)
-    
-    experiment = Experiment_TFT(args)
+    setting = stringify_setting(args)
+    experiment = Experiment_TFT(args, setting)
+    if args.clear:
+        clear_directory(experiment.output_folder)
+        
     total_data = experiment.age_dataloader.read_df()
     print(total_data.shape)
     print(total_data.head(3))
@@ -31,13 +32,11 @@ def main(args):
     )
     
     if args.test:
-        best_model_path = get_best_model_path(args.result_path)
-        print(f'Loading best model from {best_model_path}.\n\n')
+        best_model_path = get_best_model_path(experiment.output_folder)
+        print(f'Loading best model from {best_model_path}.')
         model = TemporalFusionTransformer.load_from_checkpoint(best_model_path)
     else:
-        model = experiment.train(
-            ModelConfig.primary(), train_data, val_data, ckpt_path=None
-        )
+        model = experiment.train(train_data, val_data)
     
     print('\n---Training prediction--\n')
     train_result_merged = experiment.test(model, train_data, split_type='Train')
@@ -59,7 +58,7 @@ def main(args):
         inplace=True
     )
     
-    output_file_path = os.path.join(args.result_folder, 'predictions.csv')
+    output_file_path = os.path.join(experiment.output_folder, 'predictions.csv')
     df.to_csv(output_file_path, index=False)
 
     print(df.head(3))
@@ -73,25 +72,28 @@ def get_argparser():
     )
     # data loader
     parser.add_argument(
-        '--no-scale', action='store_true',
+        '--no_scale', action='store_true',
         help='do not scale dataset'
+    )
+    parser.add_argument(
+        '--clear', action='store_true', help='clear output folder'
     )
     parser.add_argument(
         '--root_path', type=str, default=DataConfig.root_folder, 
         help='folder containing the input data file'
     )
     parser.add_argument(
-        '--data-path', type=str, default='Top_100.csv',
+        '--data_path', type=str, default='Top_100.csv',
         help='input feature file name'
     )
     parser.add_argument(
-        '--result-path', type=str, default='results', 
+        '--result_path', type=str, default='results', 
         help='result output folder'
     )
     
     # work configuration
     parser.add_argument(
-        '--disable-progress', action='store_true', 
+        '--disable_progress', action='store_true', 
         help='disable progress bar'
     )
     parser.add_argument(
@@ -102,12 +104,34 @@ def get_argparser():
         '--seed', type=int, default=7,
         help='seed for randomization'
     )
-
-    # forecasting task
-    parser.add_argument('--seq_len', type=int, default=14, help='input sequence length')
-    parser.add_argument('--pred_len', type=int, default=14, help='prediction sequence length')
+    
+    # model configuration
+    parser.add_argument('--batch_size', type=int, default=64, 
+        help='batch size of train input data')
+    parser.add_argument('--seq_len', type=int, default=14, 
+        help='input sequence length')
+    parser.add_argument('--pred_len', type=int, default=14, 
+        help='prediction sequence length')
+    parser.add_argument('--patience', type=int, default=3, help='early stopping patience')
+    parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
+    parser.add_argument('--n_heads', type=int, default=4, help='num of heads')
+    parser.add_argument('--hidden_size', type=int, default=16, 
+        help='hidden layer size')
+    parser.add_argument('--lstm_layers', type=int, default=1, 
+        help='lstm layer numbers')
+    
+    # optimization
+    parser.add_argument('--learning_rate', type=float, default=0.001, 
+        help='optimizer learning rate')
+    parser.add_argument('--epochs', type=int, default=10, help='train epochs')
+    parser.add_argument('--clip', type=float, default=1.0, 
+        help='The value at which to clip gradients. Passing gradient_clip_val=None disables gradient clipping.')
     
     return parser
+
+def stringify_setting(args):
+    setting = f"TFT_{args.data_path.split('.')[0]}"
+    return setting
 
 if __name__ == '__main__':
     parser = get_argparser()

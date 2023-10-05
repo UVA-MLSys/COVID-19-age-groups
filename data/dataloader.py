@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Tuple, Union, Optional
+from utils.tools import add_day_time_features
 import pandas as pd, numpy as np
 from torch.utils.data import Dataset
 from tqdm import tqdm
@@ -62,7 +62,7 @@ class MultiTimeSeries(Dataset):
             identifier, start_idx = tup
             sliced = split_data_map[identifier].iloc[start_idx:start_idx + time_steps]
             self.data[i] = sliced[self.past_features]
-            self.data_stamp[i] = self._add_time_features(sliced[self.time_col].values)
+            self.data_stamp[i] = add_day_time_features(sliced[self.time_col].values)
             self.target_data[i] = sliced[self.targets]
         
     def __getitem__(self, index):
@@ -76,17 +76,6 @@ class MultiTimeSeries(Dataset):
         seq_x_mark = self.data_stamp[index][:s_end]
         seq_y_mark = self.data_stamp[index][r_begin:r_end]
         return seq_x, seq_y, seq_x_mark, seq_y_mark
-    
-    def _add_time_features(self, dates):
-        df_stamp = pd.DataFrame({'date': dates})
-
-        # Time sereis library day encoding takes 3 values
-        # check utils.tools.time_features
-        df_stamp['month'] = df_stamp.date.apply(lambda row: row.month, 1)
-        df_stamp['day'] = df_stamp.date.apply(lambda row: row.day, 1)
-        df_stamp['weekday'] = df_stamp.date.apply(lambda row: row.weekday(), 1)
-        
-        return df_stamp.drop(columns=['date'])
 
     def __len__(self):
         return len(self.data) # - self.seq_len - self.pred_len + 1

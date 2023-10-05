@@ -92,7 +92,7 @@ If this is still 0, then you'll have to install the cuda and cudnn versions that
 ## Reproduce
 
 ### Running models
-Use the `run.py` to run the available models on the dataset. See `scripts/commands.sh` file for some examples. All commands must be run from this current folder. Not from any sub-folders. We currently support the following models `Transformer, DLinear, Autoformer, FEDformer, PatchTST, TimesNet` from the[Time-Series-Library](https://github.com/thuml/Time-Series-Library). Note that, anything written in the `scratch` folder will be ignored by `git`, since it is added in `.gitignore`. So setting `--result_path scratch` is a good idea for temporary experiments.
+Use the `run.py` to run the available models on the dataset. See `scripts/commands.sh` file for some examples. All commands must be run from this current folder. Not from any sub-folders. We currently support the following models `DLinear, Autoformer, FEDformer, PatchTST, TimesNet` from the[Time-Series-Library](https://github.com/thuml/Time-Series-Library). Note that, anything written in the `scratch` folder will be ignored by `git`, since it is added in `.gitignore`. So setting `--result_path scratch` is a good idea for temporary experiments.
 
 ```
 $COVID-19-age-groups> python run.py --help
@@ -102,7 +102,7 @@ Run Timeseries
 options:
   -h, --help            show this help message and exit
   --test                test the checkpointed best model, train otherwise (default: False)
-  --model {Transformer,DLinear,Autoformer,FEDformer,PatchTST,TimesNet}
+  --model {DLinear,Autoformer,FEDformer,PatchTST,TimesNet}
                         model name (default: Transformer)
   --seed SEED           random seed (default: 7)
   --root_path ROOT_PATH

@@ -6,13 +6,22 @@ import pandas as pd
 from pandas import DataFrame
 from typing import List
 
-from data.data_factory import AgeData
+# from data.data_factory import AgeData
 
-plt.switch_backend('agg')
+def add_day_time_features(dates):
+    df_stamp = pd.DataFrame({'date': dates})
+
+    # Time series library day encoding takes 3 values
+    # check layers.Embed.TimeFeatureEmbedding class
+    df_stamp['month'] = df_stamp.date.apply(lambda row: row.month, 1)
+    df_stamp['day'] = df_stamp.date.apply(lambda row: row.day, 1)
+    df_stamp['weekday'] = df_stamp.date.apply(lambda row: row.weekday(), 1)
+    
+    return df_stamp.drop(columns=['date'])
 
 def align_predictions(
     ground_truth:DataFrame, predictions_index:DataFrame, 
-    predictions:List, dataloader:AgeData,
+    predictions:List, dataloader,
     remove_negative:bool=True, upscale:bool=True
 ):
     horizons = range(dataloader.pred_len)
