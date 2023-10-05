@@ -14,8 +14,7 @@ class AgeData:
     def build(args):
         return AgeData(
             data_path=os.path.join(args.root_path, args.data_path),
-            date_index=DataConfig.date_index, 
-            group_ids=DataConfig.group_ids, 
+            group_ids=['FIPS'], 
             static_reals=DataConfig.static_reals,
             observed_reals=DataConfig.observed_reals,
             targets=DataConfig.targets,
@@ -25,7 +24,7 @@ class AgeData:
         )
     
     def __init__(
-        self, data_path:str, date_index:str, seq_len:int, 
+        self, data_path:str, seq_len:int, 
         pred_len:int, group_ids:List[str] = [],
         static_reals:List[str] = [],
         observed_reals:List[str] = [], 
@@ -37,8 +36,6 @@ class AgeData:
 
         Args:
             data_path (str): path of the input file
-            date_index (str): date column denoting the time. This column 
-                is used to calculate the time index and determine the sequence of samples.
             seq_len (int): input window length.
             pred_len (int): output prediction length.
             group_ids (List[str]): list of column names identifying a time series. This means 
@@ -57,7 +54,7 @@ class AgeData:
         # input and output features
         self.group_ids = group_ids
         self.time_index = 'TimeFromStart'
-        self.date_index = date_index
+        self.date_index = 'Date'
         self.static_reals = static_reals
 
         self.observed_reals = observed_reals
@@ -67,7 +64,7 @@ class AgeData:
         
         self.targets = targets
         
-        selected_columns = [date_index] + group_ids + static_reals + \
+        selected_columns = [self.date_index] + group_ids + static_reals + \
             observed_reals + self.known_reals + targets
         # remove any duplicates
         self.selected_columns = []

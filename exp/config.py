@@ -5,17 +5,10 @@ from dataclasses import dataclass
 @dataclass
 class DataConfig:
     root_folder = './dataset/processed'
-    date_index='Date'
-    seq_len=14 
-    pred_len=14
     
     static_reals=["UNDER5","AGE517","AGE1829","AGE3039","AGE4049","AGE5064","AGE6574","AGE75PLUS"]
     observed_reals=['VaccinationFull', 'Cases']
-    known_reals=["SinWeekly"]
     targets=['Cases']
-    
-    group_ids=['FIPS']
-    scale=True
     
 @dataclass
 class FeatureFiles:
