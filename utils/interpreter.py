@@ -96,6 +96,11 @@ def compute_attr(
             sliding_window_shapes = (1,1),
             additional_forward_args=additional_forward_args
         )
+    elif name == 'Morris Sensitivity':
+        attr = explainer.attribute(
+            inputs=inputs,
+            additional_forward_args=additional_forward_args
+        )
     else:
         print(f'{name} not supported.')
         raise NotImplementedError

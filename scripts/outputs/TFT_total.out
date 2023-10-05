@@ -1,0 +1,59 @@
+[rank: 0] Global seed set to 7
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+Missing logger folder: scratch/TFT_Total/lightning_logs
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Metric val_loss improved. New best score: 0.553
+Metric val_loss improved by 0.019 >= min_delta = 0.0. New best score: 0.534
+Metric val_loss improved by 0.083 >= min_delta = 0.0. New best score: 0.451
+Metric val_loss improved by 0.007 >= min_delta = 0.0. New best score: 0.444
+Metric val_loss improved by 0.016 >= min_delta = 0.0. New best score: 0.428
+Monitored metric val_loss did not improve in the last 3 records. Best score: 0.428. Signaling Trainer to stop.
+Experiment started at 2023-10-04 20:55:37.352168.
+Cuda available: True.
+
+Output folder scratch/TFT_Total does not exist. Creating ..
+Starting experiment. Result folder scratch/TFT_Total.
+adding time index columns TimeFromStart
+added time encoded known reals ['month', 'day', 'weekday'].
+(3255112, 15)
+        Date  FIPS  UNDER5  AGE517  ...  Cases  month  day  weekday
+0 2020-12-13  1001  0.0596  0.1725  ...    0.0     12   13        6
+1 2020-12-14  1001  0.0596  0.1725  ...   96.0     12   14        0
+2 2020-12-15  1001  0.0596  0.1725  ...   97.0     12   15        1
+
+[3 rows x 15 columns]
+
+Train samples 2001454, validation samples 87976, test samples 87976
+637 days of training, 14 days of validation data, 14 days of test data.
+
+Fitting scalers on train data
+Number of parameters in network: 23.5k.
+
+
+----Training started at 2023-10-04 20:56:05.466933----
+
+
+----Training ended at 2023-10-05 02:31:06.496881, elapsed time 5:35:01.029948.
+Best model by validation loss saved at /home/mi3se/COVID-19-age-groups/scratch/TFT_Total/best-epoch=4.ckpt
+Loading best model from /home/mi3se/COVID-19-age-groups/scratch/TFT_Total/best-epoch=4.ckpt.
+
+---Training prediction--
+
+train: rmse:61.517, mae:13.056, msle: 1.3031, r2: 0.76798
+
+---Validation results--
+
+validation: rmse:82.884, mae:23.611, msle: 1.8048, r2: 0.57461
+
+---Test results--
+
+test: rmse:170.06, mae:34.824, msle: 1.8972, r2: 0.57123
+           Date  TimeFromStart  FIPS  Cases  Predicted_Cases  split
+350  2020-03-15             14  1001    0.0         2.431719  train
+973  2020-03-15             14  1003    0.0         2.590842  train
+1596 2020-03-15             14  1005    0.0         2.916132  train
+
+Ended at 2023-10-05 02:50:07.756329. Elapsed time 5:54:30.404171
