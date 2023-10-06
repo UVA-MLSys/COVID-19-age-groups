@@ -58,4 +58,6 @@ TimesNet_Total, train: rmse:66.104, mae:12.808, msle: 1.05, r2: 0.73219
 TFT_Top_100, train: rmse:365.81, mae:138.88, msle: 1.9224, r2: 0.65061
 TFT_Top_100, validation: rmse:452.11, mae:262.72, msle: 2.9696, r2: 0.23032
 TFT_Top_100, test: rmse:942.44, mae:477.75, msle: 3.2527, r2: 0.31507
-
+TFT_Total, train: rmse:61.517, mae:13.056, msle: 1.3031, r2: 0.76798
+TFT_Total, validation: rmse:82.884, mae:23.611, msle: 1.8048, r2: 0.57461
+TFT_Total, test: rmse:170.06, mae:34.824, msle: 1.8972, r2: 0.57123

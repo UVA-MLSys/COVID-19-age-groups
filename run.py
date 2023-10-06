@@ -6,22 +6,31 @@ from exp.exp_forecasting import Exp_Forecast
 from exp.config import DataConfig
 import numpy as np
 from datetime import datetime
+        
+def initial_setup(args):
+    # set random seed
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    
+    # setup gpu devices
+    use_gpu = True if torch.cuda.is_available() and not args.no_gpu else False
 
-def main(args):
-    start = datetime.now()
-    print(f'Experiment started at {start}')
-    set_random_seed(args.seed)
-    args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
-
-    if args.use_gpu and args.use_multi_gpu:
+    if use_gpu and args.use_multi_gpu:
         args.devices = args.devices.replace(' ', '')
         device_ids = args.devices.split(',')
         args.device_ids = [int(id_) for id_ in device_ids]
         args.gpu = args.device_ids[0]
         
+    # setup feature numbers
     args.n_features = len(set(DataConfig.static_reals+DataConfig.observed_reals+DataConfig.targets))
     args.enc_in = args.dec_in = args.c_out = args.n_features
     args.n_targets = len(DataConfig.targets)
+
+def main(args):
+    start = datetime.now()
+    print(f'Experiment started at {start}')
+    initial_setup(args)
     
     print('Args in experiment:')
     print(args)
@@ -114,7 +123,7 @@ def get_parser():
     parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training')
 
     # GPU
-    parser.add_argument('--use_gpu', action='store_true', help='use gpu')
+    parser.add_argument('--no_gpu', action='store_true', help='do not use gpu')
     parser.add_argument('--gpu', type=int, default=0, help='gpu')
     parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus')
     parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multile gpus')

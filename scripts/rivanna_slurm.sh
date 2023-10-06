@@ -16,13 +16,14 @@ module load cuda cudnn
 module load singularity
 # outputing to scrach folder ensures temporary experiments aren't tracked
 # since scratch is added in gitignore
-singularity run --nv timeseries.sif python run.py --use_gpu --result_path scratch --data_path Top_20.csv --model DLinear
+singularity run --nv timeseries.sif python run.py --result_path scratch --data_path Top_20.csv --model TimesNet --disable_progress
+# singularity run --nv timeseries.sif python interpret.py --result_path scratch --data_path Top_20.csv --model TimesNet --explainer morris_sensitivity --disable_progress
 
 # # 2. using anaconda
 #  module load anaconda
 #  conda deactivate 
 #  conda activate ml # replace with your own virtual env
-#  python run.py --use_gpu --result_path scratch --data_path Top_20.csv --model DLinear
+#  python run.py --result_path scratch --data_path Top_20.csv --model DLinear
 
 # # 3. just using local env
-#  python run.py --use_gpu --result_path scratch --data_path Top_20.csv --model DLinear
+#  python run.py --result_path scratch --data_path Top_20.csv --model DLinear
