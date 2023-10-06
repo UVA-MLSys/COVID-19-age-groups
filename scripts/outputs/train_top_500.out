@@ -7,7 +7,7 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
 2023-09-26 01:44:19.797747: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /sw/ubuntu-22.04/anaconda3/current/lib:/sw/ubuntu-22.04/cudnn/current/lib:/sw/ubuntu-22.04/cuda/current/extras/CUPTI/lib64:/sw/ubuntu-22.04/cuda/current/lib64::/u/mi3se/anaconda3/envs/ml/lib/:/u/mi3se/anaconda3/envs/ml/lib/
 2023-09-26 01:44:19.797779: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
 Args in experiment:
-Namespace(test=False, model='DLinear', seed=7, root_path='./dataset/processed/', data_path='Top_500.csv', result_path='results', freq='d', no_scale=False, seq_len=14, label_len=7, pred_len=14, top_k=5, num_kernels=6, d_model=64, n_heads=4, e_layers=2, d_layers=1, d_ff=256, moving_avg=7, factor=3, distil=True, dropout=0.1, embed='timeF', activation='gelu', output_attention=False, num_workers=0, train_epochs=10, batch_size=32, patience=3, learning_rate=0.001, des='', loss='MSE', lradj='type1', use_amp=False, use_gpu=True, gpu=0, use_multi_gpu=False, devices='0,1,2,3', p_hidden_dims=[64, 64], p_hidden_layers=2, n_features=10, enc_in=10, dec_in=10, c_out=10, n_targets=1)
+Namespace(test=False, model='DLinear', seed=7, root_path='./dataset/processed/', data_path='Top_500.csv', result_path='results', freq='d', no_scale=False, seq_len=14, label_len=7, pred_len=14, top_k=5, num_kernels=6, d_model=64, n_heads=4, e_layers=2, d_layers=1, d_ff=256, moving_avg=7, factor=3, distil=True, dropout=0.1, embed='timeF', activation='gelu', output_attention=False, num_workers=0, train_epochs=10, batch_size=32, patience=3, learning_rate=0.001, des='', loss='MSE', lradj='type1', use_amp=False, no_gpu=False, gpu=0, use_multi_gpu=False, devices='0,1,2,3', p_hidden_dims=[64, 64], p_hidden_layers=2, n_features=10, enc_in=10, dec_in=10, c_out=10, n_targets=1)
 Output folder results/DLinear_Top_500 does not exist. Creating ..
 Use GPU: cuda:0
 
@@ -18,11 +18,43 @@ Fitting scalers on train data
 >>>>>>> training : DLinear_Top_500 >>>>>>>>>
 Time encoded columns : ['month', 'day', 'weekday']
 Getting valid sampling locations.
-0it [00:00, ?it/s]21177it [01:00, 352.94it/s]21177it [01:10, 352.94it/s]42413it [02:00, 353.51it/s]42413it [02:10, 353.51it/s]63652it [03:00, 353.73it/s]63652it [03:10, 353.73it/s]84817it [04:00, 353.34it/s]84817it [04:10, 353.34it/s]106038it [05:00, 353.46it/s]106038it [05:10, 353.46it/s]127262it [06:00, 353.55it/s]127262it [06:10, 353.55it/s]148495it [07:00, 353.65it/s]148495it [07:10, 353.65it/s]169713it [08:00, 353.64it/s]169713it [08:10, 353.64it/s]190942it [09:00, 353.69it/s]190942it [09:10, 353.69it/s]212180it [10:00, 353.78it/s]212180it [10:10, 353.78it/s]233398it [11:00, 353.73it/s]233398it [11:10, 353.73it/s]254639it [12:00, 353.81it/s]254639it [12:10, 353.81it/s]275861it [13:00, 353.78it/s]275861it [13:10, 353.78it/s]297100it [14:00, 353.84it/s]297100it [14:10, 353.84it/s]305000it [14:22, 353.65it/s]
+
+0it [00:00, ?it/s]
+21177it [01:00, 352.94it/s]
+21177it [01:10, 352.94it/s]
+42413it [02:00, 353.51it/s]
+42413it [02:10, 353.51it/s]
+63652it [03:00, 353.73it/s]
+63652it [03:10, 353.73it/s]
+84817it [04:00, 353.34it/s]
+84817it [04:10, 353.34it/s]
+106038it [05:00, 353.46it/s]
+106038it [05:10, 353.46it/s]
+127262it [06:00, 353.55it/s]
+127262it [06:10, 353.55it/s]
+148495it [07:00, 353.65it/s]
+148495it [07:10, 353.65it/s]
+169713it [08:00, 353.64it/s]
+169713it [08:10, 353.64it/s]
+190942it [09:00, 353.69it/s]
+190942it [09:10, 353.69it/s]
+212180it [10:00, 353.78it/s]
+212180it [10:10, 353.78it/s]
+233398it [11:00, 353.73it/s]
+233398it [11:10, 353.73it/s]
+254639it [12:00, 353.81it/s]
+254639it [12:10, 353.81it/s]
+275861it [13:00, 353.78it/s]
+275861it [13:10, 353.78it/s]
+297100it [14:00, 353.84it/s]
+297100it [14:10, 353.84it/s]
+305000it [14:22, 353.65it/s]
 Saving dataset at ./dataset/processed/Top_500/train.pt
 Time encoded columns : ['month', 'day', 'weekday']
 Getting valid sampling locations.
-0it [00:00, ?it/s]500it [00:01, 351.09it/s]
+
+0it [00:00, ?it/s]
+500it [00:01, 351.09it/s]
 Saving dataset at ./dataset/processed/Top_500/val.pt
 	iters: 500, epoch: 1 | loss: 0.1960848
 	speed: 0.0044s/iter; left time: 205.3362s
@@ -223,7 +255,9 @@ Loading the best model from results/DLinear_Top_500/checkpoint.pth
 >>>>>>> testing : DLinear_Top_500 <<<<<<<<
 Time encoded columns : ['month', 'day', 'weekday']
 Getting valid sampling locations.
-0it [00:00, ?it/s]500it [00:01, 351.92it/s]
+
+0it [00:00, ?it/s]
+500it [00:01, 351.92it/s]
 Saving dataset at ./dataset/processed/Top_500/test.pt
 Preds and Trues shape: (500, 14, 1) (500, 14, 1)
 test: rmse:447.33, mae:144.65, msle: 2.2888, r2: 0.4471

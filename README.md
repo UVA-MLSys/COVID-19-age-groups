@@ -151,7 +151,7 @@ options:
   --lradj {type1,type2}
                         adjust learning rate (default: type1)
   --use_amp             use automatic mixed precision training (default: False)
-  --use_gpu             use gpu (default: False)
+              use gpu (default: False)
   --gpu GPU             gpu (default: 0)
   --use_multi_gpu       use multiple gpus (default: False)
   --devices DEVICES     device ids of multile gpus (default: 0,1,2,3)

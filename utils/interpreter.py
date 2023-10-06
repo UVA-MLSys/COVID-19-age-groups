@@ -165,8 +165,12 @@ def evaluate_interpretation(
     # This ranking metric returns a high value if true labels are ranked high by y_score.
     ndcg = ndcg_score(y_true, y_pred)
     
-    true_scores = merged[true_features].div(merged[true_features].sum(axis=1), axis=0)
-    pred_scores = merged[pred_features].div(merged[pred_features].sum(axis=1), axis=0)
+    true_scores = merged[true_features].div(
+        merged[true_features].sum(axis=1), axis=0
+    ).fillna(0) # when all are zero
+    pred_scores = merged[pred_features].div(
+        merged[pred_features].sum(axis=1), axis=0
+    ).fillna(0)  # when all are zero
     
     normalized_mae = mean_absolute_error(true_scores, pred_scores)
     normalized_rmse = np.sqrt(mean_squared_error(true_scores, pred_scores))

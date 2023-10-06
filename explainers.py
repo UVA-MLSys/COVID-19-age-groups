@@ -4,11 +4,11 @@ import SALib, torch
 from captum._utils.typing import TensorOrTupleOfTensorsGeneric
 
 class MorrisSensitivty:
-    def __init__(self, model, inputs, pred_len) -> None:
+    def __init__(self, model, data, pred_len) -> None:
         self.model = model
         self.pred_len = pred_len
         
-        self.sp = self._build_problem_spec(inputs)
+        self.sp = self._build_problem_spec(data)
         
     def _build_problem_spec(self, inputs:torch.Tensor):
         bounds = []
@@ -28,6 +28,7 @@ class MorrisSensitivty:
             "num_vars": n_features,
             'bounds': bounds,
             'dists': dists,
+            'names':list(range(n_features))
             # 'sample_scaled': True
         })
         return sp

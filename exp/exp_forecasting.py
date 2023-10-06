@@ -57,24 +57,25 @@ class Exp_Forecast(object):
             self.dataset_map[flag] = ts_dataset
         
     def _acquire_device(self):
-        if self.args.use_gpu:
+        if self.args.no_gpu:
+            device = torch.device('cpu')
+            print('Use CPU')
+        else:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(
                 self.args.gpu) if not self.args.use_multi_gpu else self.args.devices
             device = torch.device(f'cuda:{self.args.gpu}')
             print(f'Use GPU: cuda:{self.args.gpu}')
-        else:
-            device = torch.device('cpu')
-            print('Use CPU')
+            
         return device
 
     def _build_model(self):
         model = self.model_dict[self.args.model].Model(self.args).float()
 
-        if self.args.use_multi_gpu and self.args.use_gpu:
+        if self.args.use_multi_gpu and not self.args.no_gpu:
             model = torch.nn.DataParallel(model, device_ids=self.args.device_ids)
         return model
 
-    def _get_data(self, flag:str='train', train=False):
+    def get_data(self, flag:str='train', train=False):
         dataset, dataloader = self.age_data.create_tslib_timeseries(
             self.data_map[flag], train, 
             self.dataset_map[flag] # using a cached dataset help speeding up
@@ -148,8 +149,8 @@ class Exp_Forecast(object):
         return total_loss
 
     def train(self, setting):
-        _, train_loader = self._get_data(flag='train', train=True)
-        _, vali_loader = self._get_data(flag='val')
+        _, train_loader = self.get_data(flag='train', train=True)
+        _, vali_loader = self.get_data(flag='val')
 
         path = os.path.join(self.args.result_path, setting)
         if not os.path.exists(path):
@@ -255,7 +256,7 @@ class Exp_Forecast(object):
         return self.model
     
     def pred(self, load_model:bool=False, flag:str='test', return_index=False):
-        test_dataset, test_loader = self._get_data(flag, train=False)
+        test_dataset, test_loader = self.get_data(flag, train=False)
         if load_model: self.load_model()
 
         preds = []
