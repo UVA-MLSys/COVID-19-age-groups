@@ -29,7 +29,8 @@ def batch_compute_attr(
     attr_list = []
 
     progress_bar = tqdm(
-        enumerate(dataloader), total=len(dataloader), disable=False
+        enumerate(dataloader), total=len(dataloader), 
+        disable=exp.args.disble_progress
     )
     for _, (batch_x, batch_y, batch_x_mark, batch_y_mark) in progress_bar:
         batch_x = batch_x.float().to(exp.device)
