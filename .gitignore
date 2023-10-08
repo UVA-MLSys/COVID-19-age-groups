@@ -20,6 +20,6 @@ predictions.csv
 # for temporary experiments
 scratch/
 test_results
-*.pth
+results/TimesNet_Total/checkpoint.pth
 *.pt
 *.npy
