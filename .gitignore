@@ -22,4 +22,4 @@ scratch/
 test_results
 results/TimesNet_Total/checkpoint.pth
 *.pt
-*.npy
+train_*.npy

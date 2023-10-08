@@ -32,6 +32,7 @@ explainer_map = {
 }
 
 def main(args):
+    print(f'Experiment started at {datetime.now()}')
     # only has real features and observed reals also contains past targets
     features = DataConfig.static_reals + DataConfig.observed_reals
     age_features = DataConfig.static_reals
@@ -50,11 +51,15 @@ def main(args):
     dataset, dataloader = exp.get_data(flag)
     
     # calculate attribute
+    start = datetime.now()
+    print(f'Interpretation started at {start}')
     explainer = initialize_explainer(exp.model.eval(), dataloader, args)
     attr = batch_compute_attr(
         dataloader, exp, explainer, 
         baseline_mode='aug'
     )
+    end = datetime.now()
+    print(f'Experiment ended at {end}, total time {end - start}')
     
     # return
     df = exp.data_map[flag]
