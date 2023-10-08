@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Union
 import SALib, torch
 from captum._utils.typing import TensorOrTupleOfTensorsGeneric
 
@@ -330,11 +330,11 @@ class MorrisSensitivty:
 #     """
 #     def __init__(
 #         self, model, dataloader:AgeData, 
-#         features:List[str], dists:[str | List[str]] = 'unif'
+#         features:List[str], dists:Union[str , List[str]] = 'unif'
 #     ) -> None:
 #         """
 #         Args:
-#             dists [str | List[str]]: Sample distribution a feature. Defaults to 'unif'. 
+#             dists Union[str , List[str]]: Sample distribution a feature. Defaults to 'unif'. 
 #             Possible values are unif, norm, lognorm, triang.
 #         """
 #         super().__init__(model, dataloader, features)
@@ -405,7 +405,7 @@ class MorrisSensitivty:
     
 # def explainer_factory(
 #     args, model, dataloader:AgeData, 
-#     features: List[str | int]
+#     features: List[Union[str , int]]
 # )-> BaseExplainer:
 #     if args.explainer == 'FO':
 #         explainer = FeatureOcclusion(model, dataloader, features, dists='unif')

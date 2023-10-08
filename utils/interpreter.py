@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import List
+from typing import List, Union
 from sklearn.metrics import dcg_score, ndcg_score, mean_absolute_error, mean_squared_error
 from pandas import DataFrame
 import torch
@@ -143,7 +143,7 @@ def normalize_feature_groups(df, features):
     print(summed)
 
 def evaluate_interpretation(
-    ground_truth:DataFrame, relevance_score:DataFrame, features:List[str | int]
+    ground_truth:DataFrame, relevance_score:DataFrame, features:List[Union[str , int]]
 ):
     merged = ground_truth.merge(
         relevance_score[['end_of_week'] + features], 
@@ -245,7 +245,7 @@ def calculate_global_rank(all_scores, features):
 
 def align_interpretation(
     ranges:List, attr:np.ndarray, 
-    features:List[str|int], min_date,  
+    features:List[Union[str, int]], min_date,  
     seq_len=14, pred_len=14
 ):
     pred_df = pd.DataFrame(ranges, columns=['FIPS', 'index'])
@@ -293,7 +293,7 @@ def align_interpretation(
 
 # def align_interpretation(
 #     df:pd.DataFrame, all_scores:np.ndarray, 
-#     features:List[str|int], 
+#     features:List[Union[str, int]], 
 #     seq_len=14, pred_len=14
 # ):
 #     num_dates = df['Date'].nunique() - seq_len
