@@ -120,8 +120,9 @@ def compute_attr(
     return attr
 
 def get_baseline(inputs, mode='random'):
-    if mode =='zero': baselines = torch.zeros_like(inputs)
-    elif mode == 'random': baselines = torch.randn_like(inputs)
+    device = inputs.device
+    if mode =='zero': baselines = torch.zeros_like(inputs, device=device)
+    elif mode == 'random': baselines = torch.randn_like(inputs, device=device)
     elif mode == 'aug':
         means = torch.mean(inputs, dim=(0, 1))
         std = torch.std(inputs, dim=(0, 1))
@@ -291,55 +292,3 @@ def align_interpretation(
 
     print(all_outputs['Date'].min(), all_outputs['Date'].max())
     return all_outputs
-
-# def align_interpretation(
-#     df:pd.DataFrame, all_scores:np.ndarray, 
-#     features:List[Union[str, int]], 
-#     seq_len=14, pred_len=14
-# ):
-#     num_dates = df['Date'].nunique() - seq_len
-#     num_group_ids = df['FIPS'].nunique()
-#     # prediction starts after the first seq_len days
-#     start_date = df['Date'].min() + pd.to_timedelta(seq_len, unit='D')
-#     print(start_date, df['Date'].min())
-
-#     group_agg_scores = np.full(
-#         (num_dates, len(features), pred_len), 
-#         fill_value=np.nan, dtype=np.float32
-#     )
-
-#     # aggregating importance by groups for each date
-#     # since ground truth is avaiable on US level only
-#     # this assumes things are sorted by [Date, FIPS]
-#     for feature_index in range(len(features)):
-#         time_delta = 0
-#         index = 0
-#         while time_delta < num_dates:
-#             # summing importance over whole county group per day
-#             group_agg_scores[time_delta, feature_index] = np.sum(
-#                 # features can be positive or neg influence
-#                 # taking absolute just considers the magnitude of importance
-#                 np.abs(all_scores[
-#                     index:(index + num_group_ids), feature_index
-#                 ]), axis=0
-#             )
-            
-#             index += num_group_ids 
-#             time_delta += 1
-       
-#     # align prediction tau days into the future to time t+tau     
-#     for horizon in range(pred_len):
-#         group_agg_scores[:, :, horizon] = np.roll(
-#             group_agg_scores[:, :, horizon], 
-#             shift=horizon, axis=0
-#         )
-        
-#     dates = [start_date + pd.to_timedelta(i, unit='D') \
-#         for i in range(group_agg_scores.shape[0])]
-#     group_agg_scores_df = pd.DataFrame({'Date': dates})
-    
-#     group_agg_scores_df[features] = np.nanmean(
-#         group_agg_scores, axis=-1
-#     )
-    
-#     return group_agg_scores_df

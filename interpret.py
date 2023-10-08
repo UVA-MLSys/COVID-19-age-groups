@@ -53,7 +53,7 @@ def main(args):
     # calculate attribute
     start = datetime.now()
     print(f'Interpretation started at {start}')
-    explainer = initialize_explainer(exp.model.eval(), dataloader, args)
+    explainer = initialize_explainer(exp, dataloader, args)
     attr = batch_compute_attr(
         dataloader, exp, explainer, 
         baseline_mode='aug'
@@ -168,19 +168,20 @@ def main(args):
         index=False
     )
     
-def get_all_inputs(dataloader:torch.utils.data.dataloader.DataLoader):
-    data = [batch[0] for batch in dataloader]
+def get_all_inputs(dataloader, device):
+    data = [batch[0].float().to(device) for batch in dataloader]
     return torch.vstack(data)
     
-def initialize_explainer(model, dataloader, args):
+def initialize_explainer(exp:Exp_Forecast, dataloader, args):
+    model = exp.model.eval()
     name = args.explainer
     if name == 'morris_sensitivity':
-        data = get_all_inputs(dataloader)
+        data = get_all_inputs(dataloader, exp.device)
         explainer = explainer_map[name](
             model, data, args.pred_len
         )
     elif name == 'augmented_occlusion':
-        data = get_all_inputs(dataloader)
+        data = get_all_inputs(dataloader, exp.device)
         explainer = explainer_map[name](model, data)
     else:
         explainer = explainer_map[name](model)
