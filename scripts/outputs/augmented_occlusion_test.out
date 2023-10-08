@@ -1,0 +1,52 @@
+Experiment started at 2023-10-08 18:27:27.770450
+Starting experiment. Result folder results/FEDformer_Total.
+Use GPU: cuda:0
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6]
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+ fourier enhanced cross attention used!
+modes_q=10, index_q=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+modes_kv=7, index_kv=[0, 1, 2, 3, 4, 5, 6]
+adding time index columns TimeFromStart
+added time encoded known reals ['month', 'day', 'weekday'].
+
+Train samples 2001454, validation samples 87976, test samples 87976
+637 days of training, 14 days of validation data, 14 days of test data.
+
+Fitting scalers on train data
+Loading dataset from ./dataset/processed/Total/train.pt
+Loading dataset from ./dataset/processed/Total/val.pt
+Loading dataset from ./dataset/processed/Total/test.pt
+loading best model from results/FEDformer_Total/checkpoint.pth
+Interpretation started at 2023-10-08 18:28:18.446671
+Experiment ended at 2023-10-08 18:32:08.600056, total time 0:03:50.153385
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     43988.000000  43988.000000
+mean   30383.649268      0.088571  ...         0.046080      0.151419
+std    15160.267630      0.055400  ...         0.037053      0.182978
+min     1001.000000      0.000002  ...         0.000001      0.000005
+25%    18177.000000      0.047232  ...         0.018559      0.034284
+50%    29176.000000      0.080863  ...         0.037751      0.083266
+75%    45081.000000      0.120422  ...         0.063684      0.187792
+max    56045.000000      0.473637  ...         0.369042      0.990711
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.627720         7.0        8.0
+1     AGE517  14.482830  15.615824         4.0        3.0
+2    AGE1829  24.589799  17.465744         1.0        1.0
+3    AGE3039  19.326818  14.689328         2.0        4.0
+4    AGE4049  14.099899  12.606302         5.0        5.0
+5    AGE5064  15.889536  15.993222         3.0        2.0
+6    AGE6574   5.066949  12.139565         6.0        6.0
+7  AGE75PLUS   2.975423   6.862295         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.10938, rmse: 0.14658, ndcg: 0.97629
+Normalized mae: 0.033168, rmse: 0.0421, ndcg: 0.9871
