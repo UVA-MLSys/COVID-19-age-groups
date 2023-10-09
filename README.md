@@ -97,13 +97,13 @@ Use the `run.py` to run the available models on the dataset. See `scripts/comman
 ```
 $COVID-19-age-groups> python run.py --help
 
-Run Timeseries
+Run Timeseries Models
 
 options:
   -h, --help            show this help message and exit
   --test                test the checkpointed best model, train otherwise (default: False)
   --model {DLinear,Autoformer,FEDformer,PatchTST,TimesNet}
-                        model name (default: Transformer)
+                        model name (default: DLinear)
   --seed SEED           random seed (default: 7)
   --root_path ROOT_PATH
                         root path of the data file (default: ./dataset/processed/)
@@ -112,8 +112,8 @@ options:
   --result_path RESULT_PATH
                         result folder (default: results)
   --freq {s,t,h,d,b,w,m}
-                        freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like   
-                        15min or 3h (default: d)
+                        freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min
+                        or 3h (default: d)
   --no-scale            do not scale the dataset (default: False)
   --seq_len SEQ_LEN     input sequence length (default: 14)
   --label_len LABEL_LEN
@@ -151,7 +151,7 @@ options:
   --lradj {type1,type2}
                         adjust learning rate (default: type1)
   --use_amp             use automatic mixed precision training (default: False)
-              use gpu (default: False)
+  --no_gpu              do not use gpu (default: False)
   --gpu GPU             gpu (default: 0)
   --use_multi_gpu       use multiple gpus (default: False)
   --devices DEVICES     device ids of multile gpus (default: 0,1,2,3)
@@ -159,6 +159,81 @@ options:
                         hidden layer dimensions of projector (List) (default: [64, 64])
   --p_hidden_layers P_HIDDEN_LAYERS
                         number of hidden layers in projector (default: 2)
+  --disable_progress    disable progress bar (default: False)
+```
+
+### Interpreting models
+
+```
+$COVID-19-age-groups> python interpret.py --help
+
+Interpret Timeseries Models
+
+options:
+  -h, --help            show this help message and exit
+  --test                test the checkpointed best model, train otherwise (default: False)
+  --model {DLinear,Autoformer,FEDformer,PatchTST,TimesNet}
+                        model name (default: DLinear)
+  --seed SEED           random seed (default: 7)
+  --root_path ROOT_PATH
+                        root path of the data file (default: ./dataset/processed/)
+  --data_path DATA_PATH
+                        data file (default: Top_20.csv)
+  --result_path RESULT_PATH
+                        result folder (default: results)
+  --freq {s,t,h,d,b,w,m}
+                        freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min
+                        or 3h (default: d)
+  --no-scale            do not scale the dataset (default: False)
+  --seq_len SEQ_LEN     input sequence length (default: 14)
+  --label_len LABEL_LEN
+                        start token length (default: 7)
+  --pred_len PRED_LEN   prediction sequence length (default: 14)
+  --top_k TOP_K         for TimesBlock (default: 5)
+  --num_kernels NUM_KERNELS
+                        for Inception (default: 6)
+  --d_model D_MODEL     dimension of model (default: 64)
+  --n_heads N_HEADS     num of heads (default: 4)
+  --e_layers E_LAYERS   num of encoder layers (default: 2)
+  --d_layers D_LAYERS   num of decoder layers (default: 1)
+  --d_ff D_FF           dimension of fcn (default: 256)
+  --moving_avg MOVING_AVG
+                        window size of moving average (default: 7)
+  --factor FACTOR       attn factor (default: 3)
+  --distil              whether to use distilling in encoder, using this argument means not using distilling (default: True)
+  --dropout DROPOUT     dropout (default: 0.1)
+  --embed {timeF,fixed,learned}
+                        time features encoding (default: timeF)
+  --activation ACTIVATION
+                        activation (default: gelu)
+  --output_attention    whether to output attention in ecoder (default: False)
+  --num_workers NUM_WORKERS
+                        data loader num workers (default: 0)
+  --train_epochs TRAIN_EPOCHS
+                        train epochs (default: 10)
+  --batch_size BATCH_SIZE
+                        batch size of train input data (default: 32)
+  --patience PATIENCE   early stopping patience (default: 3)
+  --learning_rate LEARNING_RATE
+                        optimizer learning rate (default: 0.001)
+  --des DES             exp description (default: )
+  --loss LOSS           loss function (default: MSE)
+  --lradj {type1,type2}
+                        adjust learning rate (default: type1)
+  --use_amp             use automatic mixed precision training (default: False)
+  --no_gpu              do not use gpu (default: False)
+  --gpu GPU             gpu (default: 0)
+  --use_multi_gpu       use multiple gpus (default: False)
+  --devices DEVICES     device ids of multile gpus (default: 0,1,2,3)
+  --p_hidden_dims P_HIDDEN_DIMS [P_HIDDEN_DIMS ...]
+                        hidden layer dimensions of projector (List) (default: [64, 64])
+  --p_hidden_layers P_HIDDEN_LAYERS
+                        number of hidden layers in projector (default: 2)
+  --disable_progress    disable progress bar (default: False)
+  --explainer {feature_ablation,occlusion,augmented_occlusion,lime,deep_lift,integrated_gradients,gradient_shap,morris_sensitivity}
+                        explainer method (default: feature_ablation)
+  --flag {train,val,test}
+                        flag for data split (default: test)
 ```
 
 ### Submitting job scripts
@@ -247,3 +322,7 @@ The following table lists the features with their source and description. Note t
 * Feature Ablation
 * Feature Occlusion
 * Augmented Feature Occlusion
+* Deep Lift
+* Integrated Gradients
+* Gradient Shap
+* Morris Sensitivity
