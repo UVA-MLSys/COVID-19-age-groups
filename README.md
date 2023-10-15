@@ -359,10 +359,10 @@ The following table lists the features with their source and description. Note t
  </tr>
  <tr>
   <td>PatchTST</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>33.174</td>
+  <td>183.647</td>
+  <td>1.530</td>
+  <td>0.469</td>
  </tr> 
  <tr>
   <td>TimesNet</td>
