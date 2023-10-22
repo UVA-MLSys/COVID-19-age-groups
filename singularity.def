@@ -6,15 +6,15 @@ From: python:3.10
     pip install torch==1.11 \
         pytorch-lightning==1.8.6 \
         pytorch-forecasting==0.10.3 \
-        tensorflow==2.10.0 \
         tqdm matplotlib numpy==1.23.0 \
         requests scikit-learn \
         setuptools \
-        pandas einops scipy sympy SALib
+        pandas einops scipy sympy \
+        SALib captum time-interpret reformer-pytorch
 
 %labels
     Author Khairul
-    Version v1.0.0
+    Version v1.1.0
 
 %help
-    This container is used to perform COVID-19 forecasting using TFT-pytorch.
+    A container for Time Series Forecasting.

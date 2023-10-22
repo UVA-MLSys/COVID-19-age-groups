@@ -9,3 +9,6 @@ tqdm
 einops
 scipy
 sympy
+captum
+time-interpret # ==0.3.0
+reformer-pytorch
