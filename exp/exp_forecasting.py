@@ -370,7 +370,7 @@ class Exp_Forecast(object):
                 result_string = f'{flag}: rmse:{rmse:0.5g}, mae:{mae:0.5g}, msle: {rmsle:0.5g}, r2: {r2:0.5g}'
                 
                 print(result_string)
-                output_file.write(setting + ', ' + result_string + '\n')
+                output_file.write(setting + ', ' + result_string + '\n\n')
                 evaluation_metrics[target_index] = [mae, rmse, rmsle, r2]
         
             np.savetxt(os.path.join(self.output_folder, f'{flag}_metrics.txt'), np.array(evaluation_metrics))

@@ -30,7 +30,7 @@ class MultiTimeSeries(Dataset):
         id_col, time_steps = self.id_col, self.time_steps
         df_raw = df_raw.sort_values(by=[self.time_col, id_col]).reset_index(drop=True)
         
-        data_stamp = self._add_time_features(df_raw.loc[0, [self.time_col]])
+        data_stamp = add_day_time_features(df_raw.loc[0, [self.time_col]].values)
         time_encoded_columns = list(data_stamp.columns)
         print('Time encoded columns :', time_encoded_columns)
             
