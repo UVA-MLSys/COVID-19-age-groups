@@ -325,4 +325,57 @@ The following table lists the features with their source and description. Note t
 * Deep Lift
 * Integrated Gradients
 * Gradient Shap
-* Morris Sensitivity
+* Morris Sensitivity 
+
+## Results
+<table>
+ <tr>
+  <th>Model</th>
+  <th>mae</th>
+  <th>rmse</th>
+  <th>rmsle</th>
+  <th>r2</th>
+ </tr>
+ <tr>
+  <td>Autoformer</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>DLinear</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>FEDformer</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>PatchTST</td>
+  <td>33.174</td>
+  <td>183.647</td>
+  <td>1.530</td>
+  <td>0.469</td>
+ </tr> 
+ <tr>
+  <td>TimesNet</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>Transformer</td>
+  <td>14.226</td>
+  <td>68.552</td>
+  <td>1.362</td>
+  <td>0.712</td>
+</tr> 
+</table>
