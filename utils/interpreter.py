@@ -145,7 +145,8 @@ def normalize_feature_groups(df, features):
     print(summed)
 
 def evaluate_interpretation(
-    ground_truth:DataFrame, relevance_score:DataFrame, features:List[Union[str , int]]
+    ground_truth:DataFrame, relevance_score:DataFrame, 
+    features:List[Union[str , int]]
 ):
     merged = ground_truth.merge(
         relevance_score[['end_of_week'] + features], 
