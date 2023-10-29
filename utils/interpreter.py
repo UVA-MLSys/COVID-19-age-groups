@@ -59,7 +59,7 @@ def batch_compute_attr(
 
 def compute_attr(
     inputs, baselines, explainer,
-    additional_forward_args, args, mean_axis=2
+    additional_forward_args, args
 ):
     assert type(inputs) == torch.Tensor, \
         f'Only input type tensor supported, found {type(inputs)} instead.'
@@ -106,18 +106,21 @@ def compute_attr(
         print(f'{name} not supported.')
         raise NotImplementedError
     
-    # if mean_axis 1, batch x seq_len x features
-    # if mean_axis 2, batch x pred_len x features
     attr = attr.reshape(
         # batch x pred_len x seq_len x features
         (inputs.shape[0], args.pred_len, args.seq_len, attr.shape[-1])
-    # take mean over the time horizon
-    ).mean(axis=mean_axis)
-    
-    # batch x features x pred_len
-    attr = attr.permute(0, 2, 1)
+    )
     
     return attr
+
+def get_total_data(dataloader, device, add_x_mark=False):        
+    if add_x_mark:
+        return (
+            torch.vstack([item[0] for item in dataloader]).float().to(device), 
+            torch.vstack([item[2] for item in dataloader]).float().to(device)
+        )
+    else:
+        return torch.vstack([item[0] for item in dataloader]).float().to(device)
 
 def get_baseline(inputs, mode='random'):
     device = inputs.device

@@ -54,10 +54,18 @@ def main(args):
     start = datetime.now()
     print(f'Interpretation started at {start}')
     explainer = initialize_explainer(exp, dataloader, args)
+    
+    # batch x pred_len x seq_len x features
     attr = batch_compute_attr(
         dataloader, exp, explainer, 
-        baseline_mode='aug'
+        baseline_mode=args.baseline_mode
     )
+    
+    # batch x pred_len x seq_len x features -> batch x pred_len x features
+    attr = attr.mean(axis=2)
+    # batch x features x pred_len
+    attr = attr.permute(0, 2, 1)
+    
     end = datetime.now()
     print(f'Experiment ended at {end}, total time {end - start}')
     
@@ -168,20 +176,16 @@ def main(args):
         index=False
     )
     
-def get_all_inputs(dataloader, device):
-    data = [batch[0].float().to(device) for batch in dataloader]
-    return torch.vstack(data)
-    
 def initialize_explainer(exp:Exp_Forecast, dataloader, args):
     model = exp.model.eval()
     name = args.explainer
     if name == 'morris_sensitivity':
-        data = get_all_inputs(dataloader, exp.device)
+        data = get_total_data(dataloader, exp.device)
         explainer = explainer_map[name](
             model, data, args.pred_len
         )
     elif name == 'augmented_occlusion':
-        data = get_all_inputs(dataloader, exp.device)
+        data = get_total_data(dataloader, exp.device)
         explainer = explainer_map[name](model, data)
     else:
         explainer = explainer_map[name](model)
@@ -196,6 +200,10 @@ def get_parser():
         choices=list(explainer_map.keys()), help='explainer method')
     parser.add_argument('--flag', type=str, default='test', choices=['train', 'val', 'test'],
         help='flag for data split')
+    parser.add_argument('--baseline_mode', type=str, default='aug',
+        choices=['random', 'aug', 'zero', 'mean'],
+        help='how to create the baselines for the interepretation methods')
+    
     return parser
 
 if __name__ == '__main__':

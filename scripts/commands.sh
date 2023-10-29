@@ -8,3 +8,8 @@ python run_tft.py --data_path Top_20.csv --result_path scratch --disable_progres
 
 python interpret.py --data_path Top_20.csv --model FEDformer --explainer augmented_occlusion --flag test
 python interpret.py --data_path Total.csv --model FEDformer --explainer augmented_occlusion --flag test
+
+python interpret_black_box_metrics.py \
+    --data_path Top_100.csv --model FEDformer \
+    --explainers feature_ablation --flag test \
+    --result_path scratch
