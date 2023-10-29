@@ -58,7 +58,8 @@ def main(args):
     # batch x pred_len x seq_len x features
     attr = batch_compute_attr(
         dataloader, exp, explainer, 
-        baseline_mode=args.baseline_mode
+        baseline_mode=args.baseline_mode,
+        include_x_mark=False # only interpret the static and dynamic features
     )
     
     # batch x pred_len x seq_len x features -> batch x pred_len x features
@@ -82,13 +83,11 @@ def main(args):
     population = pd.read_csv(join(FeatureFiles.root_folder, 'Population.csv'))
     population = population[['FIPS', 'POPESTIMATE']]
     
-    # save numpy file
-    attr_numpy = attr.detach().cpu().numpy()
-    np.save(join(exp.output_folder, f'{flag}_{explainer.get_name()}.npy'), attr_numpy)
     # taking absolute since we want the magnitude of feature importance only
-    attr_numpy  = np.abs(attr_numpy)
+    attr_numpy = np.abs(attr.detach().cpu().numpy())
+    # np.save(join(exp.output_folder, f'{flag}_{explainer.get_name()}.npy'), attr_numpy)
 
-    # aligh attribution to date time index
+    # align attribution to date time index
     attr_df = align_interpretation(
         ranges=dataset.ranges,
         attr=attr_numpy,

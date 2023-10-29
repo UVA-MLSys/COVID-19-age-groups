@@ -40,9 +40,13 @@ class Exp_Interpret:
         assert not exp.args.output_attention, 'Model needs to output target only'
         self.exp = exp
         self.args = exp.args
-        self.result_folder = exp.output_folder
-        self.device = exp.device
         
+        self.result_folder =  os.path.join(exp.output_folder, 'interpretation') 
+        if not os.path.exists(self.result_folder):
+            os.makedirs(self.result_folder, exist_ok=True)
+        print(f'Interpretations will be saved in {self.result_folder}')
+        
+        self.device = exp.device
         exp.model.eval().zero_grad()
         self.model = exp.model
         
@@ -64,6 +68,8 @@ class Exp_Interpret:
             enumerate(dataloader), total=len(dataloader), 
             disable=self.args.disable_progress
         )
+        attr = []
+        
         for batch_index, (batch_x, batch_y, batch_x_mark, batch_y_mark) in progress_bar:
             batch_x = batch_x.float().to(self.device)
             batch_y = batch_y.float().to(self.device)
@@ -73,21 +79,22 @@ class Exp_Interpret:
             # decoder input
             dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
             dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float()
-            # outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
             
-            inputs = batch_x
+            inputs = (batch_x, batch_x_mark)
             # baseline must be a scaler or tuple of tensors with same dimension as input
             baselines = get_baseline(inputs, mode=self.args.baseline_mode)
-            additional_forward_args = (batch_x_mark, dec_inp, batch_y_mark)
+            additional_forward_args = (dec_inp, batch_y_mark)
 
             # get attributions
-            batch_results = self.evaluate_regressor(
+            batch_attr, batch_results = self.evaluate_regressor(
                 name, inputs, baselines, 
                 additional_forward_args, batch_index
             )
             results.extend(batch_results)
-        
-        return results
+            attr.append(batch_attr)
+            
+        attr = tuple([torch.vstack([a[i] for a in attr])] for i in range(2))
+        return attr, results
     
     def interpret(self, dataloader):
         for name in self.args.explainers:
@@ -95,11 +102,22 @@ class Exp_Interpret:
             start = datetime.now()
             print(f'Running {name} from {start}')
             
-            results = self.run_regressor(dataloader, name)
+            attr, results = self.run_regressor(dataloader, name)
             
             end = datetime.now()
             print(f'Experiment ended at {end}. Total time taken {end - start}.')
             self.dump_results(results, f'{name}.csv')
+            
+            explainer_name = self.explainers_map[name].get_name()
+            attr_output_file = f'{self.args.flag}_{explainer_name}.pt' 
+            attr_output_path = os.path.join(self.result_folder, attr_output_file)
+            torch.save(attr, attr_output_path)
+            
+            # attr_numpy = tuple([a.detach().cpu().numpy() for a in attr])
+            # np.save(
+            #     os.path.join(self.result_folder, f'{self.args.flag}_{self.explainers_map[name].get_name()}.npy'), 
+            #     attr_numpy
+            # )
                 
             
     def evaluate_regressor(
@@ -108,7 +126,7 @@ class Exp_Interpret:
     ):
         explainer = self.explainers_map[name]
         
-        attr = compute_attr(
+        attr = compute_regressor_attr(
             inputs, baselines, explainer, 
             additional_forward_args, self.args, 
         )
@@ -145,7 +163,7 @@ class Exp_Interpret:
                     ]
                     results.append(result_row)
     
-        return results
+        return attr, results
         
     def dump_results(self, results, filename):
         results_df = pd.DataFrame(results[1:], columns=results[0])
