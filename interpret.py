@@ -111,7 +111,7 @@ def main(args):
         groups.append(group_df)
         
     groups = pd.concat(groups, axis=0)
-    weighted_attr_df = groups[['FIPS', 'Date']+age_features].reset_index(drop=True)
+    weighted_attr_df = groups[['FIPS', 'Date'] + age_features].reset_index(drop=True)
 
     weighted_attr_by_date = weighted_attr_df.groupby('Date')[
         age_features].aggregate('sum').reset_index()
@@ -199,7 +199,7 @@ def get_parser():
         choices=list(explainer_map.keys()), help='explainer method')
     parser.add_argument('--flag', type=str, default='test', choices=['train', 'val', 'test'],
         help='flag for data split')
-    parser.add_argument('--baseline_mode', type=str, default='aug',
+    parser.add_argument('--baseline_mode', type=str, default='random',
         choices=['random', 'aug', 'zero', 'mean'],
         help='how to create the baselines for the interepretation methods')
     

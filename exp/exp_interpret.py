@@ -93,7 +93,7 @@ class Exp_Interpret:
             results.extend(batch_results)
             attr.append(batch_attr)
             
-        attr = tuple([torch.vstack([a[i] for a in attr])] for i in range(2))
+        attr = tuple(torch.vstack([a[i] for a in attr]) for i in range(2))
         return attr, results
     
     def interpret(self, dataloader):
@@ -108,18 +108,12 @@ class Exp_Interpret:
             print(f'Experiment ended at {end}. Total time taken {end - start}.')
             self.dump_results(results, f'{name}.csv')
             
-            explainer_name = self.explainers_map[name].get_name()
-            attr_output_file = f'{self.args.flag}_{explainer_name}.pt' 
+            attr_output_file = f'{self.args.flag}_{name}.pt' 
             attr_output_path = os.path.join(self.result_folder, attr_output_file)
-            torch.save(attr, attr_output_path)
             
-            # attr_numpy = tuple([a.detach().cpu().numpy() for a in attr])
-            # np.save(
-            #     os.path.join(self.result_folder, f'{self.args.flag}_{self.explainers_map[name].get_name()}.npy'), 
-            #     attr_numpy
-            # )
+            attr_numpy = tuple([a.detach().cpu().numpy() for a in attr])
+            torch.save(attr_numpy, attr_output_path)
                 
-            
     def evaluate_regressor(
         self, name, inputs, baselines, 
         additional_forward_args, batch_index
