@@ -36,18 +36,17 @@ class Exp_Forecast(object):
         
         self.age_data = AgeData.build(args)
         self.total_data = self.age_data.read_df()
-        train, val, test = self.age_data.split_data(
+        train, val, test, updated = self.age_data.split_data(
             self.total_data, Split.primary()
         )
         self.data_map = {
-            'train': train, 'val':val, 'test': test
+            'train': train, 'val':val, 
+            'test': test, 'updated': updated
         }
         
-        self.dataset_map = {
-            # 'train': None, 'val':None, 'test': None
-        }
+        self.dataset_map = {}
         self.dataset_root = os.path.join(DataConfig.root_folder, args.data_path.split('.')[0])
-        for flag in ['train', 'val', 'test']:
+        for flag in ['train', 'val', 'test', 'updated']:
             path = os.path.join(self.dataset_root, f'{flag}.pt')
             ts_dataset = None
             if os.path.exists(path):

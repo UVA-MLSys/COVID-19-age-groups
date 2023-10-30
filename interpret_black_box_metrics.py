@@ -29,8 +29,10 @@ def get_parser():
     parser.add_argument('--explainers', nargs='*', default=['feature_ablation'], 
         choices=list(explainer_name_map.keys()),
         help='explaination method names')
-    parser.add_argument('--flag', type=str, default='test', choices=['train', 'val', 'test'],
-        help='flag for data split')
+    parser.add_argument('--flag', type=str, default='test', 
+        choices=['train', 'val', 'test', 'updated'],
+        help='flag for data split'
+    )
     
     parser.add_argument('--areas', nargs='*', type=float, default=[0.05, 0.1],
         help='top k features to keep or mask during evaluation')

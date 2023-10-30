@@ -17,6 +17,7 @@ from tint.attr import (
     Occlusion, 
     FeatureAblation
 )
+from explainers import MorrisSensitivty
 
 expl_metric_map = {
     'mae': mae, 'mse': mse
@@ -31,7 +32,24 @@ explainer_name_map = {
     "augmented_occlusion":AugmentedOcclusion, # requires data when initializing
     "feature_ablation":FeatureAblation,
     "feature_permutation":FeaturePermutation,
+    'morris_sensitivity': MorrisSensitivty
 }
+
+def initialize_explainer(exp:Exp_Forecast, dataloader, args):
+    model = exp.model.eval()
+    name = args.explainer
+    if name == 'morris_sensitivity':
+        data = get_total_data(dataloader, exp.device)
+        explainer = explainer_name_map[name](
+            model, data, args.pred_len
+        )
+    elif name == 'augmented_occlusion':
+        data = get_total_data(dataloader, exp.device)
+        explainer = explainer_name_map[name](model, data)
+    else:
+        explainer = explainer_name_map[name](model)
+    
+    return explainer
 
 class Exp_Interpret:
     def __init__(

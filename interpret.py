@@ -1,4 +1,4 @@
-import tint, gc, os, argparse, random
+import os, gc
 import pandas as pd
 from datetime import datetime
 from os.path import join
@@ -17,6 +17,7 @@ from tint.attr import (
 from run import stringify_setting, get_parser as get_run_parser, initial_setup
 from exp.config import FeatureFiles, DataConfig
 from exp.exp_forecasting import Exp_Forecast
+from exp.exp_interpret import initialize_explainer
 from interpret import *
 from utils.interpreter import *
 
@@ -53,6 +54,11 @@ def main(args):
     # calculate attribute
     start = datetime.now()
     print(f'Interpretation started at {start}')
+    result_folder = os.path.join(exp.output_folder, 'interpretation')
+    if not os.path.exists(result_folder):
+        os.makedirs(result_folder, exist_ok=True)
+    print(f'Interpretation results will be saved in {result_folder}')
+    
     explainer = initialize_explainer(exp, dataloader, args)
     
     # batch x pred_len x seq_len x features
@@ -85,7 +91,6 @@ def main(args):
     
     # taking absolute since we want the magnitude of feature importance only
     attr_numpy = np.abs(attr.detach().cpu().numpy())
-    # np.save(join(exp.output_folder, f'{flag}_{explainer.get_name()}.npy'), attr_numpy)
 
     # align attribution to date time index
     attr_df = align_interpretation(
@@ -97,6 +102,7 @@ def main(args):
     )
     print('Attribution statistics')
     print(attr_df.describe())
+    gc.collect()
     
     # weight attributions by population ratio and total count
     weights = df.groupby('FIPS').first()[age_features].reset_index()
@@ -152,7 +158,7 @@ def main(args):
     print(global_rank)
     global_rank.to_csv(
         join(
-            exp.output_folder, 
+            result_folder, 
             f'{flag}_global_rank_{explainer.get_name()}.csv'
         ), 
         index=False
@@ -169,27 +175,11 @@ def main(args):
     )
     result_df.to_csv(
         join(
-            exp.output_folder, 
+            result_folder, 
             f'{flag}_int_metrics_{explainer.get_name()}.csv'
         ), 
         index=False
     )
-    
-def initialize_explainer(exp:Exp_Forecast, dataloader, args):
-    model = exp.model.eval()
-    name = args.explainer
-    if name == 'morris_sensitivity':
-        data = get_total_data(dataloader, exp.device)
-        explainer = explainer_map[name](
-            model, data, args.pred_len
-        )
-    elif name == 'augmented_occlusion':
-        data = get_total_data(dataloader, exp.device)
-        explainer = explainer_map[name](model, data)
-    else:
-        explainer = explainer_map[name](model)
-    
-    return explainer
 
 def get_parser():
     parser = get_run_parser()
@@ -197,11 +187,14 @@ def get_parser():
     
     parser.add_argument('--explainer', type=str, default='feature_ablation', 
         choices=list(explainer_map.keys()), help='explainer method')
-    parser.add_argument('--flag', type=str, default='test', choices=['train', 'val', 'test'],
-        help='flag for data split')
+    parser.add_argument('--flag', type=str, default='test', 
+        choices=['train', 'val', 'test', 'updated'],
+        help='flag for data split'
+    )
     parser.add_argument('--baseline_mode', type=str, default='random',
         choices=['random', 'aug', 'zero', 'mean'],
-        help='how to create the baselines for the interepretation methods')
+        help='how to create the baselines for the interepretation methods'
+    )
     
     return parser
 

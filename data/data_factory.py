@@ -109,19 +109,24 @@ class AgeData:
 
         test_start = split.test_start - pd.to_timedelta(self.seq_len, unit='day')
         test_data = df[(dates >= test_start) & (dates <= split.test_end)]
+        
+        updated_data = df[(dates >= test_start)]
 
-        print(f'\nTrain samples {train_data.shape[0]}, validation samples {val_data.shape[0]}, test samples {test_data.shape[0]}')
+        print(f'\nTrain samples {train_data.shape[0]}, validation samples {val_data.shape[0]}, \
+            test samples {test_data.shape[0]}, last samples {updated_data.shape[0]}')
 
         train_days = (split.val_start - split.train_start).days
         validation_days = (split.test_start - split.val_start).days
         test_days = (split.test_end - split.test_start).days + 1
+        last_days = (updated_data[self.date_index].max() - split.test_start).days + 1
 
-        print(f'{train_days} days of training, {validation_days} days of validation data, {test_days} days of test data.\n')
+        print(f'{train_days} days of training, {validation_days} days of validation data,\
+             {test_days} days of test data and {last_days} of data after test start.\n')
         
         if self.scale:
             self.fit_scalers(train_data)
 
-        return train_data, val_data, test_data
+        return train_data, val_data, test_data, updated_data
     
     def fit_scalers(self, train_data:DataFrame):
         print('Fitting scalers on train data')

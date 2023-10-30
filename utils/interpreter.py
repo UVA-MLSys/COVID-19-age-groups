@@ -7,6 +7,7 @@ import torch
 from tqdm import tqdm
 from exp.exp_forecasting import Exp_Forecast
 from data.dataloader import MultiTimeSeries
+import gc
 
 def batch_compute_attr(
     dataloader:MultiTimeSeries, exp:Exp_Forecast, 
@@ -67,6 +68,8 @@ def batch_compute_attr(
     else:
         # n_examples x pred_len x seq_len x features
         attr = torch.vstack(attr_list)
+    
+    gc.collect()
     return attr
 
 def compute_regressor_attr(
