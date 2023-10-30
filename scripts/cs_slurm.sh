@@ -14,4 +14,4 @@ module load cuda-toolkit cudnn anaconda3
 conda deactivate
 conda activate ml
 
-python3 run.py --result_path scratch --data_path Total.csv --model DLinear --num_workers -1
+python3 run.py --result_path scratch --data_path Total.csv --model DLinear

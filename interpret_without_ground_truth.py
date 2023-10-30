@@ -1,4 +1,5 @@
-from run import initial_setup, get_parser as get_main_parser, stringify_setting
+from run import initial_setup, stringify_setting
+from interpret_with_ground_truth import get_parser as get_main_parser
 import os
 from exp.exp_forecasting import *
 from utils.interpreter import *
@@ -26,19 +27,12 @@ def main(args):
 def get_parser():
     parser = get_main_parser()
     parser.description = 'Interpret timeseries model'
-    parser.add_argument('--explainers', nargs='*', default=['feature_ablation'], 
-        choices=list(explainer_name_map.keys()),
-        help='explaination method names')
-    parser.add_argument('--flag', type=str, default='test', 
-        choices=['train', 'val', 'test', 'updated'],
-        help='flag for data split'
-    )
     
+    parser.add_argument('--metrics', nargs='*', type=str, default=['mae', 'mse'], 
+        help='interpretation evaluation metrics')
     parser.add_argument('--areas', nargs='*', type=float, default=[0.05, 0.1],
         help='top k features to keep or mask during evaluation')
-    parser.add_argument('--baseline_mode', type=str, default='random',
-        choices=['random', 'aug', 'zero', 'mean'],
-        help='how to create the baselines for the interepretation methods')
+    
     
     return parser
 

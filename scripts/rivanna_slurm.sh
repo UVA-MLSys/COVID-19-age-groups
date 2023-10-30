@@ -17,14 +17,19 @@ module load singularity
 # outputing to scrach folder ensures temporary experiments aren't tracked
 # since scratch is added in gitignore
 singularity run --nv timeseries.sif python run.py --data_path Top_20.csv --model FEDformer --disable_progress
-# singularity run --nv timeseries.sif python interpret.py --data_path Top_20.csv --model FEDformer --explainer morris_sensitivity --disable_progress
+# singularity run --nv timeseries.sif python interpret_with_ground_truth.py \
+#     --data_path Top_20.csv --model FEDformer \
+#     --explainers morris_sensitivity --disable_progress
 
 # # 2. using anaconda
 #  module load anaconda
 #  conda deactivate 
 #  conda activate ml # replace with your own virtual env
 #  python run.py --data_path Top_20.csv --model DLinear
-# python interpret.py --data_path Top_20.csv --model FEDformer --explainer morris_sensitivity --disable_progress
+# python interpret_with_ground_truth.py --data_path Top_20.csv \
+#     --model FEDformer \
+#     --explainers feature_ablation occlusion augmented_occlusion feature_permutation morris_sensitivity deep_lift gradient_shap integrated_gradients \
+#     --disable_progress
 
 # # 3. just using local env
 #  python run.py --data_path Top_20.csv --model DLinear

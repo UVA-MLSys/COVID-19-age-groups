@@ -58,11 +58,3 @@ class Split:
             test_start="2021-12-12", test_end="2021-12-25",
             transform=to_datetime
         )
-    
-    @staticmethod
-    def updated():
-        return Split(
-            train_start="2020-03-01", val_start="2021-11-28",
-            test_start="2022-12-12", test_end="2022-12-31",
-            transform=to_datetime
-        )

@@ -35,9 +35,11 @@ explainer_name_map = {
     'morris_sensitivity': MorrisSensitivty
 }
 
-def initialize_explainer(exp:Exp_Forecast, dataloader, args):
+def initialize_explainer(
+    name:str, exp:Exp_Forecast, 
+    dataloader:MultiTimeSeries, args
+):
     model = exp.model.eval()
-    name = args.explainer
     if name == 'morris_sensitivity':
         data = get_total_data(dataloader, exp.device)
         explainer = explainer_name_map[name](
@@ -145,7 +147,7 @@ class Exp_Interpret:
     
         results = []
         # get scores
-        for metric_name in ['mae', 'mse']:
+        for metric_name in self.args.metrics:
             # batch x pred_len x seq_len x features
             for tau in range(self.args.pred_len):
                 if type(attr) == tuple:

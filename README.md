@@ -165,7 +165,7 @@ options:
 ### Interpreting models
 
 ```
-$COVID-19-age-groups> python interpret.py --help
+$COVID-19-age-groups> python interpret_with_ground_truth.py --help
 
 Interpret Timeseries Models
 
@@ -182,8 +182,8 @@ options:
   --result_path RESULT_PATH
                         result folder (default: results)
   --freq {s,t,h,d,b,w,m}
-                        freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min
-                        or 3h (default: d)
+                        freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use    
+                        more detailed freq like 15min or 3h (default: d)
   --no-scale            do not scale the dataset (default: False)
   --seq_len SEQ_LEN     input sequence length (default: 14)
   --label_len LABEL_LEN
@@ -230,11 +230,26 @@ options:
   --p_hidden_layers P_HIDDEN_LAYERS
                         number of hidden layers in projector (default: 2)
   --disable_progress    disable progress bar (default: False)
-  --explainer {feature_ablation,occlusion,augmented_occlusion,lime,deep_lift,integrated_gradients,gradient_shap,morris_sensitivity}
-                        explainer method (default: feature_ablation)
-  --flag {train,val,test}
+  --explainers [{deep_lift,gradient_shap,integrated_gradients,lime,occlusion,augmented_occlusion,feature_ablation,feature_permutation,morris_sensitivity} ...]
+                        explaination method names (default: ['feature_ablation'])
+  --flag {train,val,test,updated}
                         flag for data split (default: test)
+  --baseline_mode {random,aug,zero,mean}
+                        how to create the baselines for the interepretation methods (default: random)
 ```
+
+```
+$COVID-19-age-groups> python interpret_without_ground_truth.py --help
+
+options:
+same as before, additional arguments
+
+--metrics [METRICS ...]
+                        interpretation evaluation metrics (default: ['mae', 'mse'])
+--areas [AREAS ...]   top k features to keep or mask during evaluation (default: [0.05, 0.1])
+
+```
+
 
 ### Submitting job scripts
 
