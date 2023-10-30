@@ -37,16 +37,16 @@ explainer_name_map = {
 
 def initialize_explainer(
     name:str, exp:Exp_Forecast, 
-    dataloader:MultiTimeSeries, args
+    dataloader:MultiTimeSeries, args,
+    add_x_mark=True
 ):
     model = exp.model.eval()
+    data = get_total_data(dataloader, exp.device, add_x_mark=add_x_mark)
     if name == 'morris_sensitivity':
-        data = get_total_data(dataloader, exp.device)
         explainer = explainer_name_map[name](
             model, data, args.pred_len
         )
     elif name == 'augmented_occlusion':
-        data = get_total_data(dataloader, exp.device)
         explainer = explainer_name_map[name](model, data)
     else:
         explainer = explainer_name_map[name](model)
@@ -72,15 +72,9 @@ class Exp_Interpret:
         
         self.explainers_map = dict()
         for name in exp.args.explainers:
-            if name in ['augmented_occlusion']:
-                all_inputs = get_total_data(dataloader, self.device)
-                
-                self.explainers_map[name] = explainer_name_map[name](
-                    self.model, data=all_inputs
-                )
-            else:
-                explainer = explainer_name_map[name](self.model)
-                self.explainers_map[name] = explainer
+            self.explainers_map[name] = initialize_explainer(
+                name, exp, dataloader, self.args
+            )
                 
     def run_regressor(self, dataloader, name):
         results = [['batch_index', 'metric', 'tau', 'area', 'comp', 'suff']]

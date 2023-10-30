@@ -6,6 +6,9 @@
 #SBATCH --account=bii_dsc_community
 #SBATCH --gres=gpu:v100:1
 #SBATCH --mem=32GB # reduce to 16GB for Top 20 ot 500 counties
+# # SBATCH --mail-type=end
+# # SBATCH --mail-user=mi3se@virginia.edu
+
 
 source /etc/profile.d/modules.sh
 source ~/.bashrc
@@ -24,7 +27,11 @@ singularity run --nv timeseries.sif python run.py --data_path Top_20.csv --model
 # # 2. using anaconda
 #  module load anaconda
 #  conda deactivate 
-#  conda activate ml # replace with your own virtual env
+#  conda activate ml # replace with your own virtual env name
+
+# # replace the following with your id and env if facing the lib not found error
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/mi3se/.conda/envs/ml/lib
+
 #  python run.py --data_path Top_20.csv --model DLinear
 # python interpret_with_ground_truth.py --data_path Top_20.csv \
 #     --model FEDformer \

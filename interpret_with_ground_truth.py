@@ -76,13 +76,15 @@ def main(args):
         # calculate attribute
         start = datetime.now()
         print(f'{explainer_name} interpretation started at {start}')
-        explainer = initialize_explainer(explainer_name, exp, dataloader, args)
+        explainer = initialize_explainer(
+            explainer_name, exp, dataloader, args, add_x_mark=False
+        )
         
         # batch x pred_len x seq_len x features
         attr = batch_compute_attr(
             dataloader, exp, explainer, 
             baseline_mode=args.baseline_mode,
-            include_x_mark=False # only interpret the static and dynamic features
+            add_x_mark=False # only interpret the static and dynamic features
         )
         
         # batch x pred_len x seq_len x features -> batch x pred_len x features

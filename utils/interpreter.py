@@ -12,7 +12,7 @@ import gc
 def batch_compute_attr(
     dataloader:MultiTimeSeries, exp:Exp_Forecast, 
     explainer, baseline_mode:str = "random",
-    include_x_mark=False
+    add_x_mark=False
 ) -> torch.TensorType:
     """Computes the attribute of this dataloder in batch using the explainer
     and baseline mode.
@@ -45,7 +45,7 @@ def batch_compute_attr(
         dec_inp = torch.cat([batch_y[:, :exp.args.label_len, :], dec_inp], dim=1).float()
         # outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
         
-        if include_x_mark:
+        if add_x_mark:
             inputs = (batch_x, batch_x_mark)
             additional_forward_args = (dec_inp, batch_y_mark)
         else:
@@ -61,7 +61,7 @@ def batch_compute_attr(
         )
         attr_list.append(attr)
         
-    if include_x_mark:
+    if add_x_mark:
         # tuple of n_examples x pred_len x seq_len x features
         attr = (
             [torch.vstack([a[i] for a in attr_list])] for i in range(2))
