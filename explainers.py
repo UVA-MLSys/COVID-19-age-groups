@@ -69,7 +69,6 @@ class MorrisSensitivty:
                 )['mu_star'].data
                 attr[:, pred_index, t] = torch.tensor(morris_index, device=device)
         
-        print(attr.shape)
         return attr
         
     def attribute(

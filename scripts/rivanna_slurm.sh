@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-#SBATCH --job-name="train"
-#SBATCH --output=scripts/outputs/train.out
+#SBATCH --job-name="interpret_without_ground_truth_test"
+#SBATCH --output=scripts/outputs/interpret_without_ground_truth_test.out
 #SBATCH --partition=gpu
-#SBATCH --time=5:00:00  # can be reduced to 1h for Top 20 ot 500 counties
+#SBATCH --time=10:00:00  # can be reduced to 1h for Top 20 ot 500 counties
 #SBATCH --account=bii_dsc_community
 #SBATCH --gres=gpu:v100:1
 #SBATCH --mem=32GB # reduce to 16GB for Top 20 ot 500 counties
@@ -19,21 +19,27 @@ module load cuda cudnn
 module load singularity
 # outputing to scrach folder ensures temporary experiments aren't tracked
 # since scratch is added in gitignore
-singularity run --nv timeseries.sif python run.py --data_path Top_20.csv --model FEDformer --disable_progress
-# singularity run --nv timeseries.sif python interpret_with_ground_truth.py \
-#     --data_path Top_20.csv --model FEDformer \
-#     --explainers morris_sensitivity --disable_progress
+# singularity run --nv timeseries.sif python run.py --data_path Top_20.csv --model FEDformer --disable_progress
+singularity run --nv timeseries.sif python interpret_without_ground_truth.py \
+    --data_path Total.csv --model FEDformer \
+    --explainers gradient_shap integrated_gradients deep_lift lime feature_ablation occlusion augmented_occlusion feature_permutation morris_sensitivity \
+    --disable_progress --flag test
 
 # # 2. using anaconda
-#  module load anaconda
-#  conda deactivate 
-#  conda activate ml # replace with your own virtual env name
+# module load anaconda
+# conda deactivate 
+# conda activate ml # replace with your own virtual env name
 
 # # replace the following with your id and env if facing the lib not found error
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/mi3se/.conda/envs/ml/lib
 
 #  python run.py --data_path Top_20.csv --model DLinear
-# python interpret_with_ground_truth.py --data_path Top_20.csv \
+# python interpret_with_ground_truth.py --data_path Total.csv \
+#     --model FEDformer \
+#     --explainers feature_ablation occlusion augmented_occlusion feature_permutation morris_sensitivity deep_lift gradient_shap integrated_gradients \
+#     --disable_progress
+    
+# python interpret_with_ground_truth.py --data_path Total.csv \
 #     --model FEDformer \
 #     --explainers feature_ablation occlusion augmented_occlusion feature_permutation morris_sensitivity deep_lift gradient_shap integrated_gradients \
 #     --disable_progress

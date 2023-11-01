@@ -56,7 +56,7 @@ def batch_compute_attr(
         baselines = get_baseline(inputs, mode=baseline_mode)
 
         # get attributions
-        attr = compute_attr(
+        attr = compute_regressor_attr(
             inputs, baselines, explainer, additional_forward_args, exp.args
         )
         attr_list.append(attr)
