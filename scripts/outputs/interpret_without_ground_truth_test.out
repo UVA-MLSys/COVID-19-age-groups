@@ -1,0 +1,85 @@
+Starting experiment. Result folder results/FEDformer_Total.
+Use GPU: cuda:0
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6]
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+ fourier enhanced cross attention used!
+modes_q=10, index_q=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+modes_kv=7, index_kv=[0, 1, 2, 3, 4, 5, 6]
+adding time index columns TimeFromStart
+added time encoded known reals ['month', 'day', 'weekday'].
+
+Train samples 2001454, validation samples 87976,             test samples 87976, last samples 1253658
+637 days of training, 14 days of validation data,             14 days of test data and 385 of data after test start.
+
+Fitting scalers on train data
+Loading dataset from ./dataset/processed/Total/train.pt
+Loading dataset from ./dataset/processed/Total/val.pt
+Loading dataset from ./dataset/processed/Total/test.pt
+Loading dataset from ./dataset/processed/Total/updated.pt
+loading best model from results/FEDformer_Total/checkpoint.pth
+Interpretations will be saved in results/FEDformer_Total/interpretation
+Running gradient_shap from 2023-10-30 14:19:51.243035
+Experiment ended at 2023-10-30 14:25:20.984694. Total time taken 0:05:29.741659.
+  metric  area      comp      suff
+0    mae  0.05  4.242687  8.154565
+1    mae  0.10  5.319849  7.927492
+2    mse  0.05  7.005538  8.634224
+3    mse  0.10  9.324691  7.904991
+Running integrated_gradients from 2023-10-30 14:25:21.526907
+Experiment ended at 2023-10-30 14:31:57.300572. Total time taken 0:06:35.773665.
+  metric  area       comp       suff
+0    mae  0.05   4.949790   9.103880
+1    mae  0.10   6.096399   9.395952
+2    mse  0.05   7.653187  10.116354
+3    mse  0.10  10.517971  10.252586
+Running deep_lift from 2023-10-30 14:31:58.373411
+Experiment ended at 2023-10-30 14:37:29.778868. Total time taken 0:05:31.405457.
+  metric  area       comp      suff
+0    mae  0.05   5.139795  8.769435
+1    mae  0.10   6.293631  9.037736
+2    mse  0.05   8.094926  9.394022
+3    mse  0.10  10.988059  9.468373
+Running lime from 2023-10-30 14:37:30.279013
+Experiment ended at 2023-10-30 18:39:36.157719. Total time taken 4:02:05.878706.
+  metric  area      comp       suff
+0    mae  0.05  3.068048   8.789881
+1    mae  0.10  3.305964   8.526693
+2    mse  0.05  4.022592  11.156584
+3    mse  0.10  4.630088  10.139100
+Running feature_ablation from 2023-10-30 18:39:36.510466
+Experiment ended at 2023-10-30 18:47:49.827143. Total time taken 0:08:13.316677.
+  metric  area      comp       suff
+0    mae  0.05  4.483121   9.436313
+1    mae  0.10  5.333766   9.628387
+2    mse  0.05  7.388331  10.573839
+3    mse  0.10  9.885390  10.488739
+Running occlusion from 2023-10-30 18:47:50.298261
+Experiment ended at 2023-10-30 18:56:10.284265. Total time taken 0:08:19.986004.
+  metric  area      comp       suff
+0    mae  0.05  4.467970   9.390641
+1    mae  0.10  5.313513   9.583538
+2    mse  0.05  7.218250  10.435208
+3    mse  0.10  9.659537  10.370070
+Running augmented_occlusion from 2023-10-30 18:56:10.748110
+Experiment ended at 2023-10-30 19:04:25.434309. Total time taken 0:08:14.686199.
+  metric  area      comp      suff
+0    mae  0.05  3.673617  8.110779
+1    mae  0.10  4.684080  7.801796
+2    mse  0.05  6.512059  8.557594
+3    mse  0.10  8.799584  7.613676
+Running feature_permutation from 2023-10-30 19:04:25.838616
+Experiment ended at 2023-10-30 19:12:42.260668. Total time taken 0:08:16.422052.
+  metric  area      comp      suff
+0    mae  0.05  3.519267  8.146303
+1    mae  0.10  4.478427  7.851969
+2    mse  0.05  6.075616  8.735586
+3    mse  0.10  8.076485  7.832357
+Running morris_sensitivity from 2023-10-30 19:12:42.679380
+Experiment ended at 2023-10-30 19:24:21.552389. Total time taken 0:11:38.873009.
+  metric  area       comp      suff
+0    mae  0.05   4.857988  6.838216
+1    mae  0.10   7.608416  4.862008
+2    mse  0.05   5.597511  7.807242
+3    mse  0.10  13.182068  3.119166

@@ -1,0 +1,271 @@
+Experiment started at 2023-10-30 11:33:24.865163
+Starting experiment. Result folder results/FEDformer_Total.
+Use GPU: cuda:0
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6]
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+ fourier enhanced cross attention used!
+modes_q=10, index_q=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+modes_kv=7, index_kv=[0, 1, 2, 3, 4, 5, 6]
+adding time index columns TimeFromStart
+added time encoded known reals ['month', 'day', 'weekday'].
+
+Train samples 2001454, validation samples 87976,             test samples 87976, last samples 1253658
+637 days of training, 14 days of validation data,             14 days of test data and 385 of data after test start.
+
+Fitting scalers on train data
+Loading dataset from ./dataset/processed/Total/train.pt
+Loading dataset from ./dataset/processed/Total/val.pt
+Loading dataset from ./dataset/processed/Total/test.pt
+Loading dataset from ./dataset/processed/Total/updated.pt
+loading best model from results/FEDformer_Total/checkpoint.pth
+Interpretation results will be saved in results/FEDformer_Total/interpretation
+feature_ablation interpretation started at 2023-10-30 11:34:20.256952
+feature_ablation interpretation ended at 2023-10-30 11:37:03.168477, total time 0:02:42.911525
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     4.398800e+04  43988.000000
+mean   30383.649268      0.077488  ...     1.173134e-01      0.187582
+std    15160.267630      0.045404  ...     5.966970e-02      0.166643
+min     1001.000000      0.000003  ...     4.622576e-07      0.000005
+25%    18177.000000      0.044758  ...     7.422813e-02      0.072240
+50%    29176.000000      0.071803  ...     1.133936e-01      0.148644
+75%    45081.000000      0.103402  ...     1.545020e-01      0.248401
+max    56045.000000      0.390084  ...     5.492762e-01      0.988068
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.746483         7.0        8.0
+1     AGE517  14.482830  15.519682         4.0        3.0
+2    AGE1829  24.589799  17.583033         1.0        1.0
+3    AGE3039  19.326818  14.449939         2.0        4.0
+4    AGE4049  14.099899  12.586645         5.0        5.0
+5    AGE5064  15.889536  15.917459         3.0        2.0
+6    AGE6574   5.066949  12.405890         6.0        6.0
+7  AGE75PLUS   2.975423   6.790869         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.125, rmse: 0.15309, ndcg: 0.97465
+Normalized mae: 0.033552, rmse: 0.042559, ndcg: 0.98494
+occlusion interpretation started at 2023-10-30 11:40:56.827389
+occlusion interpretation ended at 2023-10-30 11:43:42.139063, total time 0:02:45.311674
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     43988.000000  4.398800e+04
+mean   30383.649268      0.076982  ...         0.117467  1.863062e-01
+std    15160.267630      0.046002  ...         0.059294  1.651342e-01
+min     1001.000000      0.000004  ...         0.000008  2.190145e-07
+25%    18177.000000      0.043668  ...         0.074609  7.306691e-02
+50%    29176.000000      0.071221  ...         0.113314  1.488647e-01
+75%    45081.000000      0.102835  ...         0.155452  2.462388e-01
+max    56045.000000      0.368978  ...         0.420680  9.895691e-01
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.619726         7.0        8.0
+1     AGE517  14.482830  15.402841         4.0        3.0
+2    AGE1829  24.589799  17.528475         1.0        1.0
+3    AGE3039  19.326818  14.431036         2.0        4.0
+4    AGE4049  14.099899  12.619774         5.0        5.0
+5    AGE5064  15.889536  16.068973         3.0        2.0
+6    AGE6574   5.066949  12.436858         6.0        6.0
+7  AGE75PLUS   2.975423   6.892317         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.125, rmse: 0.14658, ndcg: 0.97519
+Normalized mae: 0.033753, rmse: 0.042938, ndcg: 0.98506
+augmented_occlusion interpretation started at 2023-10-30 11:47:36.327495
+augmented_occlusion interpretation ended at 2023-10-30 11:50:21.641192, total time 0:02:45.313697
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     4.398800e+04  4.398800e+04
+mean   30383.649268      0.089252  ...     4.635771e-02  1.509554e-01
+std    15160.267630      0.055802  ...     3.737343e-02  1.822877e-01
+min     1001.000000      0.000006  ...     2.125160e-07  3.392820e-07
+25%    18177.000000      0.047569  ...     1.874458e-02  3.473117e-02
+50%    29176.000000      0.081736  ...     3.763580e-02  8.281680e-02
+75%    45081.000000      0.122136  ...     6.418544e-02  1.873737e-01
+max    56045.000000      0.451033  ...     3.234564e-01  9.923716e-01
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.623808         7.0        8.0
+1     AGE517  14.482830  15.617009         4.0        3.0
+2    AGE1829  24.589799  16.684923         1.0        1.0
+3    AGE3039  19.326818  14.330450         2.0        4.0
+4    AGE4049  14.099899  12.863879         5.0        5.0
+5    AGE5064  15.889536  16.639920         3.0        2.0
+6    AGE6574   5.066949  12.325914         6.0        6.0
+7  AGE75PLUS   2.975423   6.914097         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.125, rmse: 0.15309, ndcg: 0.97599
+Normalized mae: 0.03456, rmse: 0.04455, ndcg: 0.95867
+feature_permutation interpretation started at 2023-10-30 11:54:16.220164
+feature_permutation interpretation ended at 2023-10-30 11:56:59.101212, total time 0:02:42.881048
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     43988.000000  43988.000000
+mean   30383.649268      0.090762  ...         0.037782      0.142300
+std    15160.267630      0.063877  ...         0.034060      0.197533
+min     1001.000000      0.000001  ...         0.000000      0.000000
+25%    18177.000000      0.042578  ...         0.013436      0.016039
+50%    29176.000000      0.079000  ...         0.028922      0.057737
+75%    45081.000000      0.126509  ...         0.051606      0.177582
+max    56045.000000      0.652384  ...         0.301843      0.990316
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.608237         7.0        8.0
+1     AGE517  14.482830  15.066734         4.0        4.0
+2    AGE1829  24.589799  17.185602         1.0        1.0
+3    AGE3039  19.326818  15.098457         2.0        3.0
+4    AGE4049  14.099899  12.707549         5.0        6.0
+5    AGE5064  15.889536  15.558936         3.0        2.0
+6    AGE6574   5.066949  12.989351         6.0        5.0
+7  AGE75PLUS   2.975423   6.785133         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.10938, rmse: 0.13258, ndcg: 0.97646
+Normalized mae: 0.033875, rmse: 0.043769, ndcg: 0.98996
+morris_sensitivity interpretation started at 2023-10-30 12:00:53.858098
+morris_sensitivity interpretation ended at 2023-10-30 12:05:47.982834, total time 0:04:54.124736
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     43988.000000  43988.000000
+mean   30383.649268      0.047633  ...         0.041436      0.563486
+std    15160.267630      0.024821  ...         0.022153      0.167186
+min     1001.000000      0.008961  ...         0.009348      0.157151
+25%    18177.000000      0.028333  ...         0.022515      0.445482
+50%    29176.000000      0.040622  ...         0.035990      0.602917
+75%    45081.000000      0.061184  ...         0.056996      0.705365
+max    56045.000000      0.140912  ...         0.113378      0.829253
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   6.022677         7.0        8.0
+1     AGE517  14.482830  14.927091         4.0        3.0
+2    AGE1829  24.589799  18.281833         1.0        1.0
+3    AGE3039  19.326818  13.971146         2.0        4.0
+4    AGE4049  14.099899  11.730393         5.0        5.0
+5    AGE5064  15.889536  18.224233         3.0        2.0
+6    AGE6574   5.066949  10.292413         6.0        6.0
+7  AGE75PLUS   2.975423   6.550215         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.125, rmse: 0.15309, ndcg: 0.97599
+Normalized mae: 0.034987, rmse: 0.039274, ndcg: 0.95867
+deep_lift interpretation started at 2023-10-30 12:09:44.014216
+deep_lift interpretation ended at 2023-10-30 12:10:39.411722, total time 0:00:55.397506
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     4.398800e+04  43988.000000
+mean   30383.649268      0.054582  ...     5.550168e-02      0.368331
+std    15160.267630      0.050955  ...     4.950767e-02      0.206904
+min     1001.000000      0.000002  ...     3.855004e-07      0.000003
+25%    18177.000000      0.017311  ...     1.897940e-02      0.205605
+50%    29176.000000      0.039972  ...     4.216663e-02      0.362959
+75%    45081.000000      0.076308  ...     7.781779e-02      0.515576
+max    56045.000000      0.473039  ...     5.530440e-01      0.991541
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.379787         7.0        8.0
+1     AGE517  14.482830  13.546598         4.0        3.0
+2    AGE1829  24.589799  23.176442         1.0        1.0
+3    AGE3039  19.326818  13.461574         2.0        5.0
+4    AGE4049  14.099899  10.249967         5.0        6.0
+5    AGE5064  15.889536  14.376063         3.0        2.0
+6    AGE6574   5.066949  13.481501         6.0        4.0
+7  AGE75PLUS   2.975423   7.328069         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.15625, rmse: 0.19264, ndcg: 0.96719
+Normalized mae: 0.038307, rmse: 0.04551, ndcg: 0.96409
+gradient_shap interpretation started at 2023-10-30 12:14:43.400190
+gradient_shap interpretation ended at 2023-10-30 12:15:42.976276, total time 0:00:59.576086
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     43988.000000  43988.000000
+mean   30383.649268      0.054981  ...         0.051567      0.368106
+std    15160.267630      0.048883  ...         0.047061      0.214427
+min     1001.000000      0.000002  ...         0.000001      0.000005
+25%    18177.000000      0.018548  ...         0.017047      0.199913
+50%    29176.000000      0.042212  ...         0.038661      0.356338
+75%    45081.000000      0.077454  ...         0.071836      0.511446
+max    56045.000000      0.442673  ...         0.472766      0.996000
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.417602         7.0        8.0
+1     AGE517  14.482830  14.978131         4.0        2.0
+2    AGE1829  24.589799  21.894005         1.0        1.0
+3    AGE3039  19.326818  12.815406         2.0        5.0
+4    AGE4049  14.099899  11.086646         5.0        6.0
+5    AGE5064  15.889536  14.511905         3.0        3.0
+6    AGE6574   5.066949  13.167823         6.0        4.0
+7  AGE75PLUS   2.975423   7.128483         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.17188, rmse: 0.20252, ndcg: 0.96506
+Normalized mae: 0.033629, rmse: 0.043092, ndcg: 0.97132
+integrated_gradients interpretation started at 2023-10-30 12:19:48.239661
+integrated_gradients interpretation ended at 2023-10-30 12:21:48.627364, total time 0:02:00.387703
+2021-12-12 00:00:00 2021-12-25 00:00:00
+Attribution statistics
+               FIPS        UNDER5  ...  VaccinationFull         Cases
+count  43988.000000  43988.000000  ...     43988.000000  43988.000000
+mean   30383.649268      0.052256  ...         0.052659      0.374521
+std    15160.267630      0.049397  ...         0.047935      0.206053
+min     1001.000000      0.000001  ...         0.000001      0.000020
+25%    18177.000000      0.016439  ...         0.017692      0.211864
+50%    29176.000000      0.038040  ...         0.039470      0.372580
+75%    45081.000000      0.072709  ...         0.073028      0.523303
+max    56045.000000      0.510616  ...         0.485043      0.992288
+
+[8 rows x 11 columns]
+Found first common date 2021-12-18T00:00:00.000000000.
+Found last common date 2021-12-25T00:00:00.000000000.
+Global rank comparison
+   age_group      cases       attr  cases_rank  attr_rank
+0     UNDER5   3.568745   4.299242         7.0        8.0
+1     AGE517  14.482830  13.591009         4.0        3.0
+2    AGE1829  24.589799  24.142227         1.0        1.0
+3    AGE3039  19.326818  12.809922         2.0        5.0
+4    AGE4049  14.099899  10.014667         5.0        6.0
+5    AGE5064  15.889536  14.342771         3.0        2.0
+6    AGE6574   5.066949  13.476933         6.0        4.0
+7  AGE75PLUS   2.975423   7.323229         8.0        7.0
+
+Evaluating local ranks
+Rank mae: 0.15625, rmse: 0.19264, ndcg: 0.96719
+Normalized mae: 0.03857, rmse: 0.045963, ndcg: 0.96409
