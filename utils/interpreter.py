@@ -56,7 +56,7 @@ def batch_compute_attr(
         baselines = get_baseline(inputs, mode=baseline_mode)
 
         # get attributions
-        attr = compute_attr(
+        attr = compute_regressor_attr(
             inputs, baselines, explainer, additional_forward_args, exp.args
         )
         attr_list.append(attr)
@@ -152,62 +152,6 @@ def reshape_over_output_horizon(attr, inputs, args):
             (inputs.shape[0], -1, args.seq_len, attr.shape[-1])
         # take mean over the output horizon
         )
-    
-    return attr
-
-def compute_attr(
-    inputs, baselines, explainer,
-    additional_forward_args, args
-):
-    assert type(inputs) == torch.Tensor, \
-        f'Only input type tensor supported, found {type(inputs)} instead.'
-    name = explainer.get_name()
-    
-    # these methods don't support having multiple outputs at the same time
-    if name in ['Deep Lift', 'Lime', 'Integrated Gradients', 'Gradient Shap']:
-        attr_list = []
-        for target in range(args.pred_len):
-            score = explainer.attribute(
-                inputs=inputs, baselines=baselines, target=target,
-                additional_forward_args=additional_forward_args
-            )
-            attr_list.append(score)
-        
-        attr = torch.stack(attr_list)
-        # pred_len x batch x seq_len x features -> batch x pred_len x seq_len x features
-        attr = attr.permute(1, 0, 2, 3)
-        
-    elif name == 'Feature Ablation':
-        attr = explainer.attribute(
-            inputs=inputs, baselines=baselines,
-            additional_forward_args=additional_forward_args
-        )
-    elif name == 'Occlusion':
-        attr = explainer.attribute(
-            inputs=inputs,
-            baselines=baselines,
-            sliding_window_shapes = (1,1),
-            additional_forward_args=additional_forward_args
-        )
-    elif name == 'Augmented Occlusion':
-        attr = explainer.attribute(
-            inputs=inputs,
-            sliding_window_shapes = (1,1),
-            additional_forward_args=additional_forward_args
-        )
-    elif name == 'Morris Sensitivity':
-        attr = explainer.attribute(
-            inputs=inputs,
-            additional_forward_args=additional_forward_args
-        )
-    else:
-        print(f'{name} not supported.')
-        raise NotImplementedError
-    
-    attr = attr.reshape(
-        # batch x pred_len x seq_len x features
-        (inputs.shape[0], args.pred_len, args.seq_len, attr.shape[-1])
-    )
     
     return attr
 
