@@ -62,3 +62,9 @@ TFT_Total, train: rmse:61.517, mae:13.056, msle: 1.3031, r2: 0.76798
 TFT_Total, validation: rmse:82.884, mae:23.611, msle: 1.8048, r2: 0.57461
 TFT_Total, test: rmse:170.06, mae:34.824, msle: 1.8972, r2: 0.57123
 
+FEDformer_Top_100, test: rmse:966.06, mae:474.52, msle: 3.0969, r2: 0.30671
+
+FEDformer_Top_100, val: rmse:414.64, mae:243.73, msle: 3.0102, r2: 0.33858
+
+FEDformer_Top_100, train: rmse:350.56, mae:148.68, msle: 1.9087, r2: 0.6793
+

@@ -18,9 +18,7 @@ def main(args):
 
     exp.load_model()
 
-    # PatchTST doesn't work with gradient based explainers
-    # explainers = ['lime', 'feature_ablation', 'deep_lift', 'gradient_shap', 'integrated_gradients']
-
+    # some models might not work with gradient based explainers
     interpreter = Exp_Interpret(exp, dataloader) 
     interpreter.interpret(dataloader)
     

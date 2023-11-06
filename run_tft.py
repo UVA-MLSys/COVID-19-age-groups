@@ -27,7 +27,7 @@ def main(args):
     print(total_data.shape)
     print(total_data.head(3))
     
-    train_data, val_data, test_data = experiment.age_dataloader.split_data(
+    train_data, val_data, test_data, _ = experiment.age_dataloader.split_data(
         total_data, Split.primary()
     )
     
