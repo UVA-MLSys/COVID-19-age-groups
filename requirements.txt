@@ -1,8 +1,6 @@
 matplotlib
-numpy==1.23
+numpy
 pandas
-pytorch-forecasting==0.10.3
-pytorch-lightning==1.8.6
 SALib
 scikit-learn
 tqdm

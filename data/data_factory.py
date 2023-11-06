@@ -3,7 +3,6 @@ from pandas import DataFrame
 from sklearn.preprocessing import StandardScaler
 import pandas as pd, numpy as np
 from torch.utils.data import DataLoader, Dataset
-from pytorch_forecasting.data import TimeSeriesDataSet
 import os
 from data.dataloader import MultiTimeSeries
 from exp.config import Split, DataConfig
@@ -86,7 +85,7 @@ class AgeData:
         df = pd.read_csv(self.data_path)
         df[self.date_index] = pd.to_datetime(df[self.date_index])
         
-        # add time index, necessary for TFT
+        # add time index, necessary to create the date alignments during post-processing
         print(f'adding time index columns {self.time_index}')
         df[self.time_index] = (df[self.date_index] - df[self.date_index].min()).dt.days
         
@@ -181,35 +180,6 @@ class AgeData:
             data = data.reshape(original_shape)
             
         return data
-    
-    def create_timeseries(
-        self, data:DataFrame, train:bool=False
-    ) -> Tuple[Dataset, DataLoader]:
-        
-        if self.scale:
-            data = self._scale_data(data)
-        
-        # Note that TimeSeriesDataSet by default uses StandardScaler on the real values
-        data_timeseries = TimeSeriesDataSet(
-            data,
-            time_idx = self.time_index,
-            target = self.targets,
-            group_ids = self.group_ids, 
-            max_encoder_length = self.seq_len,
-            max_prediction_length = self.pred_len,
-            static_reals = self.static_reals,
-            time_varying_unknown_reals=self.observed_reals,
-            time_varying_known_reals = self.known_reals
-        )
-
-        batch_size = self.batch_size
-        if type(batch_size)==list:
-            assert len(batch_size) >= 2, ValueError("Batch list must be of size 2. [train batch, val/test batch]")
-            batch_size = batch_size[0] if train else batch_size[1]
-        
-        dataloader = data_timeseries.to_dataloader(train=train, batch_size=batch_size)
-        
-        return data_timeseries, dataloader 
     
     def create_tslib_timeseries(
         self, data:DataFrame, train:bool=False, ts_dataset=None
