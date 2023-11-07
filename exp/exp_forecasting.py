@@ -8,7 +8,7 @@ from data.data_factory import AgeData
 from exp.config import Split, DataConfig
 from datetime import datetime
 from utils.plotter import PlotResults
-from utils.tools import align_predictions
+from utils.utils import align_predictions
 
 warnings.filterwarnings('ignore')
 

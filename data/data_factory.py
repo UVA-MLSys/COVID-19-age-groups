@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, Dataset
 import os
 from data.dataloader import MultiTimeSeries
 from exp.config import Split, DataConfig
-from utils.tools import add_day_time_features
+from utils.utils import add_day_time_features
 
 class AgeData:
     @staticmethod

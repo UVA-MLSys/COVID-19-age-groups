@@ -9,11 +9,8 @@
 # # SBATCH --mail-type=end
 # # SBATCH --mail-user=mi3se@virginia.edu
 
-
 source /etc/profile.d/modules.sh
 source ~/.bashrc
-
-module load cuda cudnn
 
 # 1. using singularity
 module load singularity
@@ -26,6 +23,7 @@ singularity run --nv timeseries.sif python interpret_without_ground_truth.py \
     --disable_progress --flag test
 
 # # 2. using anaconda
+# module load cuda cudnn
 # module load anaconda
 # conda deactivate 
 # conda activate ml # replace with your own virtual env name
