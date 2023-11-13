@@ -1,0 +1,7 @@
+metrics,values
+mae,0.140625
+rmse,0.1875
+ndcg,0.9682427711306141
+normalized_mae,0.045695625024510626
+normalized_rmse,0.055683138307315534
+normalized_ndcg,0.9242420715839241

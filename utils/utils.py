@@ -55,7 +55,7 @@ def align_predictions(
         if all_outputs is None: all_outputs = outputs
         else: 
             all_outputs = all_outputs.merge(
-                outputs, how='inner', on=predictions_index.columns
+                outputs, how='inner', on=list(predictions_index.columns)
             )
             
     gc.collect()
