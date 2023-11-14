@@ -114,5 +114,5 @@ class MorrisSensitivty:
         
         return attr
         
-    def get_name(self):
+    def get_name():
         return 'Morris Sensitivity'
