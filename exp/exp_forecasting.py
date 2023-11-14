@@ -3,7 +3,7 @@ from utils.metrics import calculate_metrics
 import torch, os, time, warnings
 import numpy as np
 import pandas as pd
-from models import DLinear, Autoformer, FEDformer, TimesNet, PatchTST
+from models import DLinear, Autoformer, FEDformer, TimesNet, PatchTST, Crossformer, Transformer
 from data.data_factory import AgeData
 from exp.config import Split, DataConfig
 from datetime import datetime
@@ -18,7 +18,9 @@ class Exp_Forecast(object):
         'Autoformer': Autoformer,
         'FEDformer': FEDformer,
         'PatchTST': PatchTST,
-        'TimesNet': TimesNet
+        'TimesNet': TimesNet,
+        'Crossformer': Crossformer,
+        'Transformer': Transformer
     }
     
     def __init__(self, args, setting):
