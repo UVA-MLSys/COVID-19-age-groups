@@ -1,0 +1,29 @@
+Starting experiment. Result folder results/FEDformer_Top_100.
+Use GPU: cuda:0
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6]
+fourier enhanced block used!
+modes=32, index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+ fourier enhanced cross attention used!
+modes_q=10, index_q=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+modes_kv=7, index_kv=[0, 1, 2, 3, 4, 5, 6]
+adding time index columns TimeFromStart
+added time encoded known reals ['month', 'day', 'weekday'].
+
+Train samples 63700, validation samples 2800,             test samples 2800, last samples 39900
+637 days of training, 14 days of validation data,             14 days of test data and 385 of data after test start.
+
+Fitting scalers on train data
+Loading dataset from ./dataset/processed/Top_100/train.pt
+Loading dataset from ./dataset/processed/Top_100/val.pt
+Loading dataset from ./dataset/processed/Top_100/test.pt
+Loading dataset from ./dataset/processed/Top_100/updated.pt
+loading best model from results/FEDformer_Top_100/checkpoint.pth
+Interpretations will be saved in results/FEDformer_Top_100/interpretation
+Running morris_sensitivity from 2023-11-06 16:10:59.838777
+Experiment ended at 2023-11-06 18:36:05.906292. Total time taken 2:25:06.067515.
+  metric  area       comp       suff
+0    mae  0.05   6.569190   6.974470
+1    mae  0.10  10.937360   1.786636
+2    mse  0.05  21.728723  31.321951
+3    mse  0.10  47.483568  11.863161

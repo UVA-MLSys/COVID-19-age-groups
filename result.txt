@@ -61,3 +61,9 @@ FEDformer_Top_100, val: rmse:414.64, mae:243.73, msle: 3.0102, r2: 0.33858
 
 FEDformer_Top_100, train: rmse:350.56, mae:148.68, msle: 1.9087, r2: 0.6793
 
+Crossformer_Total, test: rmse:193.63, mae:39.576, msle: 2.1412, r2: 0.39363
+
+Crossformer_Total, val: rmse:103.09, mae:29.71, msle: 1.9856, r2: 0.31832
+
+Crossformer_Total, train: rmse:83.97, mae:20.249, msle: 1.927, r2: 0.56771
+

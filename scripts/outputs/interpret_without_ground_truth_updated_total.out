@@ -1,0 +1,2 @@
+/var/spool/slurm/slurmd/job54868949/slurm_script: line 26: 463522 Killed                  singularity run --nv timeseries.sif python interpret_without_ground_truth.py --data_path Total.csv --model FEDformer --explainers feature_ablation --disable_progress --flag updated --batch_size 128
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=54868949.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.
