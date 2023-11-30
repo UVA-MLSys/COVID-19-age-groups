@@ -1,9 +1,10 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: Interpreting County-Level COVID-19 Infections
+title: COVID-19 Age Groups Analysis
 author: UVA MLSys
 logo: images/coronavirus.jpg
+theme: jekyll-theme-minimal
 
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html
