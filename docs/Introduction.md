@@ -1,4 +1,7 @@
-# Introduction
+layout: page
+title: "Introduction"
+permalink: /introduction
+
 With the increased application of deep learning models in
 different health, finance, social, and other vital domains
 (Zhao et al. 2023) the interpretability of these methods is
@@ -15,7 +18,7 @@ on an input instance.
 Explaining time series models is challenging due to the
 dynamic nature of the dataset. Most time series interpreta-
 tion works have focused on interpreting classification tasks
-or using baseline models. It is important to understand how
+or using baseline models. It is important to understand how 
 we can generalize these interpretation methods in state-of-
 the-art time series models while still getting the best perfor-
 mance.
@@ -49,4 +52,4 @@ steps. Section 6 summarizes the experimental setup, training
 steps, and test results. Section 7 lists the interpretation meth-
 ods used, how we evaluated their performance and visualiza-
 tions. Section 8 discusses our findings from the experiments.
-Finally in Section 9 we have the concluding remarks.
+Finally in Section 9 we have the concluding remarks
