@@ -176,24 +176,24 @@ The following table lists the features with their source and description. Note t
  </tr>
  <tr>
   <td>Autoformer</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>33.701</td>
+  <td>188.330</td>
+  <td>1.826</td>
+  <td>0.457</td>
  </tr>
  <tr>
   <td>DLinear</td>
-  <td>174.95</td>
   <td>29.525</td>
+  <td>174.95</td>
   <td>1.4251</td>
   <td>0.52435</td>
  </tr>
  <tr>
   <td>FEDformer</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>31.490</td>
+  <td>180.450</td>
+  <td>1.659</td>
+  <td>0.499</td>
  </tr>
  <tr>
   <td>PatchTST</td>
