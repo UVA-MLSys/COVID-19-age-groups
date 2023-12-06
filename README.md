@@ -211,10 +211,10 @@ The following table lists the features with their source and description. Note t
  </tr>
  <tr>
   <td>Transformer</td>
-  <td>14.226</td>
-  <td>68.552</td>
-  <td>1.362</td>
-  <td>0.712</td>
+  <td>34.818</td>
+  <td>192.720</td>
+  <td>1.601</td>
+  <td>0.410</td>
 </tr> 
 </table>
 
