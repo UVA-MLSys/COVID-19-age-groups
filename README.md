@@ -184,9 +184,9 @@ The following table lists the features with their source and description. Note t
  <tr>
   <td>DLinear</td>
   <td>29.525</td>
-  <td>174.95</td>
-  <td>1.4251</td>
-  <td>0.52435</td>
+  <td>174.950</td>
+  <td>1.425</td>
+  <td>0.524</td>
  </tr>
  <tr>
   <td>FEDformer</td>
