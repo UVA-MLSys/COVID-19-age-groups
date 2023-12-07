@@ -56,4 +56,4 @@ ods used, how we evaluated their performance and visualiza-
 tions. Section 8 discusses our findings from the experiments.
 Finally in Section 9 we have the concluding remarks. 
 
-[ Background ]({% link Background.md %})
+[ Background ]({{ site.baseurl }}{% link Background.md %})

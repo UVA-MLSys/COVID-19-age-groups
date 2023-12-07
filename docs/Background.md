@@ -17,4 +17,4 @@ where $\Delta$ is the small change to the input feature $x_i$. Since the origina
 
 \textbf{Algorithm \ref{alg:norm_morris}} shows the implementation of the modified Morris method for our study, where we normalized the output value change by the number of input days, counties, and delta $\Delta$. Which we call the normalized Morris index $\hat{\mu*}$. We further scaled this index using the standard deviation ($\sigma$) of the input feature $x_{i}$, which we call the scaled Morris index ($\hat{\mu*} \times \sigma$). This scaling takes the underlying distribution of the feature $x_{i}$ when ranking the features by sensitivity. In the rest of the study, by Morris score, we refer to the scaled Morris index.
 
-[ Related Works ]({% link Related_Works.md %})
+[ Related Works ]({{ site.baseurl }}{% link Related_Works.md %})

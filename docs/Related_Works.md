@@ -16,4 +16,4 @@ DeepCOVID \cite{rodriguez2021deepcovid} utilized RNN with auto-regressive inputs
 
 COVID-EENet \cite{kim2022covid} interpreted the economic impact of COVID-19 on local businesses. Self-Adaptive Forecasting \cite{arik2022self} used the model's attention weights to interpret state-level COVID-19 death forecasts. However, this is model-dependent and can't be applied to models without the attention mechanism. 
 
-[ Problem Statement ]({% link Problem_Statement.md %})
+[ Problem Statement ]({{ site.baseurl }}{% link Problem_Statement.md %})

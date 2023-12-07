@@ -346,4 +346,4 @@ The job outputs will be saved in [`scripts/outputs`](/scripts/outputs/) folder. 
   * If you have folders you want to exclude add the path in `.gitignore`, then `git add .gitignore`. Check again with `git status -u` if it is still being tracked.
 
 
-[ Introduction ]({% link Introduction.md %})
+[ Introduction ]({{ site.baseurl }}{% link Introduction.md %})
