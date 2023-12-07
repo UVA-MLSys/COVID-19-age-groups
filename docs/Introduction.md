@@ -1,6 +1,8 @@
+---
 layout: page
 title: "Introduction"
 permalink: /introduction
+---
 
 With the increased application of deep learning models in
 different health, finance, social, and other vital domains
@@ -52,4 +54,6 @@ steps. Section 6 summarizes the experimental setup, training
 steps, and test results. Section 7 lists the interpretation meth-
 ods used, how we evaluated their performance and visualiza-
 tions. Section 8 discusses our findings from the experiments.
-Finally in Section 9 we have the concluding remarks
+Finally in Section 9 we have the concluding remarks. 
+
+[ Background ]({% link Background.md %})

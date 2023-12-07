@@ -4,15 +4,4 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
-
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
-
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+Interpreting deep learning time series models is crucial in understanding the model's behavior and learned patterns from the raw data. The complexity of recent time series models makes it difficult to understand the impact of individual features on the prediction. In this work, we use recent local interpretation methods to explain the state-of-the-art time series models using the highly dynamic multivariate COVID-19 infection data. We collected around three years of daily COVID-19 case data for 3,142 US counties. Using 13 input features from the last two weeks, we predict the COVID-19 cases for the next two weeks using six Transformer-based models. Then interpret the best model using eight local interpretation methods. And evaluate the interpreted attribution scores using the current best practices when there is no interpretation ground truth. We also present an innovative way to evaluate the predicted sensitivity of eight age group features from an interpretation method using the actual COVID-19 cases by age group. Our proposed framework is generic and can be applied to other time-series datasets to interpret the model's behavior at a granular level, which is significant in further improving digital health solutions. 

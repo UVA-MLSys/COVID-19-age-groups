@@ -3,9 +3,9 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Interpreting Time Series Transformer Models | Interpreting Time Series Transformer Models in Multi-Horizon COVID-19 Infection Forecasting and Age Sensitivity Analysis</title>
+<title>README | Interpreting Time Series Transformer Models</title>
 <meta name="generator" content="Jekyll v3.9.3" />
-<meta property="og:title" content="Interpreting Time Series Transformer Models" />
+<meta property="og:title" content="README" />
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Interpreting Time Series Transformer Models in Multi-Horizon COVID-19 Infection Forecasting and Age Sensitivity Analysis" />
 <meta property="og:description" content="Interpreting Time Series Transformer Models in Multi-Horizon COVID-19 Infection Forecasting and Age Sensitivity Analysis" />
@@ -14,9 +14,9 @@
 <meta property="og:site_name" content="Interpreting Time Series Transformer Models" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Interpreting Time Series Transformer Models" />
+<meta property="twitter:title" content="README" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","description":"Interpreting Time Series Transformer Models in Multi-Horizon COVID-19 Infection Forecasting and Age Sensitivity Analysis","headline":"Interpreting Time Series Transformer Models","name":"Interpreting Time Series Transformer Models","url":"http://localhost:4000/"}</script>
+{"@context":"https://schema.org","@type":"WebSite","description":"Interpreting Time Series Transformer Models in Multi-Horizon COVID-19 Infection Forecasting and Age Sensitivity Analysis","headline":"README","name":"Interpreting Time Series Transformer Models","url":"http://localhost:4000/"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Interpreting Time Series Transformer Models" /></head>
 <body><header class="site-header" role="banner">
@@ -31,21 +31,373 @@
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+        <div class="trigger"><a class="page-link" href="/background">Background</a><a class="page-link" href="/introduction">Introduction</a><a class="page-link" href="/problem_statement">Problem Statement</a><a class="page-link" href="/related_works">Related Works</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/">README</a></div>
       </nav></div>
 </header>
 <main class="page-content" aria-label="Content">
       <div class="wrapper">
-        <div class="home">
-<h2 class="post-list-heading">Posts</h2>
-    <ul class="post-list"><li><span class="post-meta">Dec 4, 2023</span>
-        <h3>
-          <a class="post-link" href="/jekyll/update/2023/12/04/welcome-to-jekyll.html">
-            Welcome to Jekyll!
-          </a>
-        </h3></li></ul>
+        <article class="post">
 
-    <p class="rss-subscribe">subscribe <a href="/feed.xml">via RSS</a></p></div>
+  <header class="post-header">
+    <h1 class="post-title">README</h1>
+  </header>
+
+  <div class="post-content">
+    <h1 id="introduction">Introduction</h1>
+
+<p>This study aimed to identify the most influential age groups in COVID-19 infection rates at the US county level using the time series interpretation techniques with deep learning. Our approach involved training the state-of-the-art time-series models on different age groups as a static feature and the population vaccination status as the dynamic feature. We analyzed the impact of those age groups on COVID-19 infection rates by perturbing individual input features and ranked them based on their sensitivity scores. The findings are verified using ground truth data from the CDC and US Census, which provide the true infection rates for each age group. The results suggest that young adults were the most influential age group in COVID-19 transmission at the county level between March 1, 2020, and November 27, 2021. Using these results can inform public health policies and interventions, such as targeted vaccination strategies, to better control the spread of the virus.</p>
+
+<h2 id="folder-structure">Folder Structure</h2>
+<ul>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">data</code>: data loader and merger files</p>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">dataset</code>: raw and processed data set in CSV files.
+    <ul>
+      <li>The <code class="language-plaintext highlighter-rouge">Total.csv</code> file isn’t committed here. You can download from <a href="https://drive.google.com/drive/folders/1IPID82QWKUTxGOrynLn_QhYgVIa9CjUq?usp=sharing">here</a>, unzip the files and keep them in the same path.</li>
+      <li>The cached datasets (<code class="language-plaintext highlighter-rouge">.pt</code> files) are also saved here. Some initial execution times can be save by downloading them from the <a href="(https://drive.google.com/drive/folders/1IPID82QWKUTxGOrynLn_QhYgVIa9CjUq?usp=sharing)">drive</a> and keeping in the same path. The code will automatically recognise the caches and load from there instead of rebuilding. Make sure to remove the cache if you changed some data config (e.g. <code class="language-plaintext highlighter-rouge">seq_len</code>, <code class="language-plaintext highlighter-rouge">pred_len</code>), so that they are rebuild.</li>
+    </ul>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">exp</code>: experiment runner and configuration for data, model, plots.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">layers</code>: neural network layer classes and related utils.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">models</code>: timeseries model classes.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">results</code>: result output from the model training and testing.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">scratch</code>: folder to run temporary experiments in without git tracking.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">scripts</code>: template scripts and slurm job scripts for rivanna and cs remote server.</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">utils</code>: miscellaneous util methods and result plotter.</p>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">singilarity.def</code>: definition file for singularity.</li>
+</ul>
+
+<h2 id="setup-environment">Setup Environment</h2>
+
+<h3 id="1-singularity-recommended-on-rivanna">1. Singularity (Recommended on Rivanna)</h3>
+<h4 id="option-a-pull-already-built-container">Option A. Pull already built container</h4>
+
+<p>Pull the singularity container from the remote library,</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>singularity pull timeseries.sif library://khairulislam/collection/timeseries:latest
+</code></pre></div></div>
+
+<h4 id="option-b-build-container-from-scratch">Option B. Build container from scratch</h4>
+
+<p><em>Note:</em> If you want to create the container from scrach, you need a linux machine with <code class="language-plaintext highlighter-rouge">root</code> privilege or build remotely at <a href="https://cloud.sylabs.io/library">cloud.sylabs.io/library</a>. On Rivanna you can’t create containers, you are not the <code class="language-plaintext highlighter-rouge">root</code>. The you can use the <a href="/singularity.def">singularity.def</a> file. After compilation, you’ll get a container named <code class="language-plaintext highlighter-rouge">timeseries.sif</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>singularity build timeseries.sif singularity.def
+</code></pre></div></div>
+
+<h4 id="running-scripts-in-container">Running scripts in container</h4>
+<p>Then you can use the container to run the scripts. <code class="language-plaintext highlighter-rouge">--nv</code> indicates using GPU. For example,</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>singularity run <span class="nt">--nv</span> timeseries.sif python run.py
+</code></pre></div></div>
+
+<h3 id="2-virtual-environment--more-flexible-compared-to-container">2. Virtual Environment  (More flexible compared to container)</h3>
+<p>If you are on remote servers like Rivanna or UVA CS server, you don’t have the permission to upgrade default python version. But you can use the already installed <code class="language-plaintext highlighter-rouge">Anaconda</code> to create a new environment and install latest python and libraries there.</p>
+
+<p>To create a new env with name <code class="language-plaintext highlighter-rouge">ml</code> and python version <code class="language-plaintext highlighter-rouge">3.10</code> run the following. <code class="language-plaintext highlighter-rouge">python 3.10</code> is the latest one supported with <code class="language-plaintext highlighter-rouge">pytorch GPU</code> at this moment.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda create <span class="nt">--name</span> ml <span class="nv">python</span><span class="o">=</span>3.10
+
+<span class="c"># activates the virtual env</span>
+conda activate ml
+
+<span class="c"># installs libraries in the default pip and this env</span>
+pip <span class="nb">install </span>some_library 
+
+<span class="c"># installs libraries in this env, but often slower and doesn't work</span>
+conda <span class="nb">install </span>some_library 
+
+<span class="c"># will run the script with this environment</span>
+python run.py
+
+<span class="c"># deactivates the virtual env</span>
+conda deactivate
+</code></pre></div></div>
+
+<p>You should install pytorch with cuda separately, since pip server can’t find it</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span><span class="nv">torch</span><span class="o">==</span>1.11.1+cu113 <span class="nt">-f</span> https://download.pytorch.org/whl/torch_stable.html
+</code></pre></div></div>
+
+<p>Then install the other libraries from <a href="/requirements.txt">requirement.txt</a>. If you have trouble installing from the file (command <code class="language-plaintext highlighter-rouge">pip install -r requirements.txt</code>), try installing each library manually.</p>
+
+<h3 id="3-gpu">3. GPU</h3>
+<p>Next, you might face issues getting GPU running on Rivanna. Even on a GPU server the code might not recognize the GPU hardware if cuda and cudnn are not properly setup. Try to log into an interactive session in a GPU server, then run the following command from terminal,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-c</span> <span class="s2">"import torch;print(torch.cuda.is_available())"</span>
+</code></pre></div></div>
+
+<p>If this is still 0, then you’ll have to install the cuda and cudnn versions that match version in <code class="language-plaintext highlighter-rouge">nvidia-smi</code> command output. Also see if you tensorflow version is for CPU or GPU. For this project, <code class="language-plaintext highlighter-rouge">tensorflow</code> isn’t used. So no need to install it.</p>
+
+<h2 id="features">Features</h2>
+
+<p>The following table lists the features with their source and description. Note that, past values of the target and known futures are also used as observed inputs.</p>
+
+<div align="center" style="overflow-x:auto;text-align:center;vertical-align: middle;">
+<table border="1">
+<caption> <h2>Details of Features </h2> </caption>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Type</th>
+<th>Update Frequency</th>
+<th>Description</th>
+<th>Source(s)</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td><strong>Age Groups</strong> <br />( UNDER5, AGE517, AGE1829, AGE3039, AGE4049, AGE5064, AGE6574, AGE75PLUS )</td>
+<td>Static</td>
+<td>Once</td>
+<td>Percent of population in each age group.</td>
+<td><span><a href="https://www.census.gov/data/tables/time-series/demo/popest/2020s-national-detail.html" target="_blank">2020 Govt Census</a></span></td>
+</tr>
+
+<tr>
+<td><strong>Vaccination Full Dose</strong> <br />(Series_Complete_Pop_Pct)</td>
+<td>Observed</td>
+<td rowspan="3">Daily</td>
+<td> Percent of people who are fully vaccinated (have second dose of a two-dose vaccine or one dose of a single-dose vaccine) based on the jurisdiction and county where recipient lives.</td>
+<td><span><a href="https://www.unacast.com/covid19/social-distancing-scoreboard" target="_blank">CDC</a></span></td>
+</tr>
+
+<tr>
+<td><strong>Time encoded features</strong></td>
+<td>Known Future</td>
+<td> <em> Features calculated from time </em>.</td>
+<td>Date</td>
+</tr>
+
+<tr>
+<td><strong>Case</strong></td>
+<td>Target</td>
+<td> COVID-19 infection at county level.</td>
+<td><span><a href="https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/" target="_blank">USA Facts</a></span></td>
+</tr>
+
+</tbody>
+</table>
+
+</div>
+
+<h2 id="models">Models</h2>
+
+<ul>
+  <li>DLinear</li>
+  <li>Autoformer</li>
+  <li>FEDformer</li>
+  <li>PatchTST</li>
+  <li>TimesNet</li>
+  <li>Transformer</li>
+</ul>
+
+<h2 id="interpretation-techniques">Interpretation Techniques</h2>
+
+<ul>
+  <li>Feature Ablation</li>
+  <li>Feature Occlusion</li>
+  <li>Augmented Feature Occlusion</li>
+  <li>Deep Lift</li>
+  <li>Integrated Gradients</li>
+  <li>Gradient Shap</li>
+  <li>Morris Sensitivity</li>
+  <li>Lime</li>
+  <li>Feature Permutation</li>
+</ul>
+
+<h2 id="results">Results</h2>
+<table>
+ <tr>
+  <th>Model</th>
+  <th>mae</th>
+  <th>rmse</th>
+  <th>rmsle</th>
+  <th>r2</th>
+ </tr>
+ <tr>
+  <td>Autoformer</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>DLinear</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>FEDformer</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>PatchTST</td>
+  <td>33.174</td>
+  <td>183.647</td>
+  <td>1.530</td>
+  <td>0.469</td>
+ </tr> 
+ <tr>
+  <td>TimesNet</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+ </tr>
+ <tr>
+  <td>Transformer</td>
+  <td>14.226</td>
+  <td>68.552</td>
+  <td>1.362</td>
+  <td>0.712</td>
+</tr> 
+</table>
+
+<h2 id="reproduce">Reproduce</h2>
+
+<h3 id="running-models">Running models</h3>
+<p>Use the <code class="language-plaintext highlighter-rouge">run.py</code> to run the available models on the dataset. See <code class="language-plaintext highlighter-rouge">scripts/commands.sh</code> file for some examples. All commands must be run from this current folder. Not from any sub-folders. We currently support the following models <code class="language-plaintext highlighter-rouge">DLinear, Autoformer, FEDformer, PatchTST, TimesNet</code> from the<a href="https://github.com/thuml/Time-Series-Library">Time-Series-Library</a>. Note that, anything written in the <code class="language-plaintext highlighter-rouge">scratch</code> folder will be ignored by <code class="language-plaintext highlighter-rouge">git</code>, since it is added in <code class="language-plaintext highlighter-rouge">.gitignore</code>. So setting <code class="language-plaintext highlighter-rouge">--result_path scratch</code> is a good idea for temporary experiments.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$COVID-19-age-groups&gt; python run.py --help
+
+Run Timeseries Models
+
+options:
+  -h, --help            show this help message and exit
+  --test                test the checkpointed best model, train otherwise (default: False)
+  --model {DLinear,Autoformer,FEDformer,PatchTST,TimesNet}
+                        model name (default: DLinear)
+  --seed SEED           random seed (default: 7)
+  --root_path ROOT_PATH
+                        root path of the data file (default: ./dataset/processed/)
+  --data_path DATA_PATH
+                        data file (default: Top_20.csv)
+  --result_path RESULT_PATH
+                        result folder (default: results)
+  --freq {s,t,h,d,b,w,m}
+                        freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min
+                        or 3h (default: d)
+  --no-scale            do not scale the dataset (default: False)
+  --seq_len SEQ_LEN     input sequence length (default: 14)
+  --label_len LABEL_LEN
+                        start token length (default: 7)
+  --pred_len PRED_LEN   prediction sequence length (default: 14)
+  --top_k TOP_K         for TimesBlock (default: 5)
+  --num_kernels NUM_KERNELS
+                        for Inception (default: 6)
+  --d_model D_MODEL     dimension of model (default: 64)
+  --n_heads N_HEADS     num of heads (default: 4)
+  --e_layers E_LAYERS   num of encoder layers (default: 2)
+  --d_layers D_LAYERS   num of decoder layers (default: 1)
+  --d_ff D_FF           dimension of fcn (default: 256)
+  --moving_avg MOVING_AVG
+                        window size of moving average (default: 7)
+  --factor FACTOR       attn factor (default: 3)
+  --distil              whether to use distilling in encoder, using this argument means not using distilling (default: True)
+  --dropout DROPOUT     dropout (default: 0.1)
+  --embed {timeF,fixed,learned}
+                        time features encoding (default: timeF)
+  --activation ACTIVATION
+                        activation (default: gelu)
+  --output_attention    whether to output attention in ecoder (default: False)
+  --num_workers NUM_WORKERS
+                        data loader num workers (default: 0)
+  --train_epochs TRAIN_EPOCHS
+                        train epochs (default: 10)
+  --batch_size BATCH_SIZE
+                        batch size of train input data (default: 32)
+  --patience PATIENCE   early stopping patience (default: 3)
+  --learning_rate LEARNING_RATE
+                        optimizer learning rate (default: 0.001)
+  --des DES             exp description (default: )
+  --loss LOSS           loss function (default: MSE)
+  --lradj {type1,type2}
+                        adjust learning rate (default: type1)
+  --use_amp             use automatic mixed precision training (default: False)
+  --no_gpu              do not use gpu (default: False)
+  --gpu GPU             gpu (default: 0)
+  --use_multi_gpu       use multiple gpus (default: False)
+  --devices DEVICES     device ids of multile gpus (default: 0,1,2,3)
+  --p_hidden_dims P_HIDDEN_DIMS [P_HIDDEN_DIMS ...]
+                        hidden layer dimensions of projector (List) (default: [64, 64])
+  --p_hidden_layers P_HIDDEN_LAYERS
+                        number of hidden layers in projector (default: 2)
+  --disable_progress    disable progress bar (default: False)
+</code></pre></div></div>
+
+<h3 id="interpreting-models">Interpreting models</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$COVID-19-age-groups&gt; python interpret_with_ground_truth.py --help
+
+Interpret Timeseries Models
+
+options:
+ same as before, additional arguments
+
+  --explainers [{deep_lift,gradient_shap,integrated_gradients,lime,occlusion,augmented_occlusion,feature_ablation,feature_permutation,morris_sensitivity} ...]
+                        explaination method names (default: ['feature_ablation'])
+  --flag {train,val,test,updated}
+    flag for data split (default: test)
+  --baseline_mode {random,aug,zero,mean}
+    how to create the baselines for the interepretation methods (default: random)
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$COVID-19-age-groups&gt; python interpret_without_ground_truth.py --help
+
+options:
+same as before, additional arguments
+
+--metrics [METRICS ...]
+    interpretation evaluation metrics (default: ['mae', 'mse'])
+--areas [AREAS ...]   top k features to keep or mask during evaluation (default: [0.05, 0.1])
+
+</code></pre></div></div>
+
+<h3 id="submitting-job-scripts">Submitting job scripts</h3>
+
+<p>To submit job scripts in remote servers, use the templates in the <code class="language-plaintext highlighter-rouge">scripts</code> folder. And submit the jobs from this current folder.</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$COVID-19-age-groups&gt; sbatch scripts/rivanna_slurm.sh
+</code></pre></div></div>
+<p>The job outputs will be saved in <a href="/scripts/outputs/"><code class="language-plaintext highlighter-rouge">scripts/outputs</code></a> folder. The model outputs will be in the <code class="language-plaintext highlighter-rouge">result_path/setting</code> folder.</p>
+
+<h2 id="usage-guideline">Usage guideline</h2>
+
+<ul>
+  <li>Please do not add temporarily generated files in this repository.</li>
+  <li>Make sure to clean your tmp files before pushing any commits.</li>
+  <li>In the .gitignore file you will find some paths in this directory are excluded from git tracking. So if you create anything in those folders, they won’t be tracked by git.
+    <ul>
+      <li>To check which files git says untracked <code class="language-plaintext highlighter-rouge">git status -u</code>.</li>
+      <li>If you have folders you want to exclude add the path in <code class="language-plaintext highlighter-rouge">.gitignore</code>, then <code class="language-plaintext highlighter-rouge">git add .gitignore</code>. Check again with <code class="language-plaintext highlighter-rouge">git status -u</code> if it is still being tracked.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><a href="/introduction"> Introduction </a></p>
+
+  </div>
+
+</article>
 
       </div>
     </main><footer class="site-footer h-card">
