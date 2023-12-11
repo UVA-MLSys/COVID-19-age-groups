@@ -204,10 +204,10 @@ The following table lists the features with their source and description. Note t
  </tr> 
  <tr>
   <td>TimesNet</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>34.354</td>
+  <td>191.920</td>
+  <td>1.604</td>
+  <td>0.415</td>
  </tr>
  <tr>
   <td>Transformer</td>
