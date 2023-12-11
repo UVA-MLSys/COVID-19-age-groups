@@ -176,24 +176,24 @@ The following table lists the features with their source and description. Note t
  </tr>
  <tr>
   <td>Autoformer</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>33.701</td>
+  <td>188.330</td>
+  <td>1.826</td>
+  <td>0.457</td>
  </tr>
  <tr>
   <td>DLinear</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>29.525</td>
+  <td>174.950</td>
+  <td>1.425</td>
+  <td>0.524</td>
  </tr>
  <tr>
   <td>FEDformer</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>31.490</td>
+  <td>180.450</td>
+  <td>1.659</td>
+  <td>0.499</td>
  </tr>
  <tr>
   <td>PatchTST</td>
@@ -204,17 +204,17 @@ The following table lists the features with their source and description. Note t
  </tr> 
  <tr>
   <td>TimesNet</td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td></td>
+  <td>34.354</td>
+  <td>191.920</td>
+  <td>1.604</td>
+  <td>0.415</td>
  </tr>
  <tr>
   <td>Transformer</td>
-  <td>14.226</td>
-  <td>68.552</td>
-  <td>1.362</td>
-  <td>0.712</td>
+  <td>34.818</td>
+  <td>192.720</td>
+  <td>1.601</td>
+  <td>0.410</td>
 </tr> 
 </table>
 
