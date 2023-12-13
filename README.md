@@ -162,13 +162,13 @@ AOPCR results of the interpretation using the FEDformer model on the test set. C
 
 | Interpretation Method | Comp. (MAE) | Comp. (MSE) |Suff. (MAE) | Suff. (MSE) |
 |:---|:---|:---|:---|:---|
-| Feature Ablation | | | | |
-| Feature Permutation | | | | | 
-| Feature Occlusion | | | | |
-| Augmented Feature Occlusion | | | | |
-| Deep Lift | | |
-| Gradient Shap | | |
-| Integrated Gradients | | |   
+| Feature Ablation | 4.91 | 8.64 | 9.53 | 10.50 |
+| Feature Permutation | 4.00 | 7.08 | 8.00 | 8.28 | 
+| Feature Occlusion | 4.89 | 8.44 | 9.49 | 10.40 |
+| Augmented Feature Occlusion | 4.18 | 7.66 | 7.96 | 8.09 |
+| Deep Lift | 5.72 | 9.54 | 8.90 | 9.43 |
+| Gradient Shap | 4.78 | 8.17 | 8.04 | 8.27 |
+| Integrated Gradients | 5.52 | 9.09 | 9.25 | 10.20 |
 
 
 ## Setup Environment
