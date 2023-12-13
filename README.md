@@ -25,70 +25,6 @@ This study aimed to identify the most influential age groups in COVID-19 infecti
 
 * `singilarity.def`: definition file for singularity.
 
-## Setup Environment
-
-### 1. Singularity (Recommended on Rivanna)
-#### Option A. Pull already built container
-
-Pull the singularity container from the remote library,
-```bash
-singularity pull timeseries.sif library://khairulislam/collection/timeseries:latest
-```
-
-#### Option B. Build container from scratch
-
-*Note:* If you want to create the container from scrach, you need a linux machine with `root` privilege or build remotely at [cloud.sylabs.io/library](https://cloud.sylabs.io/library). On Rivanna you can't create containers, you are not the `root`. The you can use the [singularity.def](/singularity.def) file. After compilation, you'll get a container named `timeseries.sif`. 
-
-```bash
-sudo singularity build timeseries.sif singularity.def
-```
-
-#### Running scripts in container
-Then you can use the container to run the scripts. `--nv` indicates using GPU. For example, 
-```bash
-singularity run --nv timeseries.sif python run.py
-```
-
-### 2. Virtual Environment  (More flexible compared to container)
-If you are on remote servers like Rivanna or UVA CS server, you don't have the permission to upgrade default python version. But you can use the already installed `Anaconda` to create a new environment and install latest python and libraries there. 
-
-To create a new env with name `ml` and python version `3.10` run the following. `python 3.10` is the latest one supported with `pytorch GPU` at this moment. 
-```bash
-conda create --name ml python=3.10
-
-# activates the virtual env
-conda activate ml
-
-# installs libraries in the default pip and this env
-pip install some_library 
-
-# installs libraries in this env, but often slower and doesn't work
-conda install some_library 
-
-# will run the script with this environment
-python run.py
-
-# deactivates the virtual env
-conda deactivate
-```
-
-You should install pytorch with cuda separately, since pip server can't find it
-
-```bash
-pip install torch==1.11.1+cu113 -f https://download.pytorch.org/whl/torch_stable.html
-```
-
-Then install the other libraries from [requirement.txt](/requirements.txt). If you have trouble installing from the file (command `pip install -r requirements.txt`), try installing each library manually. 
-
-### 3. GPU 
-Next, you might face issues getting GPU running on Rivanna. Even on a GPU server the code might not recognize the GPU hardware if cuda and cudnn are not properly setup. Try to log into an interactive session in a GPU server, then run the following command from terminal,
-
-```bash
-python -c "import torch;print(torch.cuda.is_available())"
-```
-
-If this is still 0, then you'll have to install the cuda and cudnn versions that match version in `nvidia-smi` command output. Also see if you tensorflow version is for CPU or GPU. For this project, `tensorflow` isn't used. So no need to install it.
-
 ## Features
 
 The following table lists the features with their source and description. Note that, past values of the target and known futures are also used as observed inputs.
@@ -166,6 +102,10 @@ The following table lists the features with their source and description. Note t
 * Feature Permutation
 
 ## Results
+
+### Test Results
+
+The following table shows the test results for the COVID-19 dataset, calculated daily at each US county.
 <table>
  <tr>
   <th>Model</th>
@@ -217,6 +157,83 @@ The following table lists the features with their source and description. Note t
   <td>0.410</td>
 </tr> 
 </table>
+
+AOPCR results of the interpretation using the FEDformer model on the test set. Comp. and Suff. are the short form of comprehensiveness and sufficiency.
+
+| Interpretation Method | Comp. (MAE) | Comp. (MSE) |Suff. (MAE) | Suff. (MSE) |
+|:---|:---|:---|:---|:---|
+| Feature Ablation | | | | |
+| Feature Permutation | | | | | 
+| Feature Occlusion | | | | |
+| Augmented Feature Occlusion | | | | |
+| Deep Lift | | |
+| Gradient Shap | | |
+| Integrated Gradients | | |   
+
+
+## Setup Environment
+
+### 1. Singularity (Recommended on Rivanna)
+#### Option A. Pull already built container
+
+Pull the singularity container from the remote library,
+```bash
+singularity pull timeseries.sif library://khairulislam/collection/timeseries:latest
+```
+
+#### Option B. Build container from scratch
+
+*Note:* If you want to create the container from scrach, you need a linux machine with `root` privilege or build remotely at [cloud.sylabs.io/library](https://cloud.sylabs.io/library). On Rivanna you can't create containers, you are not the `root`. The you can use the [singularity.def](/singularity.def) file. After compilation, you'll get a container named `timeseries.sif`. 
+
+```bash
+sudo singularity build timeseries.sif singularity.def
+```
+
+#### Running scripts in container
+Then you can use the container to run the scripts. `--nv` indicates using GPU. For example, 
+```bash
+singularity run --nv timeseries.sif python run.py
+```
+
+### 2. Virtual Environment  (More flexible compared to container)
+If you are on remote servers like Rivanna or UVA CS server, you don't have the permission to upgrade default python version. But you can use the already installed `Anaconda` to create a new environment and install latest python and libraries there. 
+
+To create a new env with name `ml` and python version `3.10` run the following. `python 3.10` is the latest one supported with `pytorch GPU` at this moment. 
+```bash
+conda create --name ml python=3.10
+
+# activates the virtual env
+conda activate ml
+
+# installs libraries in the default pip and this env
+pip install some_library 
+
+# installs libraries in this env, but often slower and doesn't work
+conda install some_library 
+
+# will run the script with this environment
+python run.py
+
+# deactivates the virtual env
+conda deactivate
+```
+
+You should install pytorch with cuda separately, since pip server can't find it
+
+```bash
+pip install torch==1.11.1+cu113 -f https://download.pytorch.org/whl/torch_stable.html
+```
+
+Then install the other libraries from [requirement.txt](/requirements.txt). If you have trouble installing from the file (command `pip install -r requirements.txt`), try installing each library manually. 
+
+### 3. GPU 
+Next, you might face issues getting GPU running on Rivanna. Even on a GPU server the code might not recognize the GPU hardware if cuda and cudnn are not properly setup. Try to log into an interactive session in a GPU server, then run the following command from terminal,
+
+```bash
+python -c "import torch;print(torch.cuda.is_available())"
+```
+
+If this is still 0, then you'll have to install the cuda and cudnn versions that match version in `nvidia-smi` command output. Also see if you tensorflow version is for CPU or GPU. For this project, `tensorflow` isn't used. So no need to install it.
 
 ## Reproduce
 
