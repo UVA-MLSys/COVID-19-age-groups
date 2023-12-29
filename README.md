@@ -1,6 +1,6 @@
 # Introduction
 
-**12/26/24: Paper accepted at AAAI 2024 workshop [AI4TS: AI FOR TIME SERIES ANALYSIS](https://ai4ts.github.io/aaai2024#introduction)**
+12/26/24: Our paper titled **"Interpreting Time Series Transformer Models and Sensitivity Analysis of Population Age Groups to COVID-19 Infections"** has been accepted at the AAAI 2024 workshop [AI4TS: AI FOR TIME SERIES ANALYSIS](https://ai4ts.github.io/aaai2024#introduction)
 
 This study aimed to identify the most influential age groups in COVID-19 infection rates at the US county level using the time series interpretation techniques with deep learning. Our approach involved training the state-of-the-art time-series models on different age groups as a static feature and the population vaccination status as the dynamic feature. We analyzed the impact of those age groups on COVID-19 infection rates by perturbing individual input features and ranked them based on their sensitivity scores. The findings are verified using ground truth data from the CDC and US Census, which provide the true infection rates for each age group. The results suggest that young adults were the most influential age group in COVID-19 transmission at the county level between March 1, 2020, and November 27, 2021. Using these results can inform public health policies and interventions, such as targeted vaccination strategies, to better control the spread of the virus. 
 
