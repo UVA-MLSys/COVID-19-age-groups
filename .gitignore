@@ -22,4 +22,5 @@ scratch/
 test_results
 results/TimesNet_Total/checkpoint.pth
 *.pt
+!utils/wte_pca_500.pt
 train_*.npy
