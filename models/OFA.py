@@ -55,7 +55,6 @@ class Model(nn.Module):
         self.stride = configs.stride
         self.patch_num = (configs.seq_len - self.patch_size) // self.stride + 1
         self.gpt_layers = configs.gpt_layers 
-        self.gpt_layers = 6
         self.padding_patch_layer = nn.ReplicationPad1d((0, self.stride)) 
         self.patch_num += 1
         self.ts_scale = -100

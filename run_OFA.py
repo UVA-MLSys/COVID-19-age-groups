@@ -10,13 +10,11 @@ def get_parser():
 
     parser.add_argument('--gpt_layers', type=int, default=2)
     parser.add_argument('--is_gpt', type=int, default=1)
-
     parser.add_argument('--patch_size', type=int, default=7)
-    parser.add_argument('--kernel_size', type=int, default=8)
 
     parser.add_argument('--pretrain', type=int, default=1)
     parser.add_argument('--freeze', type=int, default=1)
-    parser.add_argument('--stride', type=int, default=7)
+    parser.add_argument('--stride', type=int, default=1)
     parser.add_argument('--max_len', type=int, default=-1)
     parser.add_argument('--hid_dim', type=int, default=16)
     parser.add_argument('--tmax', type=int, default=10)

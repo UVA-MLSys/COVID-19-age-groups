@@ -101,6 +101,7 @@ class AgeData:
     ):
         dates = df[self.date_index]
         df[self.time_index] = (dates - split.train_start).dt.days
+        
         train_data = df[(dates >= split.train_start) & (dates < split.val_start)]
         
         # at least input_sequence_length prior days data is needed to start prediction

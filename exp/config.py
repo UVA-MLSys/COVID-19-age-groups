@@ -58,3 +58,11 @@ class Split:
             test_start="2021-12-12", test_end="2021-12-25",
             transform=to_datetime
         )
+        
+    @staticmethod
+    def secondary():
+        return Split(
+            train_start="2021-08-01", val_start="2021-11-28",
+            test_start="2021-12-12", test_end="2021-12-25",
+            transform=to_datetime
+        )

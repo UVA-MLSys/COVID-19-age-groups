@@ -44,8 +44,11 @@ class Exp_Forecast(object):
         
         self.age_data = AgeData.build(args)
         self.total_data = self.age_data.read_df()
+        
+        # for pretrained models, tuning on a smaller set is sufficient
+        split = Split.primary() if args.model not in ['TimeLLM', 'OFA', 'CALF'] else Split.secondary()
         train, val, test, updated = self.age_data.split_data(
-            self.total_data, Split.primary()
+            self.total_data, split
         )
         self.data_map = {
             'train': train, 'val':val, 

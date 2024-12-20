@@ -12,17 +12,11 @@ def load_content(args):
             
 def get_parser():
 
-    parser = get_basic_parser("TimeLLM")
-
-    parser.add_argument(
-        '--model_id', default='ori', choices=['ori', 'removeLLM', 
-        'randomInit', 'llm_to_trsf', 'llm_to_attn']
-    )
-    parser.add_argument('--model', type=str, default='TimeLLM', choices=['TimeLLM'])
-    
-    parser.add_argument('--patch_len', type=int, default=16, help='patch length')
+    parser = get_basic_parser()
+    parser.add_argument('--patch_len', type=int, default=7, help='patch length')
     parser.add_argument('--stride', type=int, default=8, help='stride')
     parser.add_argument('--prompt_domain', type=int, default=1, help='')
+    
     parser.add_argument(
         '--llm_model', type=str, default='GPT2', help='LLM model',
         choices=['LLAMA', 'GPT2', 'BERT']) # 
@@ -35,5 +29,7 @@ def get_parser():
 if __name__ == '__main__':
     parser = get_parser()
     args = parser.parse_args()
-    args.content = load_content(args)
+    
+    args.model = 'TimeLLM'
+    args.content = 'Daily COVID-19 cases forecast at US county level for the next 14 days, based on previous 14 days'
     main(args)

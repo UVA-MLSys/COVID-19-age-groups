@@ -3,8 +3,7 @@ from torch import nn
 from tqdm import tqdm
 
 def stringify_args(args):
-    setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
-        args.model_id,
+    setting = '{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
         args.model,
         args.data,
         args.features,
