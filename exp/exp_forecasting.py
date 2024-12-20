@@ -45,15 +45,13 @@ class Exp_Forecast(object):
         self.age_data = AgeData.build(args)
         self.total_data = self.age_data.read_df()
         
-        # for pretrained models, tuning on a smaller set is sufficient
-        split = Split.primary() if args.model not in ['TimeLLM', 'OFA', 'CALF'] else Split.secondary()
         train, val, test, updated = self.age_data.split_data(
-            self.total_data, split
+            self.total_data, Split.primary(args)
         )
         self.data_map = {
             'train': train, 'val':val, 
             'test': test, 'updated': updated
-        }
+        } 
         
         self.dataset_map = {}
         self.dataset_root = os.path.join(DataConfig.root_folder, args.data_path.split('.')[0])
@@ -245,7 +243,7 @@ class Exp_Forecast(object):
         f_dim = - self.args.n_targets
 
         if self.args.use_amp:
-            scaler = torch.cuda.amp.GradScaler()
+            scaler = torch.amp.GradScaler('cuda')
 
         for epoch in range(self.args.train_epochs):
             iter_count = 0
@@ -358,7 +356,7 @@ class Exp_Forecast(object):
                     outputs = self.model(batch_x)
                 else:
                     if self.args.use_amp:
-                        with torch.cuda.amp.autocast():
+                        with torch.amp.autocast('cuda'):
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
@@ -423,7 +421,8 @@ class Exp_Forecast(object):
             )
             df = self.data_map[flag]
             time_index = self.age_data.time_index
-            predictions_index[time_index] += self.args.pred_len + df[time_index].min()
+            # convert relative index to absolute
+            predictions_index[time_index] += df[time_index].min()
             
             pred_list = [
                 preds[:, :, target] for target in range(preds.shape[-1])

@@ -71,7 +71,7 @@ def get_parser():
 
     # basic config
     parser.add_argument('--test', action='store_true', help='test the checkpointed best model, train otherwise')
-    parser.add_argument('--model', type=str, required=True, default='DLinear',
+    parser.add_argument('--model', type=str, default='DLinear',
         choices=(Exp_Forecast.model_dict.keys()), help='model name')
     parser.add_argument('--seed', default=7, help='random seed')
 

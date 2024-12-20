@@ -1,4 +1,4 @@
-from pandas import to_datetime
+from pandas import to_datetime, to_timedelta
 from typing import Optional, Callable
 from dataclasses import dataclass
 
@@ -37,7 +37,7 @@ class FeatureFiles:
 
 class Split:
     def __init__(
-        self, train_start, val_start, test_start, 
+        self, args, train_start, val_start, test_start, 
         test_end, transform: Optional[Callable]=None 
     ):
         self.train_start = train_start
@@ -51,18 +51,20 @@ class Split:
             self.test_start = transform(test_start)
             self.test_end = transform(test_end)
             
-    @staticmethod
-    def primary():
-        return Split(
-            train_start="2020-03-01", val_start="2021-11-28",
-            test_start="2021-12-12", test_end="2021-12-25",
-            transform=to_datetime
-        )
+        if args.percent < 100:
+            days = (self.val_start - self.train_start).days - args.seq_len - args.pred_len
+            assert days >= 0, "not enough data to split using percent"
+            self.train_start = self.train_start + to_timedelta(days * (100 - args.percent) // 100, unit='day')
+
+            print(f'Using {days * args.percent // 100} days of training data.')
+            
+        print(f'Train start: {self.train_start}, val start: {self.val_start}, test start: {self.test_start}, test end: {self.test_end}')
         
+            
     @staticmethod
-    def secondary():
+    def primary(args):
         return Split(
-            train_start="2021-08-01", val_start="2021-11-28",
+            args=args, train_start="2020-03-01", val_start="2021-11-28",
             test_start="2021-12-12", test_end="2021-12-25",
             transform=to_datetime
         )

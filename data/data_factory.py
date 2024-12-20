@@ -97,7 +97,7 @@ class AgeData:
         return df[self.selected_columns]
         
     def split_data(
-        self, df:DataFrame, split:Split, 
+        self, df:DataFrame, split:Split 
     ):
         dates = df[self.date_index]
         df[self.time_index] = (dates - split.train_start).dt.days
