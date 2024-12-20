@@ -4,11 +4,13 @@ import torch, os, time, warnings
 import numpy as np
 import pandas as pd
 from models import DLinear, Autoformer, FEDformer, TimesNet, PatchTST, Crossformer, Transformer
+from models import TemporalFusionTransformer, TimeLLM, OFA, CALF
 from data.data_factory import AgeData
 from exp.config import Split, DataConfig
 from datetime import datetime
 from utils.plotter import PlotResults
 from utils.utils import align_predictions
+from utils.distillationLoss import DistillationLoss
 
 warnings.filterwarnings('ignore')
 
@@ -20,7 +22,11 @@ class Exp_Forecast(object):
         'PatchTST': PatchTST,
         'TimesNet': TimesNet,
         'Crossformer': Crossformer,
-        'Transformer': Transformer
+        'Transformer': Transformer,
+        'TemporalFusionTransformer': TemporalFusionTransformer,
+        'TimeLLM': TimeLLM,
+        'OFA': OFA,
+        'CALF': CALF
     }
     
     def __init__(self, args, setting):
@@ -70,7 +76,10 @@ class Exp_Forecast(object):
         return device
 
     def _build_model(self):
-        model = self.model_dict[self.args.model].Model(self.args).float()
+        Model = self.model_dict[self.args.model].Model
+        if self.args.model in ['CALF', 'OFA']:
+            model = Model(self.args, self.device).float()
+        else: model = Model(self.args).float()
 
         if self.args.use_multi_gpu and not self.args.no_gpu:
             model = torch.nn.DataParallel(model, device_ids=self.args.device_ids)
@@ -93,18 +102,51 @@ class Exp_Forecast(object):
         return dataset, dataloader
 
     def _select_optimizer(self):
-        model_optim = torch.optim.Adam(
-            self.model.parameters(), lr=self.args.learning_rate
-        )
+        if self.args.model == 'CALF':
+            param_dict = [
+                {"params": [p for n, p in self.model.named_parameters() if p.requires_grad and '_proj' in n], "lr": 1e-4},
+                {"params": [p for n, p in self.model.named_parameters() if p.requires_grad and '_proj' not in n], "lr": self.args.learning_rate}
+            ]
+            model_optim = torch.optim.Adam([param_dict[1]], lr=self.args.learning_rate)
+            loss_optim = torch.optim.Adam([param_dict[0]], lr=self.args.learning_rate)
+            return model_optim, loss_optim
+        else:
+            model_optim = torch.optim.Adam(
+                self.model.parameters(), lr=self.args.learning_rate
+            )
         return model_optim
 
     def _select_criterion(self):
-        criterion = torch.nn.MSELoss()
+        if self.args.model == 'CALF':
+            criterion = DistillationLoss(
+                self.args.distill_loss, 
+                self.args.logits_loss, 
+                self.args.task_loss,  
+                self.args.feature_w, 
+                self.args.logits_w, 
+                self.args.task_w,
+                self.args.pred_len
+            )
+        else: criterion = torch.nn.MSELoss()
         return criterion
+    
+    def set_model_eval(self):
+        if self.args.model == 'CALF':
+            self.model.in_layer.eval()
+            self.model.out_layer.eval()
+            self.model.time_proj.eval()
+            self.model.text_proj.eval()
+            
+        elif self.args.model == 'OFA':
+            self.model.in_layer.eval()
+            self.model.out_layer.eval()
+        else:
+            self.model.eval()
 
     def vali(self, vali_loader, criterion):
         total_loss = []
-        self.model.eval()
+        
+        self.set_model_eval()
         f_dim = - self.args.n_targets
         
         with torch.no_grad():
@@ -118,26 +160,29 @@ class Exp_Forecast(object):
                 # decoder input
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                
                 # encoder - decoder
-                if self.args.use_amp:
-                    with torch.cuda.amp.autocast():
-                        if self.args.output_attention:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                        else:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                if self.args.model in ['CALF', 'OFA']:
+                    outputs = self.model(batch_x)
                 else:
-                    if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    if self.args.use_amp:
+                        with torch.amp.autocast('cuda'):
+                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                            
+                    if self.args.output_attention:
+                        outputs = outputs[0]
         
-                outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                # only CALF model has dictionary output
+                if self.args.model != 'CALF':
+                    outputs = outputs[:, -self.args.pred_len:, f_dim:]
+                    batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
 
-                pred = outputs.detach().cpu()
-                true = batch_y.detach().cpu()
+                    # pred = outputs.detach().cpu()
+                    # true = batch_y.detach().cpu()
 
-                loss = criterion(pred, true)
+                loss = criterion(outputs, batch_y)
                 total_loss.append(loss.item())
         
         if len(total_loss) == 0:
@@ -146,8 +191,30 @@ class Exp_Forecast(object):
         else:
             total_loss = np.average(total_loss)
         
-        self.model.train()
+        if self.args.model == 'CALF':
+            self.model.in_layer.train()
+            self.model.out_layer.train()
+            self.model.time_proj.train()
+            self.model.text_proj.train()
+        elif self.args.model == 'OFA':
+            self.model.in_layer.train()
+            self.model.out_layer.train()
+        else: 
+            self.model.train()
+            
         return total_loss
+    
+    def _select_lr_scheduler(self, optimizer):
+        if self.args.model in ['CALF', 'OFA']:
+            return torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=self.args.tmax, 
+                eta_min=1e-8, verbose=True
+            )
+        else:
+            return torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, patience=1, factor=0.1, 
+                verbose=True, min_lr=5e-6
+            )
 
     def train(self, setting):
         _, train_loader = self.get_data(flag='train', train=True)
@@ -164,11 +231,13 @@ class Exp_Forecast(object):
 
         time_now = time.time()
         start_time = datetime.now()
-        model_optim = self._select_optimizer()
+        
+        if self.args.model == 'CALF':
+            model_optim, loss_optim = self._select_optimizer()
+        else: model_optim = self._select_optimizer()
+        
         # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html
-        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            model_optim, patience=0, factor=0.1, verbose=True, min_lr=1e-5
-        )
+        lr_scheduler = self._select_lr_scheduler(model_optim)
         criterion = self._select_criterion()
         f_dim = - self.args.n_targets
 
@@ -184,6 +253,9 @@ class Exp_Forecast(object):
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
                 iter_count += 1
                 model_optim.zero_grad()
+                if self.args.model == 'CALF': 
+                    loss_optim.zero_grad()
+                    
                 batch_x = batch_x.float().to(self.device)
 
                 batch_y = batch_y.float().to(self.device)
@@ -195,27 +267,25 @@ class Exp_Forecast(object):
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
 
                 # encoder - decoder
-                if self.args.use_amp:
-                    with torch.cuda.amp.autocast():
-                        if self.args.output_attention:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                        else:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-
-                        outputs = outputs[:, -self.args.pred_len:]
-                        batch_y = batch_y[:, -self.args.pred_len:].to(self.device)
-                        loss = criterion(outputs, batch_y)
-                        train_loss.append(loss.item())
+                if self.args.model in ['CALF', 'OFA']:
+                    outputs = self.model(batch_x)
                 else:
-                    if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                    if self.args.use_amp:
+                        with torch.amp.autocast('cuda'):
+                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                    
+                    if self.args.output_attention: 
+                        outputs = outputs[0]
 
+                # only CALF model has dictionary output
+                if self.args.model != 'CALF':
                     outputs = outputs[:, -self.args.pred_len:, f_dim:]
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
-                    loss = criterion(outputs, batch_y)
-                    train_loss.append(loss.item())
+                    
+                loss = criterion(outputs, batch_y)
+                train_loss.append(loss.item())
 
                 if (i + 1) % 500 == 0:
                     print(f"\titers: {i + 1}, epoch: {epoch + 1} | loss: {loss.item():.7g}")
@@ -232,6 +302,7 @@ class Exp_Forecast(object):
                 else:
                     loss.backward()
                     model_optim.step()
+                    if self.args.model == 'CALF': loss_optim.step()
 
             print(f"Epoch: {epoch + 1} cost time: {(time.time() - epoch_time):0.5g}")
             train_loss = np.average(train_loss)
@@ -263,7 +334,7 @@ class Exp_Forecast(object):
         preds = []
         trues = []
 
-        self.model.eval()
+        self.set_model_eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(test_loader):
                 batch_x = batch_x.float().to(self.device)
@@ -275,19 +346,22 @@ class Exp_Forecast(object):
                 # decoder input
                 dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
                 dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                
                 # encoder - decoder
-                if self.args.use_amp:
-                    with torch.cuda.amp.autocast():
-                        if self.args.output_attention:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-                        else:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                if self.args.model == 'CALF':
+                    outputs = self.model(batch_x)
+                    outputs = outputs['outputs_time']
+                elif self.args.model == 'OFA':
+                    outputs = self.model(batch_x)
                 else:
-                    if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
-
+                    if self.args.use_amp:
+                        with torch.cuda.amp.autocast():
+                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                            
+                    if self.args.output_attention:
+                        outputs = outputs[0]
 
                 f_dim = - self.args.n_targets
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]

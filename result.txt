@@ -67,3 +67,15 @@ Crossformer_Total, val: rmse:103.09, mae:29.71, msle: 1.9856, r2: 0.31832
 
 Crossformer_Total, train: rmse:83.97, mae:20.249, msle: 1.927, r2: 0.56771
 
+OFA_Top_20, test: rmse:1711.3, mae:946.58, msle: 2.408, r2: 0.22047
+
+OFA_Top_20, val: rmse:695.34, mae:378.71, msle: 2.4594, r2: 0.41641
+
+OFA_Top_20, train: rmse:664.36, mae:292.3, msle: 1.6932, r2: 0.70263
+
+CALF_Top_20, test: rmse:1776.3, mae:987.9, msle: 2.4014, r2: 0.17129
+
+CALF_Top_20, val: rmse:783.4, mae:418.33, msle: 2.4548, r2: 0.33499
+
+CALF_Top_20, train: rmse:601.01, mae:261.64, msle: 1.6564, r2: 0.75661
+
