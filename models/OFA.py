@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 
-from transformers.models.gpt2.modeling_gpt2 import GPT2Model , GPT2LMHeadModel 
+from transformers.models.gpt2.modeling_gpt2 import GPT2Model , GPT2LMHeadModel
+from transformers import LlamaConfig, LlamaModel
 from einops import rearrange
 from transformers.models.gpt2.configuration_gpt2 import GPT2Config
 from  models.Attention import MultiHeadAttention
@@ -73,7 +74,21 @@ class Model(nn.Module):
             self.gpt2.h = self.gpt2.h[:self.gpt_layers]
             # print("gpt2 = {}".format(self.gpt2))
         else : 
-            self.gpt2 = GPT2LMHeadModel.from_pretrained("gpt2") 
+            # self.gpt2 = GPT2LMHeadModel.from_pretrained("gpt2") 
+            llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
+            llama_config.num_hidden_layers = configs.gpt_layers
+            llama_config.output_attentions = True
+            llama_config.output_hidden_states = True
+            
+            self.gpt2 = LlamaModel.from_pretrained(
+                # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
+                'huggyllama/llama-7b',
+                # self.llama_model_path, 
+                trust_remote_code=True,
+                local_files_only=False,
+                config=llama_config,
+                # load_in_4bit=True
+            )
             
         self.in_layer = nn.Linear(configs.patch_size, configs.d_model)
         self.out_layer = nn.Linear(configs.d_model * self.patch_num, configs.pred_len)
