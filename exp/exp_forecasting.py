@@ -23,7 +23,7 @@ class Exp_Forecast(object):
         'TimesNet': TimesNet,
         'Crossformer': Crossformer,
         'Transformer': Transformer,
-        'TemporalFusionTransformer': TemporalFusionTransformer,
+        'TFT': TemporalFusionTransformer,
         'TimeLLM': TimeLLM,
         'OFA': OFA,
         'CALF': CALF
