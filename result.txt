@@ -109,3 +109,13 @@ iTransformer_Total, val: rmse:93.469, mae:26.468, msle: nan, r2: 0.54856
 
 iTransformer_Total, train: rmse:62.99, mae:19.486, msle: nan, r2: 0.65533
 
+TimeXer_Total, test: rmse:205.2, mae:34.328, msle: nan, r2: 0.49599
+
+TimeXer_Total, val: rmse:91.293, mae:25.974, msle: nan, r2: 0.57563
+
+TimeXer_Total, train: rmse:63.074, mae:19.434, msle: nan, r2: 0.65438
+
+TimesNet_Total, test: rmse:218.05, mae:41.662, msle: nan, r2: 0.39322
+
+TimesNet_Total, val: rmse:112.13, mae:31.087, msle: nan, r2: 0.34576
+
