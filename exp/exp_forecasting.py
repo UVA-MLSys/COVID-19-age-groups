@@ -4,7 +4,7 @@ import torch, os, time, warnings
 import numpy as np
 import pandas as pd
 from models import DLinear, Autoformer, FEDformer, TimesNet, PatchTST, Crossformer, Transformer, iTransformer
-from models import TemporalFusionTransformer, TimeLLM, OFA, CALF
+from models import TemporalFusionTransformer, TimeLLM, OFA, CALF, TimeMixer, TSMixer, TimeXer
 from data.data_factory import AgeData
 from exp.config import Split, DataConfig
 from datetime import datetime
@@ -27,7 +27,10 @@ class Exp_Forecast(object):
         'TFT': TemporalFusionTransformer,
         'TimeLLM': TimeLLM,
         'OFA': OFA,
-        'CALF': CALF
+        'CALF': CALF,
+        'TimeMixer': TimeMixer,
+        'TSMixer': TSMixer,
+        'TimeXer': TimeXer
     }
     
     def __init__(self, args, setting):
