@@ -81,10 +81,6 @@ class Model(nn.Module):
         # noised_wpe_param_ = None 
         if configs.freeze and configs.pretrain:
             for i, (name, param) in enumerate(self.gpt2.named_parameters()):
-                # double-change adding noise 
-                # if 'wpe' in name and self.n_scale > 0 : 
-                #     print('perturbating WPE  ... ')
-                #     noised_wpe_param_ = self.perturbate( param , log_fine_name )
                 if 'ln' in name or 'wpe' in name:
                     param.requires_grad = True
                 else:
@@ -123,6 +119,9 @@ class Model(nn.Module):
         outputs = self.in_layer(x)
         # print(outputs.shape)
         
+        if self.is_gpt:
+            outputs = self.gpt2(inputs_embeds=outputs).last_hidden_state
+        
         outputs = self.out_layer(outputs.reshape(B*M, -1))
         
         # print('outputs3' ,outputs.shape) [256, 96]
@@ -131,53 +130,3 @@ class Model(nn.Module):
         outputs = outputs * stdev
         outputs = outputs + means
         return outputs
-
-    def perturbate(self , param , log_fine_name ):
-        
-        if 'zero' in log_fine_name : 
-            param = torch.zeros_like(param).to(device=param.device, dtype=param.dtype)
-            with open(log_fine_name , 'a') as f : 
-                f.write('Param scale from 0.03 to 0 \n')
-            return param
-            
-        n_scale = self.n_scale
-        
-        n_scale = float(n_scale)
-        o_scale = torch.mean(torch.abs(param.clone())) 
-
-        # Add noise here 
-        noise = torch.randn_like(param).to(device=param.device, dtype=param.dtype) * n_scale
-        param = param + noise
-        
-        no_scale = torch.mean(torch.abs(param.clone())) 
-        with open(log_fine_name , 'a') as f : 
-            f.write('n_scale:{} Param scale from {} to {} \n'.format(n_scale, o_scale , no_scale))
-
-        return param    
-
-    def inject_noise(self , noised_wpe_param_ , model , fix_wpe = True ):
-        noised_wpe_param_ = noised_wpe_param_.to(model.device)
-        model.wpe.weight.data = noised_wpe_param_.data
-        for _, (name, param) in enumerate(model.named_parameters()):
-            if 'wpe' in name:  
-                print(name, param)
-                if fix_wpe:
-                    param.requires_grad = False
-                    print('noised wpe has been frezen!!!!')
-
-'''
-# if self.ts_scale > -1 : 
-        #     noise = torch.randn_like(x).to(device=x.device, dtype=x.dtype) * self.ts_scale 
-        #     # print(torch.mean(torch.abs(x)))  20 0.7949
-        #     x += noise
-            # print(torch.mean(torch.abs(x)))  20 15.9119
-            
-            
-            # # 'disturb_TS_0.txt'
-        # if 'disturb_TS' in log_fine_name:
-        #     n_scale = log_fine_name.split('_')[-1].split('.')[0]
-        #     if 'p' in n_scale :
-        #         n_scale = n_scale.replace('p' , '.')
-        #     self.ts_scale = float(n_scale)
-
-'''

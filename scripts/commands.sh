@@ -23,11 +23,12 @@ python interpret_without_ground_truth.py \
     --explainers feature_ablation --flag test \
     --result_path scratch
 
-python run_OFA.py --data_path Top_20.csv --model OFA
+python run_OFA.py --data_path Top_20.csv --learning_rate 0.0005 --d_model 768 --gpt_layer 6 --dropout 0.3 
 
 python run_OFA.py --data_path Top_20.csv \
-    --learning_rate 0.0005 \
+    --learning_rate 0.0001 \
     --model OFA \
     --patch_size 7 \
     --stride 1 \
-    --batch_size 32
+    --batch_size 32 --d_model 768 \
+    --gpt_layer 6 --dropout 0.3 

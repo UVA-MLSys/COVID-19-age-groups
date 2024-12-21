@@ -9,7 +9,6 @@
 # # SBATCH --mail-type=end
 # # SBATCH --mail-user=mi3se@virginia.edu
 
-
 source /etc/profile.d/modules.sh
 source ~/.bashrc
 

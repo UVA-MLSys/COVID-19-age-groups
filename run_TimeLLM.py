@@ -14,7 +14,7 @@ def get_parser():
 
     parser = get_basic_parser()
     parser.add_argument('--patch_len', type=int, default=7, help='patch length')
-    parser.add_argument('--stride', type=int, default=8, help='stride')
+    parser.add_argument('--stride', type=int, default=1, help='stride')
     parser.add_argument('--prompt_domain', type=int, default=1, help='')
     
     parser.add_argument(
