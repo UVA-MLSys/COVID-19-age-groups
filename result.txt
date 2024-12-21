@@ -79,3 +79,15 @@ CALF_Top_20, val: rmse:783.4, mae:418.33, msle: 2.4548, r2: 0.33499
 
 CALF_Top_20, train: rmse:601.01, mae:261.64, msle: 1.6564, r2: 0.75661
 
+OFA_Total, test: rmse:178.55, mae:27.139, msle: 1.263, r2: 0.52253
+
+OFA_Total, val: rmse:81.933, mae:20.517, msle: 1.1832, r2: 0.5868
+
+OFA_Total, train: rmse:59.846, mae:14.653, msle: 1.1836, r2: 0.61197
+
+CALF_Total, test: rmse:202.35, mae:32.192, msle: nan, r2: 0.52425
+
+CALF_Total, val: rmse:92.993, mae:25.963, msle: nan, r2: 0.58786
+
+CALF_Total, train: rmse:60.471, mae:17.418, msle: nan, r2: 0.68233
+
