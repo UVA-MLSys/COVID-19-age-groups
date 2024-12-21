@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-#SBATCH --job-name="TimesNet"
-#SBATCH --output=scripts/outputs/TimesNet_train_total.out
+#SBATCH --job-name="OFA"
+#SBATCH --output=scripts/outputs/OFA.out
 #SBATCH --partition=gpu
-#SBATCH --time=5:00:00
+#SBATCH --time=12:00:00
 #SBATCH --gres=gpu:1
 #---SBATCH --nodelist=lynx01
 #SBATCH --mem=32GB
@@ -14,4 +14,7 @@ module load miniforge
 # conda deactivate
 conda activate ml
 
-python3 run.py --data_path Total.csv --model TimesNet --disable_progress
+python run_OFA.py --data_path Total.csv \
+    --learning_rate 0.0005 \
+    --d_model 768 \
+    --gpt_layers 2 --dropout 0.3 

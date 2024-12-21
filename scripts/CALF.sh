@@ -10,7 +10,7 @@
 source /etc/profile.d/modules.sh
 source ~/.bashrc
 
-module load  miniforge
+module load miniforge
 # conda deactivate
 conda activate ml
 

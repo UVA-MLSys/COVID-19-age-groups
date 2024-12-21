@@ -91,3 +91,21 @@ CALF_Total, val: rmse:92.993, mae:25.963, msle: nan, r2: 0.58786
 
 CALF_Total, train: rmse:60.471, mae:17.418, msle: nan, r2: 0.68233
 
+OFA_Total, test: rmse:200.66, mae:33.58, msle: nan, r2: 0.5165
+
+OFA_Total, val: rmse:89.107, mae:25.727, msle: nan, r2: 0.57163
+
+OFA_Total, train: rmse:63.226, mae:19.603, msle: nan, r2: 0.65277
+
+TFT_Total, test: rmse:201.51, mae:33.289, msle: nan, r2: 0.50233
+
+TFT_Total, val: rmse:84.737, mae:23.828, msle: nan, r2: 0.62017
+
+TFT_Total, train: rmse:56.661, mae:18.195, msle: nan, r2: 0.72097
+
+iTransformer_Total, test: rmse:208.94, mae:36.023, msle: nan, r2: 0.46849
+
+iTransformer_Total, val: rmse:93.469, mae:26.468, msle: nan, r2: 0.54856
+
+iTransformer_Total, train: rmse:62.99, mae:19.486, msle: nan, r2: 0.65533
+
