@@ -221,10 +221,8 @@ class Model(nn.Module):
             
         self.cnt = 0
             
-    def forecast(self, x):
-        
+    def forecast(self, x, mask=None):        
         B, L, M = x.shape
-
         means = x.mean(1, keepdim=True).detach()
         x = x - means
         stdev = torch.sqrt(torch.var(x, dim=1, keepdim=True, unbiased=False) + 1e-5).detach() 
@@ -267,38 +265,3 @@ class Model(nn.Module):
             'intermidiate_time':intermidiate_feat_time,
             'intermidiate_text':intermidiate_feat_text,
         }
-
-    def forward(self, x, mask=None):
-        output = self.forecast(x)
-        return output
-
-        
-    def inject_noise(self  , model , setZero=False ):
-        if setZero : 
-            # Drop Posi 
-            for _, (name, param) in enumerate(model.named_parameters()):
-                if 'wpe' in name:  
-                    target_wpe_param_ = torch.zeros_like(param).to(device=param.device, dtype=param.dtype)
-                    break
-        else :
-            # Inject Noise to Position 
-            with open('results/noise_Posi_96_96/'+self.log_fine_name , 'a') as f:
-                f.write('Noise scale to Posi -{}\n'.format(self.n_scale))
-                
-            for _, (name, param) in enumerate(model.named_parameters()):
-                if 'wpe' in name:  
-                    noise = torch.randn_like(param).to(device=param.device, dtype=param.dtype) * self.n_scale
-                    target_wpe_param_ = param + noise 
-                    break
-
-        model.wpe.weight.data = target_wpe_param_.data
-        for _, (name, param) in enumerate(model.named_parameters()):
-            if 'wpe' in name:  
-                print(name, param)
-                if setZero : param.requires_grad = False 
-                
-    def disturb_WE(self , word_embedding):
-        noise = torch.randn_like(word_embedding).to(device=word_embedding.device, dtype=word_embedding.dtype) * self.n_scale
-        with open('results/noise_WE_96_96/' + self.log_fine_name , 'a') as f :
-            f.write('Noise scale to WE -{}\n'.format(self.n_scale))
-        return word_embedding + noise 
