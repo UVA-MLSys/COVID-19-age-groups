@@ -19,6 +19,9 @@ def get_parser():
     parser.add_argument('--hid_dim', type=int, default=16)
     parser.add_argument('--tmax', type=int, default=10)
     parser.add_argument('--n_scale', type=float, default=-1)
+    parser.add_argument(
+        '--llm_model', type=str, default='GPT2', help='LLM model',
+        choices=['LLAMA', 'GPT2']) # 
     
     return parser
 

@@ -7,7 +7,8 @@ python run.py --data_path Top_100.csv --model FEDformer
 
 python run_CALF.py --data_path Top_20.csv --model CALF --d_model 768 --dropout 0.3 --learning_rate 0.0005 --gpt_layers 2
 
-python run_TimeLLM.py --data_path Top_20.csv --model CALF --llm_dim 768 --d_model 768 --batch_size 16
+python run_TimeLLM.py --data_path Top_20.csv --model TimeLLM --llm_dim 768 --d_model 768 --batch_size 16
+python run_TimeLLM.py --data_path Top_20.csv --model TimeLLM --llm_dim 4096 --llm_model LLAMA --batch_size 16
 
 python interpret_with_ground_truth.py --data_path Top_20.csv \
     --model FEDformer \
@@ -24,6 +25,7 @@ python interpret_without_ground_truth.py \
     --result_path scratch
 
 python run_OFA.py --data_path Top_20.csv --learning_rate 0.0005 --d_model 768 --gpt_layer 6 --dropout 0.3
+python run_OFA.py --data_path Top_20.csv --learning_rate 0.0005 --is_gpt 0 --train_epochs 1 --result_path scratch
 
 python run_OFA.py --data_path Top_20.csv \
     --learning_rate 0.0001 \

@@ -63,32 +63,37 @@ class Model(nn.Module):
         self.n_scale = configs.n_scale
         
         if configs.is_gpt:
-            if configs.pretrain:
-                self.gpt2 = GPT2Model.from_pretrained(
-                    'gpt2', attn_implementation="eager", 
-                    output_hidden_states=True
-                )  # loads a pretrained GPT-2 base model
-            else:
-                print("------------------no pretrain------------------")
-                self.gpt2 = GPT2Model(GPT2Config())
-            self.gpt2.h = self.gpt2.h[:self.gpt_layers]
-            # print("gpt2 = {}".format(self.gpt2))
-        else : 
-            # self.gpt2 = GPT2LMHeadModel.from_pretrained("gpt2") 
-            llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
-            llama_config.num_hidden_layers = configs.gpt_layers
-            llama_config.output_attentions = True
-            llama_config.output_hidden_states = True
-            
-            self.gpt2 = LlamaModel.from_pretrained(
-                # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
-                'huggyllama/llama-7b',
-                # self.llama_model_path, 
-                trust_remote_code=True,
-                local_files_only=False,
-                config=llama_config,
-                # load_in_4bit=True
-            )
+            if configs.llm_model == 'GPT2':
+                if configs.pretrain:
+                    self.gpt2 = GPT2Model.from_pretrained(
+                        'gpt2', attn_implementation="eager", 
+                        output_hidden_states=True
+                    )  # loads a pretrained GPT-2 base model
+                else:
+                    print("------------------no pretrain------------------")
+                    self.gpt2 = GPT2Model(GPT2Config())
+                
+                self.gpt2.h = self.gpt2.h[:self.gpt_layers]
+                
+            elif configs.llm_model == 'LLAMA':
+                llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
+                llama_config.num_hidden_layers = configs.gpt_layers
+                llama_config.output_attentions = True
+                llama_config.output_hidden_states = True
+                print('Getting the LLaMA model')
+
+                if configs.pretrain:
+                    self.gpt2 = LlamaModel.from_pretrained(
+                        # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
+                        'huggyllama/llama-7b',
+                        # self.llama_model_path, 
+                        trust_remote_code=True,
+                        local_files_only=False,
+                        config=llama_config,
+                        # load_in_4bit=True
+                    )
+                else:
+                    self.gpt2 = LlamaModel(llama_config)
             
         self.in_layer = nn.Linear(configs.patch_size, configs.d_model)
         self.out_layer = nn.Linear(configs.d_model * self.patch_num, configs.pred_len)
