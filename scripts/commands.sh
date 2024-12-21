@@ -32,3 +32,9 @@ python run_OFA.py --data_path Top_20.csv \
     --stride 1 \
     --batch_size 32 --d_model 768 \
     --gpt_layer 6 --dropout 0.3 
+
+python run.py --data_path Top_20.csv \
+    --model TimeMixer \
+    --down_sampling_layers 1 \
+    --down_sampling_method avg \
+    --down_sampling_window 2
