@@ -1,52 +1,7 @@
-Experiment started at 2024-12-22 09:30:28.923660
+Experiment started at 2024-12-22 14:12:01.329412
 Args in experiment:
-Namespace(test=True, model='OFA', seed=7, root_path='./dataset/processed/', data_path='Total.csv', result_path='scratch', freq='d', no_scale=False, seq_len=14, label_len=7, pred_len=14, top_k=5, num_kernels=6, d_model=4096, n_heads=4, e_layers=2, d_layers=1, d_ff=256, moving_avg=7, factor=3, distil=True, dropout=0.3, embed='timeF', activation='gelu', output_attention=False, down_sampling_layers=0, down_sampling_window=1, decomp_method='moving_avg', channel_independence=1, down_sampling_method=None, use_norm=1, patch_len=7, num_workers=0, train_epochs=10, batch_size=32, patience=3, learning_rate=0.0005, des='', loss='MSE', lradj='type1', use_amp=False, no_gpu=False, gpu=0, use_multi_gpu=False, devices='0,1,2,3', p_hidden_dims=[64, 64], p_hidden_layers=2, percent=10, disable_progress=False, gpt_layers=2, is_gpt=1, patch_size=7, pretrain=1, freeze=1, stride=1, max_len=-1, hid_dim=16, tmax=10, n_scale=-1, llm_model='LLAMA', n_features=10, enc_in=10, dec_in=10, c_out=10, n_targets=1)
+Namespace(test=False, model='OFA', seed=7, root_path='./dataset/processed/', data_path='Total.csv', result_path='scratch', freq='d', no_scale=False, seq_len=14, label_len=7, pred_len=14, top_k=5, num_kernels=6, d_model=4096, n_heads=4, e_layers=2, d_layers=1, d_ff=256, moving_avg=7, factor=3, distil=True, dropout=0.3, embed='timeF', activation='gelu', output_attention=False, down_sampling_layers=0, down_sampling_window=1, decomp_method='moving_avg', channel_independence=1, down_sampling_method=None, use_norm=1, patch_len=7, num_workers=0, train_epochs=10, batch_size=32, patience=3, learning_rate=0.0005, des='', loss='MSE', lradj='type1', use_amp=False, no_gpu=False, gpu=0, use_multi_gpu=False, devices='0,1,2,3', p_hidden_dims=[64, 64], p_hidden_layers=2, percent=10, disable_progress=False, gpt_layers=2, is_gpt=1, patch_size=7, pretrain=1, freeze=1, stride=1, max_len=-1, hid_dim=16, tmax=10, n_scale=-1, llm_model='LLAMA', n_features=10, enc_in=10, dec_in=10, c_out=10, n_targets=1)
 Starting experiment. Result folder scratch/OFA_Total.
 Use GPU: cuda:0
 Getting the LLaMA model
-Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:09<00:09,  9.96s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  4.34s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:10<00:00,  5.18s/it]
-adding time index columns TimeFromStart
-added time encoded known reals ['month', 'day', 'weekday'].
-Using 60 days of training data.
-Train start: 2021-08-31 00:00:00, val start: 2021-11-28 00:00:00, test start: 2021-12-12 00:00:00, test end: 2021-12-25 00:00:00
-
-Train samples 279638, validation samples 87976,             test samples 87976, last samples 1253658
-89 days of training, 14 days of validation data,             14 days of test data and 385 of data after test start.
-
-Fitting scalers on train data
-Loading cached dataset from ./dataset/processed/Total/train_percent_10.pt
-Loading cached dataset from ./dataset/processed/Total/val_percent_10.pt
-Loading cached dataset from ./dataset/processed/Total/test_percent_10.pt
->>>>>>> testing : OFA_Total <<<<<<<<
-loading best model from scratch/OFA_Total/checkpoint.pth
-Traceback (most recent call last):
-  File "/u/mi3se/projects/COVID-19-age-groups/run_OFA.py", line 32, in <module>
-    main(args)
-  File "/u/mi3se/projects/COVID-19-age-groups/run.py", line 43, in main
-    exp.test(setting, load_model=True, flag='test')
-  File "/u/mi3se/projects/COVID-19-age-groups/exp/exp_forecasting.py", line 410, in test
-    preds, trues, predictions_index = self.pred(
-                                      ^^^^^^^^^^
-  File "/u/mi3se/projects/COVID-19-age-groups/exp/exp_forecasting.py", line 337, in pred
-    if load_model: self.load_model()
-                   ^^^^^^^^^^^^^^^^^
-  File "/u/mi3se/projects/COVID-19-age-groups/exp/exp_forecasting.py", line 402, in load_model
-    self.model.load_state_dict(torch.load(best_model_path))
-                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/u/mi3se/.local/lib/python3.11/site-packages/torch/serialization.py", line 1384, in load
-    return _legacy_load(
-           ^^^^^^^^^^^^^
-  File "/u/mi3se/.local/lib/python3.11/site-packages/torch/serialization.py", line 1611, in _legacy_load
-    return legacy_load(f)
-           ^^^^^^^^^^^^^^
-  File "/u/mi3se/.local/lib/python3.11/site-packages/torch/serialization.py", line 1485, in legacy_load
-    tar.extract("storages", path=tmpdir)
-  File "/sw/ubuntu-22.04/miniforge/current/lib/python3.11/tarfile.py", line 2325, in extract
-    tarinfo = self._get_extract_tarinfo(member, filter_function, path)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/sw/ubuntu-22.04/miniforge/current/lib/python3.11/tarfile.py", line 2332, in _get_extract_tarinfo
-    tarinfo = self.getmember(member)
-              ^^^^^^^^^^^^^^^^^^^^^^
-  File "/sw/ubuntu-22.04/miniforge/current/lib/python3.11/tarfile.py", line 2015, in getmember
-    raise KeyError("filename %r not found" % name)
-KeyError: "filename 'storages' not found"
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|█████     | 1/2 [00:10<00:10, 10.75s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  4.84s/it]Loading checkpoint shards: 100%|██████████| 2/2 [00:11<00:00,  5.73s/it]

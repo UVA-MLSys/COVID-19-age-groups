@@ -181,3 +181,17 @@ TimeXer_Total, val: rmse:95.607, mae:24.347, msle: 1.4193, r2: 0.35426
 
 TimeXer_Total, train: rmse:72.676, mae:13.774, msle: 1.0609, r2: 0.67068
 
+TimeMixer_Total, test: rmse:176.54, mae:30.011, msle: 1.499, r2: 0.49946
+
+TimeMixer_Total, val: rmse:83.251, mae:21.266, msle: 1.2573, r2: 0.52269
+
+TimeMixer_Total, train: rmse:65.358, mae:12.403, msle: 1.0148, r2: 0.73367
+
+TFT_Total, test: rmse:179.32, mae:27.902, msle: 1.2692, r2: 0.48174
+
+TFT_Total, val: rmse:79.912, mae:20.21, msle: 1.3202, r2: 0.56168
+
+TFT_Total, test: rmse:179.32, mae:27.902, msle: 1.2692, r2: 0.48174
+
+TFT_Total, val: rmse:79.912, mae:20.21, msle: 1.3202, r2: 0.56168
+

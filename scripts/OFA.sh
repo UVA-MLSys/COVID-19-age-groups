@@ -25,4 +25,4 @@ python run_OFA.py --data_path Total.csv \
     --d_model 4096 \
     --gpt_layers 2 \
     --dropout 0.3 --llm_model LLAMA\
-    --result_path scratch --percent 10 --test
+    --result_path scratch --percent 10
