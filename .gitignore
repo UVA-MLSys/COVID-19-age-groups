@@ -9,6 +9,7 @@ __init__.py
 
 # checkpoint and data folders
 # checkpoints
+checkpoint.pth
 lightning_logs
 # *.out
 

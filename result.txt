@@ -119,3 +119,65 @@ TimesNet_Total, test: rmse:218.05, mae:41.662, msle: nan, r2: 0.39322
 
 TimesNet_Total, val: rmse:112.13, mae:31.087, msle: nan, r2: 0.34576
 
+TimesNet_Total, train: rmse:79.951, mae:24.97, msle: nan, r2: 0.44513
+
+Autoformer_Total, test: rmse:209.19, mae:36.982, msle: nan, r2: 0.45398
+
+Autoformer_Total, val: rmse:96.112, mae:26.748, msle: nan, r2: 0.50776
+
+Autoformer_Total, train: rmse:68.39, mae:20.464, msle: nan, r2: 0.59372
+
+FEDformer_Total, test: rmse:203.99, mae:37.504, msle: nan, r2: 0.49615
+
+FEDformer_Total, val: rmse:94.195, mae:26.178, msle: nan, r2: 0.51372
+
+FEDformer_Total, train: rmse:63.677, mae:19.836, msle: nan, r2: 0.64771
+
+OFA_Total, test: rmse:178.06, mae:26.8, msle: 1.1938, r2: 0.52783
+
+OFA_Total, val: rmse:77.388, mae:19.959, msle: 1.2211, r2: 0.60402
+
+OFA_Total, train: rmse:55.194, mae:14.101, msle: 1.099, r2: 0.66986
+
+CALF_Total, test: rmse:181.27, mae:25.233, msle: 1.015, r2: 0.52115
+
+CALF_Total, val: rmse:84.063, mae:20.333, msle: 1.0875, r2: 0.58473
+
+CALF_Total, train: rmse:53.1, mae:11.762, msle: 0.89754, r2: 0.69438
+
+CALF_Top_20, test: rmse:1810.2, mae:979.39, msle: 2.4665, r2: 0.17227
+
+CALF_Top_20, val: rmse:705.67, mae:384.47, msle: 2.3628, r2: 0.40287
+
+CALF_Top_20, train: rmse:531.66, mae:284.3, msle: 2.435, r2: 0.48355
+
+CALF_Total, test: rmse:181.18, mae:25.232, msle: 1.0051, r2: 0.52521
+
+CALF_Total, val: rmse:83.233, mae:20.097, msle: 1.0549, r2: 0.59083
+
+CALF_Total, train: rmse:53.921, mae:12.007, msle: 0.91926, r2: 0.68488
+
+iTransformer_Total, test: rmse:192.59, mae:34.884, msle: 1.6357, r2: 0.40349
+
+iTransformer_Total, val: rmse:97.799, mae:25.131, msle: 1.4568, r2: 0.33761
+
+iTransformer_Total, train: rmse:72.41, mae:13.505, msle: 1.0462, r2: 0.67309
+
+DLinear_Total, test: rmse:173.23, mae:30.088, msle: 1.4368, r2: 0.51913
+
+DLinear_Total, val: rmse:84.134, mae:21.179, msle: 1.3417, r2: 0.55017
+
+DLinear_Total, train: rmse:74.38, mae:13.722, msle: 1.1028, r2: 0.65515
+
+PatchTST_Total, test: rmse:185.36, mae:34.29, msle: 1.5949, r2: 0.43966
+
+PatchTST_Total, val: rmse:102.12, mae:25.944, msle: 1.4413, r2: 0.35963
+
+PatchTST_Total, train: rmse:72.236, mae:13.609, msle: 1.0508, r2: 0.67464
+
+TimeXer_Total, test: rmse:193.57, mae:34.351, msle: 1.5739, r2: 0.38842
+
+TimeXer_Total, val: rmse:95.607, mae:24.347, msle: 1.4193, r2: 0.35426
+
+TimeXer_Total, train: rmse:72.676, mae:13.774, msle: 1.0609, r2: 0.67068
+

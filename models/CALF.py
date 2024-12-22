@@ -221,7 +221,7 @@ class Model(nn.Module):
             
         self.cnt = 0
             
-    def forecast(self, x, mask=None):        
+    def forward(self, x, mask=None):        
         B, L, M = x.shape
         means = x.mean(1, keepdim=True).detach()
         x = x - means

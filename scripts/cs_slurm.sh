@@ -15,3 +15,9 @@ module load miniforge
 conda activate ml
 
 python3 run.py --data_path Total.csv --model TimesNet --disable_progress
+
+# python3 run.py --data_path Total.csv \
+#     --model TimeMixer \
+#     --down_sampling_layers 1 \
+#     --down_sampling_method avg \
+#     --down_sampling_window 2 --disable_progress
