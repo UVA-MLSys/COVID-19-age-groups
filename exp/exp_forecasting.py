@@ -60,10 +60,10 @@ class Exp_Forecast(object):
         self.dataset_map = {}
         self.dataset_root = os.path.join(DataConfig.root_folder, args.data_path.split('.')[0])
         for flag in ['train', 'val', 'test', 'updated']:
-            path = os.path.join(self.dataset_root, f'{flag}.pt')
+            path = os.path.join(self.dataset_root, f'{flag}_percent_{self.args.percent}.pt')
             ts_dataset = None
             if os.path.exists(path):
-                print(f'Loading dataset from {path}')
+                print(f'Loading cached dataset from {path}')
                 ts_dataset = torch.load(path, map_location=self.device)
             
             self.dataset_map[flag] = ts_dataset
@@ -97,7 +97,7 @@ class Exp_Forecast(object):
         )
         if self.dataset_map[flag] is None:
             self.dataset_map[flag] = dataset
-            output_path = os.path.join(self.dataset_root, f'{flag}.pt')
+            output_path = os.path.join(self.dataset_root, f'{flag}_percent_{self.args.percent}.pt')
             if not os.path.exists(self.dataset_root):
                 os.makedirs(self.dataset_root, exist_ok=True)
                 
@@ -388,6 +388,7 @@ class Exp_Forecast(object):
         if return_index:
             predictions_index = pd.DataFrame(
                 test_dataset.ranges, 
+                # ['FIPS', 'TimeFromStart']
                 columns=self.age_data.group_ids + [self.age_data.time_index]
             )
             return preds, trues, predictions_index
@@ -426,7 +427,7 @@ class Exp_Forecast(object):
             df = self.data_map[flag]
             time_index = self.age_data.time_index
             # convert relative index to absolute
-            predictions_index[time_index] += df[time_index].min()
+            predictions_index[time_index] += df[time_index].min() + self.args.seq_len
             
             pred_list = [
                 preds[:, :, target] for target in range(preds.shape[-1])
