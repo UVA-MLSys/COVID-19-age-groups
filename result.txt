@@ -191,7 +191,11 @@ TFT_Total, test: rmse:179.32, mae:27.902, msle: 1.2692, r2: 0.48174
 
 TFT_Total, val: rmse:79.912, mae:20.21, msle: 1.3202, r2: 0.56168
 
-TFT_Total, test: rmse:179.32, mae:27.902, msle: 1.2692, r2: 0.48174
+TFT_Total, train: rmse:53.597, mae:11.088, msle: 0.93438, r2: 0.82079
 
-TFT_Total, val: rmse:79.912, mae:20.21, msle: 1.3202, r2: 0.56168
+OFA_Total, test: rmse:232.17, mae:53.022, msle: 1.9742, r2: -0.10099
+
+OFA_Total, val: rmse:142.7, mae:34.608, msle: 1.6864, r2: -0.41967
+
+OFA_Total, train: rmse:150.87, mae:36.327, msle: 1.9009, r2: -1.4665
 
